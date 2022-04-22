@@ -1,0 +1,116 @@
+﻿<!--<local:ListViewBase-->
+<UserControl
+    x:Class="ViewModelExtended.GroupListView"
+	xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+	xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+	xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+	xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+	xmlns:local="clr-namespace:ViewModelExtended"
+	mc:Ignorable="d"
+	xmlns:i="http://schemas.microsoft.com/xaml/behaviors"
+	xmlns:diag="clr-namespace:System.Diagnostics;assembly=WindowsBase"
+	d:DesignHeight="450"
+	d:DesignWidth="800">
+
+	<Grid>
+
+		<ListView
+			FontSize="9"
+			x:Name="ListViewLinkables"
+			AllowDrop="True"
+			SelectedItem="{ Binding Highlighted }"
+			ItemsSource="{ Binding Items, UpdateSourceTrigger=PropertyChanged }">
+			<ListView.Resources>
+				<Style TargetType="{ x:Type GridViewColumnHeader }">
+					<Setter Property="HorizontalContentAlignment" Value="Left" />
+				</Style>
+			</ListView.Resources>
+
+			<ListView.ItemContainerStyle>
+				<Style TargetType="{ x:Type ListViewItem }" BasedOn="{ StaticResource listViewItemStyle }">
+					<Setter Property="IsSelected" Value="{ Binding IsSelected }" />
+					<!--<EventSetter Event="MouseMove" Handler="Item_MouseMove" />
+					<EventSetter Event="DragOver" Handler="Item_DragOver" />-->
+				</Style>
+			</ListView.ItemContainerStyle>
+
+			<ListView.ItemTemplate>
+				<DataTemplate>
+					<Grid HorizontalAlignment="Stretch">
+
+						<Grid.ColumnDefinitions>
+							<ColumnDefinition Width="*" />
+							<ColumnDefinition Width="*" />
+						</Grid.ColumnDefinitions>
+
+						<Button
+							Template="{ StaticResource closeButtonTemplate }"
+							Style="{ StaticResource closeButtonStyle }"
+							Grid.Column="0"
+							Margin="0 0 10 0"
+							Padding="10 0"
+							Name="RemoveItemButton"
+							Content="x"
+							CommandParameter="{ Binding }"
+							Command="{ Binding
+								(local:ListAction.RemoveCommand),
+								RelativeSource={ RelativeSource AncestorType={ x:Type local:GroupListView } } }" />
+
+						<TextBox
+							Grid.Column="1"
+							Background="Transparent"
+							BorderBrush="Transparent"
+							Text="{ Binding Title, UpdateSourceTrigger=PropertyChanged }" />
+						<!--<StackPanel Grid.Column="1">
+							<TextBlock Text="{ Binding Id,UpdateSourceTrigger=PropertyChanged }" />
+							<TextBlock Text="{ Binding Idx, UpdateSourceTrigger=PropertyChanged }" />
+
+							<TextBlock Text="{ Binding Title }" />
+
+							<TextBlock Text="{ Binding PreviousId, UpdateSourceTrigger=PropertyChanged }" />
+							<TextBlock Text="{ Binding NextId, UpdateSourceTrigger=PropertyChanged }" />
+						</StackPanel>-->
+
+						<i:Interaction.Triggers>
+
+							<i:EventTrigger
+								EventName="PreviewMouseLeftButtonDown"
+								SourceObject="{ Binding RelativeSource={ RelativeSource AncestorType={ x:Type ListViewItem } } }">
+								<i:InvokeCommandAction
+									PassEventArgsToCommand="True"
+									Command="{ Binding
+										Path=DataContext.PreselectCommand,
+										RelativeSource={ RelativeSource AncestorType={ x:Type local:GroupListView } } }" />
+							</i:EventTrigger>
+
+							<i:EventTrigger
+								EventName="DragOver"
+								SourceObject="{ Binding RelativeSource={ RelativeSource AncestorType={ x:Type ListViewItem } } }">
+								<i:InvokeCommandAction
+									PassEventArgsToCommand="True"
+									Command="{ Binding
+										Path=DataContext.ReorderCommand,
+										RelativeSource={ RelativeSource AncestorType={ x:Type local:GroupListView } } }" />
+							</i:EventTrigger>
+
+							<i:EventTrigger
+								EventName="MouseDoubleClick"
+								SourceObject="{ Binding RelativeSource={ RelativeSource AncestorType={ x:Type ListViewItem } } }">
+								<i:InvokeCommandAction
+									CommandParameter="{ Binding
+										Path=DataContext.Highlighted,
+										RelativeSource={ RelativeSource AncestorType={ x:Type local:GroupListView } } }"
+									Command="{ Binding
+										Path=(local:ListAction.SelectCommand),
+										RelativeSource={ RelativeSource AncestorType={ x:Type local:GroupListView } } }" />
+							</i:EventTrigger>
+
+						</i:Interaction.Triggers>
+					</Grid>
+				</DataTemplate>
+			</ListView.ItemTemplate>
+		</ListView>
+
+	</Grid>
+</UserControl>
+<!--</local:ListViewBase-->
