@@ -9,23 +9,21 @@ namespace ViewModelExtended.ViewModel
 {
 	public class GroupListObjectViewModel : ViewModelBase, IListItem, ISelectable
 	{
-		// base object - Db link and timestamp
-		public GroupListObject Data {
-			get { return m_Data; }
+		public GroupListObject Model {
+			get { return m_Model; }
 		}
 
-		private readonly GroupListObject m_Data;
+		private readonly GroupListObject m_Model;
 
 		public int ItemId {
-			get { return Data.Item.Id; }
-			private set { Data.Item.Id = value; }
+			get { return Model.Item.Id; }
+			private set { Model.Item.Id = value; }
 		}
 
 		public INode Node {
-			get { return Data.Node; }
+			get { return Model.Node; }
 		}
 
-		// NOTE: for testing purposes only. assigns to itself solely to trigger INotifyPropertyChanged
 		public int? PreviousId {
 			get {
 				PreviousId = Node.PreviousId;
@@ -47,24 +45,24 @@ namespace ViewModelExtended.ViewModel
 		private int? m_NextId;
 
 		public Timestamp Timestamp {
-			get { return Data.Timestamp; }
+			get { return Model.Timestamp; }
 		}
 
 		public string Title {
-			get { return Data.Data.Title; }
+			get { return Model.Data.Title; }
 			set {
 				Set(ref m_Title, value);
-				Data.Data.Title = m_Title;
+				Model.Data.Title = m_Title;
 			}
 		}
 
 		private string m_Title;
 
 		public string Color {
-			get { return Data.Data.Color; }
+			get { return Model.Data.Color; }
 			set {
 				Set(ref m_Color, value);
-				Data.Data.Color = m_Color;
+				Model.Data.Color = m_Color;
 			}
 		}
 
@@ -84,14 +82,16 @@ namespace ViewModelExtended.ViewModel
 
 		//public int Idx => throw new NotImplementedException();
 
-		public GroupListObjectViewModel (GroupListObject data)
+		public GroupListObjectViewModel (GroupListObject model)
 		{
-			m_Data = data;
+			m_Model = model;
 			Previous = null;
 			Next = null;
 			m_IsSelected = false;
-			m_Title = string.Empty;
-			m_Color = "#888";
+			m_Title = Model.Data.Title;
+			Title = m_Title;
+			m_Color = Model.Data.Color;
+			Color = m_Color;
 		}
 	}
 }

@@ -53,7 +53,7 @@ namespace ViewModelExtended.Model
 		public void DeleteNode (INode target);
 
 		public Timestamp CreateTimestamp ();
-		public void UpdateTimestamp (Timestamp target, int? userModified, int? userIndexed, int? autoModified);
+		public void UpdateTimestamp (Timestamp target, long? userModified, long? userIndexed, long? autoModified);
 		public void DeleteTimestamp (Timestamp target);
 
 		public Note CreateNote (string title, string text);
@@ -85,15 +85,19 @@ namespace ViewModelExtended.Model
 		#region Instantiated Objects
 
 		public NoteListObject CreateNoteListObject (NoteListItem item, IObject root, Note data);
+		public void UpdateNoteListObject (NoteListObject target);
 		public void DeleteNoteListObject (NoteListObject target);
 
 		public GroupListObject CreateGroupListObject (GroupListItem item, IObject root, Group data);
+		public void UpdateGroupListObject (GroupListObject target);
 		public void DeleteGroupListObject (GroupListObject target);
 
 		public GroupObject CreateGroupObject (GroupItem item, IObject root, Group groop, Note data);
+		public void UpdateGroupObject (GroupObject target);
 		public void DeleteGroupObject (GroupObject target);
 
 		public ObjectRoot CreateObjectRoot (INode node, Timestamp timestamp);
+		public void UpdateObjectRoot (IObject target);
 		public void DeleteObjectRoot (IObject target);
 
 		#endregion

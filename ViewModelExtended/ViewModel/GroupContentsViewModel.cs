@@ -5,7 +5,7 @@ using System.Text;
 using System.Windows.Input;
 using ViewModelExtended.Model;
 
-// TODO: selecting a group does not refresh the view, and in addition adds a stray new empty GroupNote which should not be possible. may or may not need to call Clear() or RefreshList(). UPDATE: found issue and one possible cause: NextId/PreviousId are overwritten when calling Add on a record existing in db. UPDATE 2: ListViewModel.Add() does not assign Next because it erroneously assumes the next item in the queue will assign it at the same time it is modified. This combined with UpdateNodes immediately after takes that nonexistent Next node and converts it into a null id in the database. Since this is a readonly operation, either make an add function that does not perform Node persistence or remove the node db updating code from ListViewModel and move it to a higher level, so when Add is called, whether or not UpdateNodes is called is optional. ***There are two instances when persistence of the underlying node data upon Add() is required: 1) when a GroupObject is created and added to the GroupContents on DragDrop. 2) When external test data is added.
+// TODO: DragOver and MouseUp after DragOver should be two separate operations: DragOver should set a real value for Incoming (not an attached proxy for Outgoing called Incoming, as is currently extant). As outgoing is the NoteListObject, incoming should be GroupObject. This way, if MouseUp event is fired before DragLeave, the GroupObject save operation is performed. If DragLeave is triggered, delete the GroupObject.
 
 // TODO: DragLeave on GroupContentsView should remove the dragged item from the list before dropping it (this means every time an item is dragged it will create and destroy a new item - this would be an instance where not saving the object first could be useful)
 
@@ -14,23 +14,22 @@ namespace ViewModelExtended.ViewModel
 	/// <summary>
 	/// ViewModel data for displaying any notes in a selected group
 	/// </summary>
-	public class GroupContentsViewModel : ViewModelBase, IObservableList
+	public class GroupContentsViewModel : ViewModelBase
 	{
 		private IViewModelResource Resource { get; set; }
 
 		/// <summary>
 		/// the base ListViewModel
 		/// </summary>
-		private ListViewModel ListViewModel { get; set; }
+		private IObservableList List { get; set; }
 
 		public IEnumerable<IListItem> Items {
-			get { return ListViewModel.Items; }
+			get { return List.Items; }
 		}
 
 		/// <summary>
 		/// Group that is handed off from NoteTabsViewModel.SelectedGroup - represents an interface to SelectedGroup
 		/// </summary>
-		private GroupListObjectViewModel? m_ContentData = null;
 		public GroupListObjectViewModel? ContentData {
 			get { return m_ContentData; }
 			set {
@@ -39,6 +38,8 @@ namespace ViewModelExtended.ViewModel
 				NotifyPropertyChanged(nameof(Color));
 			}
 		}
+
+		private GroupListObjectViewModel? m_ContentData = null;
 
 		public string Title {
 			get {
@@ -70,14 +71,14 @@ namespace ViewModelExtended.ViewModel
 
 		#region Cross-View Data
 
-		private IListItem? m_Highlighted;
-		public IListItem? Highlighted {
+		public GroupObjectViewModel? Highlighted {
 			get { return m_Highlighted; }
 			set {
 				Set(ref m_Highlighted, value);
-				ListViewModel.Highlighted = m_Highlighted;
 			}
 		}
+
+		private GroupObjectViewModel? m_Highlighted;
 
 		#endregion
 
@@ -86,14 +87,18 @@ namespace ViewModelExtended.ViewModel
 		#region Commands
 
 		public ICommand ReorderCommand {
-			get { return ListViewModel.ReorderCommand ?? throw new NullReferenceException("command not assigned"); }
-			set { if (ListViewModel.ReorderCommand == null) ListViewModel.ReorderCommand = value; }
+			get { return m_ReorderCommand ?? throw new NullReferenceException("command not assigned"); }
+			set { if (m_ReorderCommand == null) m_ReorderCommand = value; }
 		}
 
+		private ICommand? m_ReorderCommand;
+
 		public ICommand PreselectCommand {
-			get { return ListViewModel.PreselectCommand ?? throw new NullReferenceException("command not assigned"); }
-			set { if (ListViewModel.PreselectCommand == null) ListViewModel.PreselectCommand = value; }
+			get { return m_PreselectCommand ?? throw new NullReferenceException("command not assigned"); }
+			set { if (m_PreselectCommand == null) m_PreselectCommand = value; }
 		}
+
+		private ICommand? m_PreselectCommand;
 
 		#endregion
 
@@ -104,14 +109,9 @@ namespace ViewModelExtended.ViewModel
 		public GroupContentsViewModel (IViewModelResource resource)
 		{
 			Resource = resource;
-			ListViewModel = new ListViewModel(Resource);
+			List = Resource.ViewModelCreator.CreateList();
 			Resource.CommandBuilder.MakeGroup(this);
 		}
-
-		//public GroupContentsViewModel (IViewModelResource resource, Group groop) : this(resource)
-		//{
-		//	SetGroup(groop);
-		//}
 
 		#endregion
 
@@ -119,33 +119,51 @@ namespace ViewModelExtended.ViewModel
 
 		#region Access
 
-		public void Add (IListItem item)
+		public void Add (GroupObjectViewModel input)
 		{
-			ListViewModel.Add(item);
+			List.Add(input);
+
+			using (IDbContext dbContext = Resource.CreateDbContext()) {
+				Resource.DbListHelper.UpdateAfterAdd(dbContext, input);
+				dbContext.Save();
+			}
 		}
 
-		public void Insert (IListItem? target, IListItem input)
+		public void Insert (GroupObjectViewModel? target, GroupObjectViewModel input)
 		{
-			ListViewModel.Insert(target, input);
+			List.Insert(target, input);
+
+			using (IDbContext dbContext = Resource.CreateDbContext()) {
+				Resource.DbListHelper.UpdateAfterInsert(dbContext, target, input);
+				dbContext.Save();
+			}
 		}
 
-		public void Reorder (IListItem source, IListItem target)
+		public void Reorder (GroupObjectViewModel source, GroupObjectViewModel target)
 		{
-			ListViewModel.Reorder(source, target);
+			List.Reorder(source, target);
+
+			using (IDbContext dbContext = Resource.CreateDbContext()) {
+				Resource.DbListHelper.UpdateAfterReorder(dbContext, source, target);
+				dbContext.Save();
+			}
 		}
 
-		public void Remove (IListItem obj)
+		public void Remove (GroupObjectViewModel input)
 		{
-			//using (IDbContext dbContext = Resource.CreateDbContext()) {
-			//	dbContext.DeleteGroupItem(dbContext.GroupItems.Find(obj.ItemId));
-			//}
-			ListViewModel.Remove(obj);
-			Resource.ViewModelCreator.DestroyGroupObjectViewModel((GroupObjectViewModel)obj);
+			List.Remove(input);
+
+			using (IDbContext dbContext = Resource.CreateDbContext()) {
+				Resource.DbListHelper.UpdateAfterRemove(dbContext, input);
+				dbContext.Save();
+			}
+
+			Resource.ViewModelCreator.DestroyGroupObjectViewModel(input);
 		}
 
-		public int Index (IListItem input)
+		public int Index (GroupObjectViewModel input)
 		{
-			return ListViewModel.Index(input);
+			return List.Index(input);
 		}
 
 		#endregion
@@ -167,7 +185,7 @@ namespace ViewModelExtended.ViewModel
 
 		public void Refresh ()
 		{
-			ListViewModel.RefreshListView();
+			Utility.RefreshListView(List.Items);
 		}
 
 		#endregion
@@ -180,15 +198,15 @@ namespace ViewModelExtended.ViewModel
 		{
 			using (IDbContext dbContext = Resource.CreateDbContext()) {
 				IQueryable<IListItem> unsortedObjects =
-					Resource.DbQueryHelper.GetGroupObjectsInGroup(dbContext, groop.Data.Data);
+					Resource.DbQueryHelper.GetGroupObjectsInGroup(dbContext, groop.Model.Data);
 
-				Resource.DbQueryHelper.GetSortedListObjects(unsortedObjects, ListViewModel);
+				Resource.DbQueryHelper.GetSortedListObjects(unsortedObjects, List);
 			}
 		}
 
 		public void Clear ()
 		{
-			ListViewModel.Clear();
+			List.Clear();
 		}
 
 		#endregion

@@ -51,6 +51,18 @@
 							RelativeSource={ RelativeSource AncestorType={ x:Type local:GroupContentsView } } }" />
                 </i:EventTrigger>
 
+                <!--<i:EventTrigger
+					EventName="DragLeave"
+					SourceObject="{ Binding RelativeSource={ RelativeSource AncestorType={ x:Type ListView } } }">
+                    <i:InvokeCommandAction
+						CommandParameter="{ Binding
+							Path=(local:ListState.Incoming),
+							RelativeSource={ RelativeSource AncestorType={ x:Type local:GroupContentsView } } }"
+						Command="{ Binding
+							Path=(local:ListAction.RemoveCommand),
+							RelativeSource={ RelativeSource AncestorType={ x:Type local:GroupContentsView } } }" />
+                </i:EventTrigger>-->
+
             </i:Interaction.Triggers>
 
             <ListView.ItemTemplate>

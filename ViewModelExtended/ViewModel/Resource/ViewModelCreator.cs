@@ -51,10 +51,10 @@ namespace ViewModelExtended.ViewModel
 				NoteListItem item = dbContext.CreateNoteListItem(root, note);
 				dbContext.Save();
 
-				// create instance wrapper
-				NoteListObject obj = dbContext.CreateNoteListObject(item, root, note);
+				// create model instance wrapper
+				NoteListObject model = dbContext.CreateNoteListObject(item, root, note);
 
-				return new NoteListObjectViewModel(obj);
+				return new NoteListObjectViewModel(model);
 			}
 		}
 
@@ -62,21 +62,31 @@ namespace ViewModelExtended.ViewModel
 		{
 			NoteListObjectViewModel output = CreateNoteListObjectViewModel();
 
-			action(output);
+			// save the external modifications
+			using (IDbContext dbContext = Resource.CreateDbContext()) {
+				action(output);
+				dbContext.UpdateNoteListObject(output.Model);
+				dbContext.Save();
+			}
 
 			return output;
 		}
 
-		public NoteListObjectViewModel CreateNoteListObjectViewModel (NoteListObject data)
+		public NoteListObjectViewModel CreateNoteListObjectViewModel (NoteListObject model)
 		{
-			return new NoteListObjectViewModel(data);
+			return new NoteListObjectViewModel(model);
 		}
 
-		public NoteListObjectViewModel CreateNoteListObjectViewModel (NoteListObject data, Action<NoteListObjectViewModel> action)
+		public NoteListObjectViewModel CreateNoteListObjectViewModel (NoteListObject model, Action<NoteListObjectViewModel> action)
 		{
-			NoteListObjectViewModel output = CreateNoteListObjectViewModel(data);
+			NoteListObjectViewModel output = CreateNoteListObjectViewModel(model);
 
-			action(output);
+			// save the external modifications
+			using (IDbContext dbContext = Resource.CreateDbContext()) {
+				action(output);
+				dbContext.UpdateNoteListObject(output.Model);
+				dbContext.Save();
+			}
 
 			return output;
 		}
@@ -108,10 +118,10 @@ namespace ViewModelExtended.ViewModel
 				GroupListItem item = dbContext.CreateGroupListItem(root, data);
 				dbContext.Save();
 
-				// create instance wrapper
-				GroupListObject obj = dbContext.CreateGroupListObject(item, root, data);
+				// create model instance wrapper
+				GroupListObject model = dbContext.CreateGroupListObject(item, root, data);
 
-				return new GroupListObjectViewModel(obj);
+				return new GroupListObjectViewModel(model);
 			}
 		}
 
@@ -119,21 +129,31 @@ namespace ViewModelExtended.ViewModel
 		{
 			GroupListObjectViewModel output = CreateGroupListObjectViewModel();
 
-			action(output);
+			// save the external modifications
+			using (IDbContext dbContext = Resource.CreateDbContext()) {
+				action(output);
+				dbContext.UpdateGroupListObject(output.Model);
+				dbContext.Save();
+			}
 
 			return output;
 		}
 
-		public GroupListObjectViewModel CreateGroupListObjectViewModel (GroupListObject data)
+		public GroupListObjectViewModel CreateGroupListObjectViewModel (GroupListObject model)
 		{
-			return new GroupListObjectViewModel(data);
+			return new GroupListObjectViewModel(model);
 		}
 
-		public GroupListObjectViewModel CreateGroupListObjectViewModel (GroupListObject data, Action<GroupListObjectViewModel> action)
+		public GroupListObjectViewModel CreateGroupListObjectViewModel (GroupListObject model, Action<GroupListObjectViewModel> action)
 		{
-			GroupListObjectViewModel output = CreateGroupListObjectViewModel(data);
+			GroupListObjectViewModel output = CreateGroupListObjectViewModel(model);
 
-			action(output);
+			// save the external modifications
+			using (IDbContext dbContext = Resource.CreateDbContext()) {
+				action(output);
+				dbContext.UpdateGroupListObject(output.Model);
+				dbContext.Save();
+			}
 
 			return output;
 		}
@@ -169,10 +189,10 @@ namespace ViewModelExtended.ViewModel
 				GroupItem item = dbContext.CreateGroupItem(root, groop, data);
 				dbContext.Save();
 
-				// create instance wrapper
-				GroupObject obj = dbContext.CreateGroupObject(item, root, groop, data);
+				// create model instance wrapper
+				GroupObject model = dbContext.CreateGroupObject(item, root, groop, data);
 
-				return new GroupObjectViewModel(obj);
+				return new GroupObjectViewModel(model);
 			}
 		}
 
@@ -180,21 +200,31 @@ namespace ViewModelExtended.ViewModel
 		{
 			GroupObjectViewModel output = CreateGroupObjectViewModel(groop, note);
 
-			action(output);
+			// save the external modifications
+			using (IDbContext dbContext = Resource.CreateDbContext()) {
+				action(output);
+				dbContext.UpdateGroupObject(output.Model);
+				dbContext.Save();
+			}
 
 			return output;
 		}
 
-		public GroupObjectViewModel CreateGroupObjectViewModel (GroupObject data)
+		public GroupObjectViewModel CreateGroupObjectViewModel (GroupObject model)
 		{
-			return new GroupObjectViewModel(data);
+			return new GroupObjectViewModel(model);
 		}
 
-		public GroupObjectViewModel CreateGroupObjectViewModel (GroupObject data, Action<GroupObjectViewModel> action)
+		public GroupObjectViewModel CreateGroupObjectViewModel (GroupObject model, Action<GroupObjectViewModel> action)
 		{
-			GroupObjectViewModel output = CreateGroupObjectViewModel(data);
+			GroupObjectViewModel output = CreateGroupObjectViewModel(model);
 
-			action(output);
+			// save the external modifications
+			using (IDbContext dbContext = Resource.CreateDbContext()) {
+				action(output);
+				dbContext.UpdateGroupObject(output.Model);
+				dbContext.Save();
+			}
 
 			return output;
 		}
@@ -288,22 +318,30 @@ namespace ViewModelExtended.ViewModel
 		public void DestroyNoteListObjectViewModel (NoteListObjectViewModel target)
 		{
 			using (IDbContext dbContext = Resource.CreateDbContext()) {
-				dbContext.DeleteNoteListObject(target.Data);
+				dbContext.DeleteNoteListObject(target.Model);
+				dbContext.Save();
 			}
 		}
 
 		public void DestroyGroupListObjectViewModel (GroupListObjectViewModel target)
 		{
 			using (IDbContext dbContext = Resource.CreateDbContext()) {
-				dbContext.DeleteGroupListObject(target.Data);
+				dbContext.DeleteGroupListObject(target.Model);
+				dbContext.Save();
 			}
 		}
 
 		public void DestroyGroupObjectViewModel (GroupObjectViewModel target)
 		{
 			using (IDbContext dbContext = Resource.CreateDbContext()) {
-				dbContext.DeleteGroupObject(target.Data);
+				dbContext.DeleteGroupObject(target.Model);
+				dbContext.Save();
 			}
+		}
+
+		public IObservableList CreateList ()
+		{
+			return new ObservableList();
 		}
 
 		#endregion

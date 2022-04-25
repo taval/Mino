@@ -12,15 +12,15 @@ namespace ViewModelExtended.ViewModel
 	/// <summary>
 	/// ViewModel data for displaying the master list of all Notes
 	/// </summary>
-	public class NoteListViewModel : ViewModelBase, IObservableList
+	public class NoteListViewModel : ViewModelBase
 	{
 		/// <summary>
 		/// the base ListViewModel
 		/// </summary>
-		private ListViewModel ListViewModel { get; set; }
+		private IObservableList List { get; set; }
 
 		public IEnumerable<IListItem> Items {
-			get { return ListViewModel.Items; }
+			get { return List.Items; }
 		}
 
 		private IViewModelResource Resource { get; set; }
@@ -29,12 +29,11 @@ namespace ViewModelExtended.ViewModel
 
 		#region Cross-View Data
 
-		private IListItem? m_Highlighted;
-		public IListItem? Highlighted {
+		private NoteListObjectViewModel? m_Highlighted;
+		public NoteListObjectViewModel? Highlighted {
 			get { return m_Highlighted; }
 			set {
 				Set(ref m_Highlighted, value);
-				ListViewModel.Highlighted = m_Highlighted;
 			}
 		}
 
@@ -45,14 +44,18 @@ namespace ViewModelExtended.ViewModel
 		#region Commands
 
 		public ICommand ReorderCommand {
-			get { return ListViewModel.ReorderCommand ?? throw new NullReferenceException("command not assigned"); }
-			set { if (ListViewModel.ReorderCommand == null) ListViewModel.ReorderCommand = value; }
+			get { return m_ReorderCommand ?? throw new NullReferenceException("command not assigned"); }
+			set { if (m_ReorderCommand == null) m_ReorderCommand = value; }
 		}
 
+		private ICommand? m_ReorderCommand;
+
 		public ICommand PreselectCommand {
-			get { return ListViewModel.PreselectCommand ?? throw new NullReferenceException("command not assigned"); }
-			set { if (ListViewModel.PreselectCommand == null) ListViewModel.PreselectCommand = value; }
+			get { return m_PreselectCommand ?? throw new NullReferenceException("command not assigned"); }
+			set { if (m_PreselectCommand == null) m_PreselectCommand = value; }
 		}
+
+		private ICommand? m_PreselectCommand;
 
 		#endregion
 
@@ -63,11 +66,12 @@ namespace ViewModelExtended.ViewModel
 		public NoteListViewModel (IViewModelResource resource)
 		{
 			Resource = resource;
-			ListViewModel = new ListViewModel(Resource);
+			List = Resource.ViewModelCreator.CreateList();
 			Resource.CommandBuilder.MakeNoteList(this);
+
 			using (IDbContext dbContext = Resource.CreateDbContext()) {
 				IQueryable<IListItem> unsortedObjects = Resource.DbQueryHelper.GetAllNoteListObjects(dbContext);
-				Resource.DbQueryHelper.GetSortedListObjects(unsortedObjects, ListViewModel);
+				Resource.DbQueryHelper.GetSortedListObjects(unsortedObjects, List);
 			}
 		}
 
@@ -77,38 +81,56 @@ namespace ViewModelExtended.ViewModel
 
 		#region Access
 
-		public void Add (IListItem item)
+		public void Add (NoteListObjectViewModel input)
 		{
-			ListViewModel.Add(item);
+			List.Add(input);
+
+			using (IDbContext dbContext = Resource.CreateDbContext()) {
+				Resource.DbListHelper.UpdateAfterAdd(dbContext, input);
+				dbContext.Save();
+			}
 		}
 
-		public void Insert (IListItem? target, IListItem input)
+		public void Insert (NoteListObjectViewModel? target, NoteListObjectViewModel input)
 		{
-			ListViewModel.Insert(target, input);
+			List.Insert(target, input);
+
+			using (IDbContext dbContext = Resource.CreateDbContext()) {
+				Resource.DbListHelper.UpdateAfterInsert(dbContext, target, input);
+				dbContext.Save();
+			}
 		}
 
-		public void Reorder (IListItem source, IListItem target)
+		public void Reorder (NoteListObjectViewModel source, NoteListObjectViewModel target)
 		{
-			ListViewModel.Reorder(source, target);
+			List.Reorder(source, target);
+
+			using (IDbContext dbContext = Resource.CreateDbContext()) {
+				Resource.DbListHelper.UpdateAfterReorder(dbContext, source, target);
+				dbContext.Save();
+			}
 		}
 
-		public void Remove (IListItem obj)
+		public void Remove (NoteListObjectViewModel input)
 		{
-			//using (IDbContext dbContext = Resource.CreateDbContext()) {
-			//	dbContext.DeleteNoteListItem(dbContext.NoteListItems.Find(obj.ItemId));
-			//}
-			ListViewModel.Remove(obj);
-			Resource.ViewModelCreator.DestroyNoteListObjectViewModel((NoteListObjectViewModel)obj);
+			List.Remove(input);
+
+			using (IDbContext dbContext = Resource.CreateDbContext()) {
+				Resource.DbListHelper.UpdateAfterRemove(dbContext, input);
+				dbContext.Save();
+			}
+
+			Resource.ViewModelCreator.DestroyNoteListObjectViewModel(input);
 		}
 
-		public int Index (IListItem input)
+		public int Index (NoteListObjectViewModel input)
 		{
-			return ListViewModel.Index(input);
+			return List.Index(input);
 		}
 
 		public void Clear ()
 		{
-			ListViewModel.Clear();
+			List.Clear();
 		}
 
 		#endregion
@@ -130,7 +152,7 @@ namespace ViewModelExtended.ViewModel
 
 		public void Refresh ()
 		{
-			ListViewModel.RefreshListView();
+			Utility.RefreshListView(List.Items);
 		}
 
 		#endregion

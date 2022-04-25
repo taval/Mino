@@ -9,22 +9,21 @@ namespace ViewModelExtended.ViewModel
 {
 	public class GroupObjectViewModel : ViewModelBase, IListItem, ISelectable
 	{
-		public GroupObject Data {
-			get { return m_Data; }
+		public GroupObject Model {
+			get { return m_Model; }
 		}
 
-		private readonly GroupObject m_Data;
+		private readonly GroupObject m_Model;
 
 		public int ItemId {
-			get { return Data.Item.Id; }
-			private set { Data.Item.Id = value; }
+			get { return Model.Item.Id; }
+			private set { Model.Item.Id = value; }
 		}
 
 		public INode Node {
-			get { return Data.Node; }
+			get { return Model.Node; }
 		}
 
-		// NOTE: for testing purposes only. assigns to itself solely to trigger INotifyPropertyChanged
 		public int? PreviousId {
 			get {
 				PreviousId = Node.PreviousId;
@@ -46,25 +45,25 @@ namespace ViewModelExtended.ViewModel
 		private int? m_NextId;
 
 		public Timestamp Timestamp {
-			get { return Data.Timestamp; }
+			get { return Model.Timestamp; }
 		}
 
 		public string Title {
-			get { return Data.Data.Title; }
-			set {
-				Set(ref m_Title, value);
-				Data.Data.Title = m_Title;
+			get {
+				Title = Model.Data.Title;
+				return m_Title;
 			}
+			private set { Set(ref m_Title, value); }
 		}
 
 		private string m_Title;
 
 		public string Text {
-			get { return Data.Data.Text; }
-			set {
-				Set(ref m_Text, value);
-				Data.Data.Text = m_Text;
+			get {
+				Text = Model.Data.Text;
+				return m_Text;
 			}
+			private set { Set(ref m_Text, value); }
 		}
 
 		private string m_Text;
@@ -81,16 +80,18 @@ namespace ViewModelExtended.ViewModel
 
 		private bool m_IsSelected;
 
-
 		//public int Idx => throw new NotImplementedException();
 
-		public GroupObjectViewModel (GroupObject data)
+		public GroupObjectViewModel (GroupObject model)
 		{
-			m_Data = data;
+			m_Model = model;
 			Previous = null;
 			Next = null;
-			m_Title = string.Empty;
-			m_Text = string.Empty;
+			m_IsSelected = false;
+			m_Title = Model.Data.Title;
+			Title = m_Title;
+			m_Text = Model.Data.Text;
+			Text = m_Text;
 		}
 	}
 }

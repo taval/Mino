@@ -49,7 +49,7 @@ namespace ViewModelExtended.Command
 			}
 
 			// set the highlighted item
-			m_ListViewModel.Highlighted = dataContext as GroupObjectViewModel;
+			m_ListViewModel.Highlighted = dataContext as GroupListObjectViewModel;
 
 			// capture item for drag drop operation
 			DragDropEffects dragDropResult = DragDrop.DoDragDrop(

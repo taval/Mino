@@ -36,6 +36,8 @@ namespace ViewModelExtended
 
 		public void MakeGroupTabs (GroupTabsViewModel target)
 		{
+			target.GroupTabsLoadCommand = new GroupTabsLoadCommand(target);
+
 			target.GroupSelectCommand = new GroupSelectCommand(target);
 			target.GroupCreateCommand = new GroupCreateCommand(target);
 			target.GroupDestroyCommand = new GroupDestroyCommand(target);
@@ -54,13 +56,13 @@ namespace ViewModelExtended
 		public void MakePrime (PrimeViewModel target)
 		{
 			target.PrimeLoadCommand = new PrimeLoadCommand(target);
+
 			target.NoteSelectCommand = new NoteSelectCommand(target);
 			target.NoteCreateCommand = new NoteCreateCommand(target);
 			target.NoteDestroyCommand = new NoteDestroyCommand(target);
 
-			target.NoteReceiveCommand = new NoteReceiveCommand(target);
 			target.NoteSendCommand = new NoteSendCommand(target);
-
+			target.NoteReceiveCommand = new NoteReceiveCommand(target);
 		}
 
 		public void MakeMainWindow (MainWindowViewModel target)

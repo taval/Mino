@@ -33,8 +33,8 @@ namespace ViewModelExtended.Command
 				return;
 			}
 
-			IListItem? target = element.DataContext as IListItem;
-			IListItem? source = e.Data.GetData(DataFormats.Serializable) as IListItem;
+			GroupObjectViewModel? target = element.DataContext as GroupObjectViewModel;
+			GroupObjectViewModel? source = e.Data.GetData(DataFormats.Serializable) as GroupObjectViewModel;
 
 			if (source != null && target != null) {
 				m_ListViewModel.Reorder(source, target);

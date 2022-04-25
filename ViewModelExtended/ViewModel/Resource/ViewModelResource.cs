@@ -9,7 +9,7 @@ namespace ViewModelExtended.ViewModel
 {
 	public class ViewModelResource : IViewModelResource
 	{
-		public IDbHelper DbHelper { get; private set; }
+		public IDbListHelper DbListHelper { get; private set; }
 		public IDbQueryHelper DbQueryHelper { get; private set; }
 		public IViewModelCreator ViewModelCreator { get; private set; }
 		public ICommandBuilder CommandBuilder { get; private set; }
@@ -31,12 +31,14 @@ namespace ViewModelExtended.ViewModel
 			//       all are dependent on the helpers and factories
 			//       while its fine here, the classes internally should account for the fail cases in a clean way because it is hard to track what happens otherwise
 
+			// TODO: (optional fix, unnecessary in production) Node display is inaccurate. This problem could be more significent however in other areas where bubbling notifications is necessary. In this instance, it may require making Node a viewModelBase-derived object and listening to its changes - however, making some modifications to Previous and Next in the same viewmodel may suffice. See desktop doc prop_events.cs for details of solution.
+
 			// TODO: Testing only: truncating the table and resetting id auto-increment - remove this in production
 			using (IDbContext dbContext = CreateDbContext()) {
-				dbContext.Reset();
+				//dbContext.Reset();
 			}
 
-			DbHelper = new DbHelper();
+			DbListHelper = new DbListHelper();
 			DbQueryHelper = new DbQueryHelper(this);
 			ViewModelCreator = new ViewModelCreator(this);
 			CommandBuilder = new CommandBuilder(this);

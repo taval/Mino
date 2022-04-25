@@ -12,8 +12,7 @@ namespace ViewModelExtended.ViewModel
 	/// </summary>
 	public interface IViewModelResource
 	{
-		public IDbContext CreateDbContext ();
-		public IDbHelper DbHelper { get; }
+		public IDbListHelper DbListHelper { get; }
 		public IDbQueryHelper DbQueryHelper { get; }
 		public IViewModelCreator ViewModelCreator { get; }
 		public ICommandBuilder CommandBuilder { get; }
@@ -26,5 +25,7 @@ namespace ViewModelExtended.ViewModel
 
 		public GroupTabsViewModel GroupTabsViewModel { get; }
 		public PrimeViewModel PrimeViewModel { get; }
+
+		public IDbContext CreateDbContext ();
 	}
 }

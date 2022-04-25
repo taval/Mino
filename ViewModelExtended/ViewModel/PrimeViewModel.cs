@@ -72,10 +72,6 @@ namespace ViewModelExtended.ViewModel
 		{
 			Resource = resource;
 			Resource.CommandBuilder.MakePrime(this);
-			if (Resource.NoteListViewModel.Items.Count() > 0) {
-				NoteListObjectViewModel firstNote = (NoteListObjectViewModel)Resource.NoteListViewModel.Items.First();
-				SelectNote(firstNote);
-			}
 		}
 
 		#endregion
@@ -83,6 +79,16 @@ namespace ViewModelExtended.ViewModel
 
 
 		#region Events: NoteList
+
+		/// <summary>
+		/// adds external data to the NoteList, e.g. test data
+		/// </summary>
+		/// <param name="input"></param>
+		public void AddNote (NoteListObjectViewModel input)
+		{
+			Resource.NoteListViewModel.Add(input);
+		}
+
 
 		/// <summary>
 		/// // set the Text viewer to the selected note (this is generally the SelectedNote passed in from NoteList to Prime)
@@ -100,7 +106,7 @@ namespace ViewModelExtended.ViewModel
 		/// </summary>
 		/// <param name="target">the location at where the item will be inserted</param>
 		/// <param name="input">the item to insert</param>
-		public void CreateNote (IListItem? target, NoteListObjectViewModel input)
+		public void CreateNote (NoteListObjectViewModel? target, NoteListObjectViewModel input)
 		{
 			// the insert target is the most recently highlighted Item
 			//NoteListViewModel.Target = target;
@@ -115,7 +121,7 @@ namespace ViewModelExtended.ViewModel
 
 			// de-select the target
 			if (target != null) {
-				((NoteListObjectViewModel)target).IsSelected = false;
+				target.IsSelected = false;
 			}
 
 			Resource.NoteListViewModel.Insert(target, input);
@@ -134,7 +140,7 @@ namespace ViewModelExtended.ViewModel
 		/// chooses a new selection when removing a list item (or doesn't)
 		/// </summary>
 		/// <param name="obj"></param>
-		public void DestroyNote (IListItem obj)
+		public void DestroyNote (NoteListObjectViewModel input)
 		{
 			// don't let lack of highlighted item cause deleted item to not be de-selected
 			if (Resource.NoteListViewModel.Highlighted == null) {
@@ -142,22 +148,22 @@ namespace ViewModelExtended.ViewModel
 			}
 
 			// compare what is selected to what is highlighted and what is to be deleted
-			if (SelectedNoteViewModel == obj) {
-				if (Resource.NoteListViewModel.Highlighted == obj) {
-					if (obj.Next != null) {
-						SelectNote((NoteListObjectViewModel)obj.Next);
+			if (SelectedNoteViewModel == input) {
+				if (Resource.NoteListViewModel.Highlighted == input) {
+					if (input.Next != null) {
+						SelectNote((NoteListObjectViewModel)input.Next);
 					}
-					else if (obj.Previous != null) {
-						SelectNote((NoteListObjectViewModel)obj.Previous);
+					else if (input.Previous != null) {
+						SelectNote((NoteListObjectViewModel)input.Previous);
 					}
 					Resource.NoteListViewModel.Highlighted = SelectedNoteViewModel;
 				}
 				else if (Resource.NoteListViewModel.Highlighted != null) {
-					SelectNote((NoteListObjectViewModel)Resource.NoteListViewModel.Highlighted);
+					SelectNote(Resource.NoteListViewModel.Highlighted);
 				}
 			}
 			else {
-				if (Resource.NoteListViewModel.Highlighted == obj) {
+				if (Resource.NoteListViewModel.Highlighted == input) {
 					Resource.NoteListViewModel.Highlighted = SelectedNoteViewModel;
 
 				}
@@ -180,7 +186,7 @@ namespace ViewModelExtended.ViewModel
 
 			if (Resource.GroupContentsViewModel.Items.Count() > 0) {
 				groupObj = (GroupObjectViewModel?)Resource.GroupContentsViewModel.Items.Where(
-					c => ((GroupObjectViewModel)c).Data.Data == ((NoteListObjectViewModel)obj).Data.Data)?.First();
+					(c) => ((GroupObjectViewModel)c).Model.Data.Id == input.Model.Data.Id)?.First();
 			}
 
 			if (groupObj != null) {
@@ -188,7 +194,7 @@ namespace ViewModelExtended.ViewModel
 			}
 
 			// remove the note
-			Resource.NoteListViewModel.Remove(obj);
+			Resource.NoteListViewModel.Remove(input);
 		}
 
 
@@ -215,7 +221,7 @@ namespace ViewModelExtended.ViewModel
 			// associate a newly created GroupObject with the given NoteListObject
 			GroupObjectViewModel groupNote =
 				Resource.ViewModelCreator.CreateGroupObjectViewModel(
-					Resource.GroupContentsViewModel.ContentData.Data.Data, input.Data.Data);
+					Resource.GroupContentsViewModel.ContentData.Model.Data, input.Model.Data);
 
 			// add the GroupObject to the contents list
 			Resource.GroupContentsViewModel.Add(groupNote);
@@ -235,7 +241,7 @@ namespace ViewModelExtended.ViewModel
 			// if no notes exist, create one
 			if (Resource.NoteListViewModel.Items.Count() == 0) {
 				//NoteListViewModel.Add(new NoteViewModel(NoteListViewModel));
-				Resource.NoteListViewModel.Add(Resource.NoteListViewModel.Create());
+				AddNote(Resource.NoteListViewModel.Create());
 			}
 
 			// select the first note
@@ -257,7 +263,7 @@ namespace ViewModelExtended.ViewModel
 	{
 		public bool Equals (IListItem lhs, IListItem rhs)
 		{
-			return ((GroupObjectViewModel)lhs).Data.Data == ((NoteListObjectViewModel)rhs).Data.Data;
+			return ((GroupObjectViewModel)lhs).Model.Data == ((NoteListObjectViewModel)rhs).Model.Data;
 
 		}
 

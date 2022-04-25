@@ -33,7 +33,7 @@
 				Margin="8 0 4 0"
 				DataContext="{ Binding Resource.NoteListViewModel, diag:PresentationTraceSources.TraceLevel=High }"
 
-                local:ListAction.SendCommand="{ Binding
+				local:ListAction.SendCommand="{ Binding
 					RelativeSource={ RelativeSource AncestorType={ x:Type local:PrimeView } },
 					Path=DataContext.NoteSendCommand,
 					diag:PresentationTraceSources.TraceLevel=High }"
@@ -62,13 +62,13 @@
 				Margin="4 0 8 0"
 				Grid.Column="2"
 				DataContext="{ Binding Resource.GroupTabsViewModel }"
-                
-                local:ListState.Incoming="{ Binding
+				
+				local:ListState.Incoming="{ Binding
 					RelativeSource={ RelativeSource AncestorType={ x:Type local:PrimeView } },
 					Path=DataContext.OutgoingNoteViewModel,
 					diag:PresentationTraceSources.TraceLevel=High }"
-                
-                local:ListAction.ReceiveCommand="{ Binding
+				
+				local:ListAction.ReceiveCommand="{ Binding
 					RelativeSource={ RelativeSource AncestorType={ x:Type local:PrimeView } },
 					Path=DataContext.NoteReceiveCommand,
 					diag:PresentationTraceSources.TraceLevel=High }"/>

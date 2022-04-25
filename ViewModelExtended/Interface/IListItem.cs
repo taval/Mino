@@ -21,7 +21,6 @@ namespace ViewModelExtended
 		/// </summary>
 		public IListItem? Previous { get; set; }
 
-		// NOTE: for testing purposes only. assigns to itself solely to trigger INotifyPropertyChanged
 		public int? PreviousId { get; }
 
 		/// <summary>
@@ -29,7 +28,6 @@ namespace ViewModelExtended
 		/// </summary>
 		public IListItem? Next { get; set; }
 
-		// NOTE: for testing purposes only. assigns to itself solely to trigger INotifyPropertyChanged
 		public int? NextId { get; }
 
 		public IListItem Value { get; }

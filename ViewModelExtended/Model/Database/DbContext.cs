@@ -111,7 +111,6 @@ namespace ViewModelExtended.Model
 			return output;
 		}
 
-		// TODO: when selecting a GroupListObject, this is called inadvertently sometimes
 		public void UpdateNode (INode target, INode? previous, INode? next)
 		{
 			// always assign even if null
@@ -144,7 +143,7 @@ namespace ViewModelExtended.Model
 			return output;
 		}
 
-		public void UpdateTimestamp (Timestamp target, int? userModified, int? userIndexed, int? autoModified)
+		public void UpdateTimestamp (Timestamp target, long? userModified, long? userIndexed, long? autoModified)
 		{
 			// only assign if not null
 			if (userModified == null && userIndexed == null && autoModified == null) {
@@ -319,7 +318,7 @@ namespace ViewModelExtended.Model
 
 
 
-		#region Instance Objects
+		#region Instance Objects: Create
 
 		public ObjectRoot CreateObjectRoot (INode node, Timestamp timestamp)
 		{
@@ -345,7 +344,36 @@ namespace ViewModelExtended.Model
 
 
 
-		#region Destructors
+		#region Instance Objects: Update
+
+		public void UpdateNoteListObject (NoteListObject target)
+		{
+			UpdateObjectRoot(target);
+			Notes.Update(target.Data);
+		}
+
+		public void UpdateGroupListObject (GroupListObject target)
+		{
+			UpdateObjectRoot(target);
+			Groups.Update(target.Data);
+		}
+
+		public void UpdateGroupObject (GroupObject target)
+		{
+			UpdateObjectRoot(target);
+		}
+
+		public void UpdateObjectRoot (IObject target)
+		{
+			Nodes.Update((Node)target.Node);
+			Timestamps.Update(target.Timestamp);
+		}
+
+		#endregion
+
+
+
+		#region Instance Objects: Destructors
 
 		public void DeleteNoteListObject (NoteListObject target)
 		{

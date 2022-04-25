@@ -12,15 +12,15 @@ namespace ViewModelExtended.ViewModel
 	/// <summary>
 	/// ViewModel data for displaying the master list of all Groups
 	/// </summary>
-	public class GroupListViewModel : ViewModelBase, IObservableList
+	public class GroupListViewModel : ViewModelBase
 	{
 		/// <summary>
 		/// the base ListViewModel
 		/// </summary>
-		private ListViewModel ListViewModel { get; set; }
+		private IObservableList List { get; set; }
 
 		public IEnumerable<IListItem> Items {
-			get { return ListViewModel.Items; }
+			get { return List.Items; }
 		}
 
 		private IViewModelResource Resource { get; set; }
@@ -29,14 +29,14 @@ namespace ViewModelExtended.ViewModel
 
 		#region Cross-View Data
 
-		private IListItem? m_Highlighted;
-		public IListItem? Highlighted {
+		public GroupListObjectViewModel? Highlighted {
 			get { return m_Highlighted; }
 			set {
 				Set(ref m_Highlighted, value);
-				ListViewModel.Highlighted = m_Highlighted;
 			}
 		}
+
+		private GroupListObjectViewModel? m_Highlighted;
 
 		#endregion
 
@@ -45,14 +45,18 @@ namespace ViewModelExtended.ViewModel
 		#region Commands
 
 		public ICommand ReorderCommand {
-			get { return ListViewModel.ReorderCommand ?? throw new NullReferenceException("command not assigned"); }
-			set { if (ListViewModel.ReorderCommand == null) ListViewModel.ReorderCommand = value; }
+			get { return m_ReorderCommand ?? throw new NullReferenceException("command not assigned"); }
+			set { if (m_ReorderCommand == null) m_ReorderCommand = value; }
 		}
 
+		private ICommand? m_ReorderCommand;
+
 		public ICommand PreselectCommand {
-			get { return ListViewModel.PreselectCommand ?? throw new NullReferenceException("command not assigned"); }
-			set { if (ListViewModel.PreselectCommand == null) ListViewModel.PreselectCommand = value; }
+			get { return m_PreselectCommand ?? throw new NullReferenceException("command not assigned"); }
+			set { if (m_PreselectCommand == null) m_PreselectCommand = value; }
 		}
+
+		private ICommand? m_PreselectCommand;
 
 		#endregion
 
@@ -63,11 +67,12 @@ namespace ViewModelExtended.ViewModel
 		public GroupListViewModel (IViewModelResource resource)
 		{
 			Resource = resource;
-			ListViewModel = new ListViewModel(Resource);
+			List = Resource.ViewModelCreator.CreateList();
 			Resource.CommandBuilder.MakeGroupList(this);
+
 			using (IDbContext dbContext = Resource.CreateDbContext()) {
 				IQueryable<IListItem> unsortedObjects = Resource.DbQueryHelper.GetAllGroupListObjects(dbContext);
-				Resource.DbQueryHelper.GetSortedListObjects(unsortedObjects, ListViewModel);
+				Resource.DbQueryHelper.GetSortedListObjects(unsortedObjects, List);
 			}
 		}
 
@@ -77,38 +82,57 @@ namespace ViewModelExtended.ViewModel
 
 		#region Access
 
-		public void Add (IListItem item)
+		public void Add (GroupListObjectViewModel input)
 		{
-			ListViewModel.Add(item);
+			List.Add(input);
+
+			// make changes to database
+			using (IDbContext dbContext = Resource.CreateDbContext()) {
+				Resource.DbListHelper.UpdateAfterAdd(dbContext, input);
+				dbContext.Save();
+			}
 		}
 
-		public void Insert (IListItem? target, IListItem input)
+		public void Insert (GroupListObjectViewModel? target, GroupListObjectViewModel input)
 		{
-			ListViewModel.Insert(target, input);
+			List.Insert(target, input);
+
+			using (IDbContext dbContext = Resource.CreateDbContext()) {
+				Resource.DbListHelper.UpdateAfterInsert(dbContext, target, input);
+				dbContext.Save();
+			}
 		}
 
-		public void Reorder (IListItem source, IListItem target)
+		public void Reorder (GroupListObjectViewModel source, GroupListObjectViewModel target)
 		{
-			ListViewModel.Reorder(source, target);
+			List.Reorder(source, target);
+
+			using (IDbContext dbContext = Resource.CreateDbContext()) {
+				Resource.DbListHelper.UpdateAfterReorder(dbContext, source, target);
+				dbContext.Save();
+			}
 		}
 
-		public void Remove (IListItem obj)
+		public void Remove (GroupListObjectViewModel input)
 		{
-			//using (IDbContext dbContext = Resource.CreateDbContext()) {
-			//	dbContext.DeleteGroupListItem(dbContext.GroupListItems.Find(obj.ItemId)); // TODO: this should refer to object and not item
-			//}
-			ListViewModel.Remove(obj);
-			Resource.ViewModelCreator.DestroyGroupListObjectViewModel((GroupListObjectViewModel)obj);
+			List.Remove(input);
+
+			using (IDbContext dbContext = Resource.CreateDbContext()) {
+				Resource.DbListHelper.UpdateAfterRemove(dbContext, input);
+				dbContext.Save();
+			}
+
+			Resource.ViewModelCreator.DestroyGroupListObjectViewModel(input);
 		}
 
-		public int Index (IListItem input)
+		public int Index (GroupListObjectViewModel input)
 		{
-			return ListViewModel.Index(input);
+			return List.Index(input);
 		}
 
 		public void Clear ()
 		{
-			ListViewModel.Clear();
+			List.Clear();
 		}
 
 		#endregion
@@ -130,7 +154,7 @@ namespace ViewModelExtended.ViewModel
 
 		public void Refresh ()
 		{
-			ListViewModel.RefreshListView();
+			Utility.RefreshListView(List.Items);
 		}
 
 		#endregion

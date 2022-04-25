@@ -9,6 +9,8 @@ namespace ViewModelExtended.ViewModel
 {
 	public interface IViewModelCreator
 	{
+		public IObservableList CreateList ();
+
 		// ListObjects have two input methods: new data and existing data
 
 		#region NoteList

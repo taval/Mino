@@ -9,19 +9,21 @@ namespace ViewModelExtended.ViewModel
 {
 	public class NoteListObjectViewModel : ViewModelBase, IListItem, ISelectable
 	{
-		// base object - Db link and timestamp
-		public NoteListObject Data {
-			get { return m_Data; }
+		public NoteListObject Model {
+			get { return m_Model; }
 		}
 
-		private readonly NoteListObject m_Data;
+		private readonly NoteListObject m_Model;
 
 		public int ItemId {
-			get { return Data.Item.Id; }
-			private set { Data.Item.Id = value; }
+			get { return Model.Item.Id; }
+			private set { Model.Item.Id = value; }
 		}
 
-		// NOTE: for testing purposes only. assigns to itself solely to trigger INotifyPropertyChanged
+		public INode Node {
+			get { return Model.Node; }
+		}
+
 		public int? PreviousId {
 			get {
 				PreviousId = Node.PreviousId;
@@ -42,29 +44,25 @@ namespace ViewModelExtended.ViewModel
 
 		private int? m_NextId;
 
-		public INode Node {
-			get { return Data.Node; }
-		}
-
 		public Timestamp Timestamp {
-			get { return Data.Timestamp; }
+			get { return Model.Timestamp; }
 		}
 
 		public string Title {
-			get { return m_Title; }
+			get { return Model.Data.Title; }
 			set {
+				Model.Data.Title = value;
 				Set(ref m_Title, value);
-				Data.Data.Title = value;
 			}
 		}
 
 		private string m_Title;
 
 		public string Text {
-			get { return m_Text; }
+			get { return Model.Data.Text; }
 			set {
+				Model.Data.Text = value;
 				Set(ref m_Text, value);
-				Data.Data.Text = value;
 			}
 		}
 
@@ -84,13 +82,16 @@ namespace ViewModelExtended.ViewModel
 
 		//public int Idx => throw new NotImplementedException();
 
-		public NoteListObjectViewModel (NoteListObject data)
+		public NoteListObjectViewModel (NoteListObject model)
 		{
-			m_Data = data;
+			m_Model = model;
 			Previous = null;
 			Next = null;
-			m_Title = String.Empty;
-			m_Text = string.Empty;
+			m_IsSelected = false;
+			m_Title = Model.Data.Title;
+			Title = m_Title;
+			m_Text = Model.Data.Text;
+			Text = m_Text;
 		}
 	}
 }
