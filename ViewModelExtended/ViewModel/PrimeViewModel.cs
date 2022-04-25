@@ -185,8 +185,15 @@ namespace ViewModelExtended.ViewModel
 			GroupObjectViewModel? groupObj = null;
 
 			if (Resource.GroupContentsViewModel.Items.Count() > 0) {
-				groupObj = (GroupObjectViewModel?)Resource.GroupContentsViewModel.Items.Where(
-					(c) => ((GroupObjectViewModel)c).Model.Data.Id == input.Model.Data.Id)?.First();
+				IEnumerable<IListItem>? groupObjsInGroup = Resource.GroupContentsViewModel.Items.Where(
+					(c) => ((GroupObjectViewModel)c).Model.Data.Id == input.Model.Data.Id);
+
+				if (groupObjsInGroup != null && groupObjsInGroup.Count() > 0) {
+					groupObj = (GroupObjectViewModel?)groupObjsInGroup?.First();
+				}
+
+				//groupObj = (GroupObjectViewModel?)Resource.GroupContentsViewModel.Items.Where(
+				//	(c) => ((GroupObjectViewModel)c).Model.Data.Id == input.Model.Data.Id)?.First();
 			}
 
 			if (groupObj != null) {

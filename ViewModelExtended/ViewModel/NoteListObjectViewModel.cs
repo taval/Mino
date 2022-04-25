@@ -25,24 +25,12 @@ namespace ViewModelExtended.ViewModel
 		}
 
 		public int? PreviousId {
-			get {
-				PreviousId = Node.PreviousId;
-				return m_PreviousId;
-			}
-			private set { Set(ref m_PreviousId, value); }
+			get { return Node.PreviousId; }
 		}
-
-		private int? m_PreviousId;
 
 		public int? NextId {
-			get {
-				NextId = Node.NextId;
-				return m_NextId;
-			}
-			private set { Set(ref m_NextId, value); }
+			get { return Node.NextId; }
 		}
-
-		private int? m_NextId;
 
 		public Timestamp Timestamp {
 			get { return Model.Timestamp; }

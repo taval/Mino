@@ -26,6 +26,8 @@ namespace ViewModelExtended.ViewModel
 		public GroupTabsViewModel GroupTabsViewModel { get; }
 		public PrimeViewModel PrimeViewModel { get; }
 
+		public MainWindowViewModel MainWindowViewModel { get; }
+
 		public IDbContext CreateDbContext ();
 	}
 }

@@ -14,13 +14,16 @@ namespace ViewModelExtended.ViewModel
 		public IViewModelCreator ViewModelCreator { get; private set; }
 		public ICommandBuilder CommandBuilder { get; private set; }
 
-		public MainWindowViewModel MainWindowViewModel { get; private set; }
-		public PrimeViewModel PrimeViewModel { get; private set; }
-		public GroupTabsViewModel GroupTabsViewModel { get; private set; }
 		public NoteListViewModel NoteListViewModel { get; private set; }
 		public GroupListViewModel GroupListViewModel { get; private set; }
-		public GroupContentsViewModel GroupContentsViewModel { get; private set; }
+
 		public NoteTextViewModel NoteTextViewModel { get; private set; }
+		public GroupContentsViewModel GroupContentsViewModel { get; private set; }
+
+		public GroupTabsViewModel GroupTabsViewModel { get; private set; }
+		public PrimeViewModel PrimeViewModel { get; private set; }
+
+		public MainWindowViewModel MainWindowViewModel { get; private set; }
 
 		public ViewModelResource ()
 		{
@@ -35,7 +38,7 @@ namespace ViewModelExtended.ViewModel
 
 			// TODO: Testing only: truncating the table and resetting id auto-increment - remove this in production
 			using (IDbContext dbContext = CreateDbContext()) {
-				//dbContext.Reset();
+				dbContext.Reset();
 			}
 
 			DbListHelper = new DbListHelper();
