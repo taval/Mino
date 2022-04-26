@@ -5,6 +5,8 @@ using System.Text;
 using System.Windows.Input;
 using ViewModelExtended.Model;
 
+// TODO: incomplete/invalid Notes should be disallowed from GroupContentsViewModel addition/insertion
+
 // TODO: DragOver and MouseUp after DragOver should be two separate operations: DragOver should set a real value for Incoming (not an attached proxy for Outgoing called Incoming, as is currently extant). As outgoing is the NoteListObject, incoming should be GroupObject. This way, if MouseUp event is fired before DragLeave, the GroupObject save operation is performed. If DragLeave is triggered, delete the GroupObject.
 
 // TODO: DragLeave on GroupContentsView should remove the dragged item from the list before dropping it (this means every time an item is dragged it will create and destroy a new item - this would be an instance where not saving the object first could be useful)

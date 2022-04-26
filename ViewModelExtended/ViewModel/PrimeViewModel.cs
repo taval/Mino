@@ -8,6 +8,19 @@ using System.Windows;
 using System.Windows.Input;
 using ViewModelExtended.Model;
 
+// TODO: the link between GroupObjects is broken upon removal from a non-visible group. this is because the link remodeling never occurs at the viewmodel level if the group's contents are not currently loaded into GroupContentsViewModel.
+
+/* e.g.
+ * load the dbContext
+ * call GetGroupObjectsOfNote
+ * for each GroupObject, set join the previous and next nodes
+ * (calling GroupContentsViewModel.Remove will redundantly call List.Remove and probably break stuff, so maybe don't call it but adapt a nearly identical function here without the List.Remove call, if necessary after doing delete from GetGroupObjectsOfNote ---
+ * complicating this is the fact that the object will still need to be removed from the list somehow. perhaps find a way to separate the join behavior from remove, like a 'clean' remove that bypasses ObservableList and removes directly without side effects)
+ 
+ a possibly better way to handle this might be to use GroupContentsViewModel as storage for all groupNotes lazily loaded into a hash or something and iterating over that. shouldn't have to violate the encapsulation of ObservableList that way.
+ 
+ */
+
 
 
 namespace ViewModelExtended.ViewModel
@@ -191,9 +204,6 @@ namespace ViewModelExtended.ViewModel
 				if (groupObjsInGroup != null && groupObjsInGroup.Count() > 0) {
 					groupObj = (GroupObjectViewModel?)groupObjsInGroup?.First();
 				}
-
-				//groupObj = (GroupObjectViewModel?)Resource.GroupContentsViewModel.Items.Where(
-				//	(c) => ((GroupObjectViewModel)c).Model.Data.Id == input.Model.Data.Id)?.First();
 			}
 
 			if (groupObj != null) {

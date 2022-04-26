@@ -91,6 +91,11 @@ namespace ViewModelExtended.Model
 			return GroupListItems;
 		}
 
+		public IQueryable<GroupItem> GetAllGroupItems ()
+		{
+			return GroupItems;
+		}
+
 		public IQueryable<GroupItem> GetGroupItemsInGroup (Group groop)
 		{
 			return GroupItems.Where(row => row.GroupId == groop.Id);

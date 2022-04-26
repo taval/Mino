@@ -35,6 +35,7 @@ namespace ViewModelExtended.Model
 
 		public IQueryable<NoteListItem> GetAllNoteListItems ();
 		public IQueryable<GroupListItem> GetAllGroupListItems ();
+		public IQueryable<GroupItem> GetAllGroupItems ();
 		public IQueryable<GroupItem> GetGroupItemsInGroup (Group groop);
 
 		#endregion
