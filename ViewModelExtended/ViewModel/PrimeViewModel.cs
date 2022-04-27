@@ -8,19 +8,6 @@ using System.Windows;
 using System.Windows.Input;
 using ViewModelExtended.Model;
 
-// TODO: the link between GroupObjects is broken upon removal from a non-visible group. this is because the link remodeling never occurs at the viewmodel level if the group's contents are not currently loaded into GroupContentsViewModel.
-
-/* e.g.
- * load the dbContext
- * call GetGroupObjectsOfNote
- * for each GroupObject, set join the previous and next nodes
- * (calling GroupContentsViewModel.Remove will redundantly call List.Remove and probably break stuff, so maybe don't call it but adapt a nearly identical function here without the List.Remove call, if necessary after doing delete from GetGroupObjectsOfNote ---
- * complicating this is the fact that the object will still need to be removed from the list somehow. perhaps find a way to separate the join behavior from remove, like a 'clean' remove that bypasses ObservableList and removes directly without side effects)
- 
- a possibly better way to handle this might be to use GroupContentsViewModel as storage for all groupNotes lazily loaded into a hash or something and iterating over that. shouldn't have to violate the encapsulation of ObservableList that way.
- 
- */
-
 
 
 namespace ViewModelExtended.ViewModel
@@ -30,20 +17,25 @@ namespace ViewModelExtended.ViewModel
 		#region Cross-View Data
 
 		/// <summary>
-		/// the NoteViewModel (data displayed by NoteTextView)
+		/// the selected NoteListObjectViewModel (data displayed by NoteTextView)
 		/// NOTE: this is bound for purpose of NoteText population operation
 		/// </summary>
-		private NoteListObjectViewModel? m_SelectedNoteViewModel = null;
 		public NoteListObjectViewModel? SelectedNoteViewModel {
 			get { return m_SelectedNoteViewModel; }
 			set { Set(ref m_SelectedNoteViewModel, value); }
 		}
 
-		private NoteListObjectViewModel? m_OutgoingNoteViewModel = null;
+		private NoteListObjectViewModel? m_SelectedNoteViewModel;
+
+		/// <summary>
+		/// the NoteListObjectViewModel sent to an external list, e.g. to GroupContentsViewModel
+		/// </summary>
 		public NoteListObjectViewModel? OutgoingNoteViewModel {
 			get { return m_OutgoingNoteViewModel; }
 			set { Set(ref m_OutgoingNoteViewModel, value); }
 		}
+
+		private NoteListObjectViewModel? m_OutgoingNoteViewModel;
 
 		#endregion
 
@@ -54,18 +46,62 @@ namespace ViewModelExtended.ViewModel
 		/// <summary>
 		/// sends a Note to a Group
 		/// </summary>
-		public ICommand NoteSendCommand { get; set; }
+		public ICommand NoteSendCommand {
+			get { return m_NoteSendCommand ?? throw new MissingCommandException(); }
+			set { if (m_NoteSendCommand == null) m_NoteSendCommand = value; }
+		}
+
+		private ICommand? m_NoteSendCommand;
 
 		/// <summary>
 		/// receives a Note from NoteList
 		/// </summary>
-		public ICommand NoteReceiveCommand { get; set; }
+		public ICommand NoteReceiveCommand {
+			get { return m_NoteReceiveCommand ?? throw new MissingCommandException(); }
+			set { if (m_NoteReceiveCommand == null) m_NoteReceiveCommand = value; }
+		}
 
-		public ICommand NoteSelectCommand { get; set; }
-		public ICommand NoteCreateCommand { get; set; }
-		public ICommand NoteDestroyCommand { get; set; }
+		private ICommand? m_NoteReceiveCommand;
 
-		public ICommand PrimeLoadCommand { get; set; }
+		/// <summary>
+		/// selects a Note in the NoteList
+		/// </summary>
+		public ICommand NoteSelectCommand {
+			get { return m_NoteSelectCommand ?? throw new MissingCommandException(); }
+			set { if (m_NoteSelectCommand == null) m_NoteSelectCommand = value; }
+		}
+
+		private ICommand? m_NoteSelectCommand;
+
+		/// <summary>
+		/// inserts an empty note into NoteList
+		/// </summary>
+		public ICommand NoteCreateCommand {
+			get { return m_NoteCreateCommand ?? throw new MissingCommandException(); }
+			set { if (m_NoteCreateCommand == null) m_NoteCreateCommand = value; }
+		}
+
+		private ICommand? m_NoteCreateCommand;
+
+		/// <summary>
+		/// removes a note from the NoteList
+		/// </summary>
+		public ICommand NoteDestroyCommand {
+			get { return m_NoteDestroyCommand ?? throw new MissingCommandException(); }
+			set { if (m_NoteDestroyCommand == null) m_NoteDestroyCommand = value; }
+		}
+
+		private ICommand? m_NoteDestroyCommand;
+
+		/// <summary>
+		/// loads ViewModel
+		/// </summary>
+		//public ICommand PrimeLoadCommand {
+		//	get { return m_PrimeLoadCommand ?? throw new MissingCommandException(); }
+		//	set { if (m_PrimeLoadCommand == null) m_PrimeLoadCommand = value; }
+		//}
+
+		//private ICommand? m_PrimeLoadCommand;
 
 		#endregion
 
@@ -84,7 +120,38 @@ namespace ViewModelExtended.ViewModel
 		public PrimeViewModel (IViewModelResource resource)
 		{
 			Resource = resource;
+			m_SelectedNoteViewModel = null;
+			m_OutgoingNoteViewModel = null;
 			Resource.CommandBuilder.MakePrime(this);
+		}
+
+		#endregion
+
+
+
+		#region Load
+
+		/// <summary>
+		/// upon view init, display the first Note
+		/// </summary>
+		public void Load ()
+		{
+			// if no notes exist, create one
+			if (Resource.NoteListViewModel.Items.Count() == 0) {
+				AddNote(Resource.NoteListViewModel.Create());
+			}
+
+			// select the first note
+			SelectedNoteViewModel = Resource.NoteListViewModel.Items.First() as NoteListObjectViewModel;
+			if (SelectedNoteViewModel != null) {
+				SelectNote(SelectedNoteViewModel);
+			}
+
+			// highlight the first note
+			Resource.NoteListViewModel.Highlighted = SelectedNoteViewModel;
+
+			// perform GroupTabs setup
+			Resource.GroupTabsViewModel.Load();
 		}
 
 		#endregion
@@ -194,21 +261,25 @@ namespace ViewModelExtended.ViewModel
 				Resource.NoteListViewModel.Highlighted = newNote;
 			}
 
-			// find any existing note objects residing in the displayed group
-			GroupObjectViewModel? groupObj = null;
+			//// find any existing note objects residing in the displayed group
+			//GroupObjectViewModel? groupObj = null;
 
-			if (Resource.GroupContentsViewModel.Items.Count() > 0) {
-				IEnumerable<IListItem>? groupObjsInGroup = Resource.GroupContentsViewModel.Items.Where(
-					(c) => ((GroupObjectViewModel)c).Model.Data.Id == input.Model.Data.Id);
+			//if (Resource.GroupContentsViewModel.Items.Count() > 0) {
+			//	IEnumerable<IListItem>? groupObjsInGroup = Resource.GroupContentsViewModel.Items.Where(
+			//		(c) => ((GroupObjectViewModel)c).Model.Data.Id == input.Model.Data.Id);
 
-				if (groupObjsInGroup != null && groupObjsInGroup.Count() > 0) {
-					groupObj = (GroupObjectViewModel?)groupObjsInGroup?.First();
-				}
-			}
+			//	if (groupObjsInGroup != null && groupObjsInGroup.Count() > 0) {
+			//		groupObj = (GroupObjectViewModel?)groupObjsInGroup?.First();
+			//	}
+			//}
 
-			if (groupObj != null) {
-				Resource.GroupContentsViewModel.Remove(groupObj);
-			}
+			//if (groupObj != null) {
+			//	Resource.GroupContentsViewModel.Remove(groupObj);
+			//}
+
+			// find any existing note objects matching the input in any of the groups
+			
+			Resource.GroupContentsViewModel.RemoveGroupObjectsByNote(input.Model.Data);
 
 			// remove the note
 			Resource.NoteListViewModel.Remove(input);
@@ -235,40 +306,17 @@ namespace ViewModelExtended.ViewModel
 				return;
 			}
 
-			// associate a newly created GroupObject with the given NoteListObject
-			GroupObjectViewModel groupNote =
-				Resource.ViewModelCreator.CreateGroupObjectViewModel(
-					Resource.GroupContentsViewModel.ContentData.Model.Data, input.Model.Data);
+			// TODO: not sure why AddNoteToGroup shouldn't just be a wrapper for GroupContentsViewModel.AddNoteToGroup.
+			//       having this dbContext the sole one outside of the listviewmodels seems like a code smell/antipattern.
+			using (IDbContext dbContext = Resource.CreateDbContext()) {
+				// associate a newly created GroupObject with the given NoteListObject
+				GroupObjectViewModel groupNote =
+					Resource.ViewModelCreator.CreateGroupObjectViewModel(
+						dbContext, Resource.GroupContentsViewModel.ContentData.Model.Data, input.Model.Data);
 
-			// add the GroupObject to the contents list
-			Resource.GroupContentsViewModel.Add(groupNote);
-		}
-
-		#endregion
-
-
-
-		#region Load
-
-		/// <summary>
-		/// upon view init, display the first Note
-		/// </summary>
-		public void Load ()
-		{
-			// if no notes exist, create one
-			if (Resource.NoteListViewModel.Items.Count() == 0) {
-				//NoteListViewModel.Add(new NoteViewModel(NoteListViewModel));
-				AddNote(Resource.NoteListViewModel.Create());
+				// add the GroupObject to the contents list
+				Resource.GroupContentsViewModel.Add(groupNote);
 			}
-
-			// select the first note
-			SelectedNoteViewModel = Resource.NoteListViewModel.Items.First() as NoteListObjectViewModel;
-			if (SelectedNoteViewModel != null) {
-				SelectNote(SelectedNoteViewModel);
-			}
-
-			// highlight the first note
-			Resource.NoteListViewModel.Highlighted = SelectedNoteViewModel;
 		}
 
 		#endregion
@@ -278,9 +326,9 @@ namespace ViewModelExtended.ViewModel
 
 	class GroupObjectEqualityComparer : IEqualityComparer<IListItem>
 	{
-		public bool Equals (IListItem lhs, IListItem rhs)
+		public bool Equals (IListItem? lhs, IListItem? rhs)
 		{
-			return ((GroupObjectViewModel)lhs).Model.Data == ((NoteListObjectViewModel)rhs).Model.Data;
+			return ((GroupObjectViewModel?)lhs)?.Model.Data == ((NoteListObjectViewModel?)rhs)?.Model.Data;
 
 		}
 

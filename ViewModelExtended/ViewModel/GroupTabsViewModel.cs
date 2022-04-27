@@ -7,6 +7,9 @@ using System.Windows.Input;
 using ViewModelExtended.Model;
 
 
+// TODO: DragOver gets confused and will trigger the ListView Receive command instead of ListViewItem Reorder command. Incoming must be nullified on resolution to allow prevention of erroneous receive.
+
+// TODO: destroying a Group should also destroy all GroupObjects within it
 
 namespace ViewModelExtended.ViewModel
 {
@@ -18,20 +21,22 @@ namespace ViewModelExtended.ViewModel
 		/// the GroupViewModel (data displayed by GroupView)
 		/// NOTE: this is bound for purpose of GroupView population operation
 		/// </summary>
-		private GroupListObjectViewModel? m_SelectedGroupViewModel = null;
 		public GroupListObjectViewModel? SelectedGroupViewModel {
 			get { return m_SelectedGroupViewModel; }
 			set { Set(ref m_SelectedGroupViewModel, value); }
 		}
 
+		private GroupListObjectViewModel? m_SelectedGroupViewModel;
+
 		/// <summary>
 		/// the NoteViewModel selected in the Group Contents tab
 		/// </summary>
-		private GroupObjectViewModel? m_SelectedGroupNoteViewModel = null;
 		public GroupObjectViewModel? SelectedGroupNoteViewModel {
 			get { return m_SelectedGroupNoteViewModel; }
 			set { Set(ref m_SelectedGroupNoteViewModel, value); }
 		}
+
+		private GroupObjectViewModel? m_SelectedGroupNoteViewModel;
 
 		#endregion
 
@@ -45,18 +50,40 @@ namespace ViewModelExtended.ViewModel
 
 
 
-		#region Load Command
+		//#region Load Command
 
-		public ICommand GroupTabsLoadCommand { get; set; }
+		//public ICommand GroupTabsLoadCommand {
+		//	get { return m_GroupTabsLoadCommand ?? throw new MissingCommandException(); }
+		//	set { if (m_GroupTabsLoadCommand == null) m_GroupTabsLoadCommand = value; }
+		//}
 
-		#endregion
+		//private ICommand? m_GroupTabsLoadCommand;
+
+		//#endregion
 
 
 		#region GroupList Commands
 
-		public ICommand GroupSelectCommand { get; set; }
-		public ICommand GroupCreateCommand { get; set; }
-		public ICommand GroupDestroyCommand { get; set; }
+		public ICommand GroupSelectCommand {
+			get { return m_GroupSelectCommand ?? throw new MissingCommandException(); }
+			set { if (m_GroupSelectCommand == null) m_GroupSelectCommand = value; }
+		}
+
+		private ICommand? m_GroupSelectCommand;
+
+		public ICommand GroupCreateCommand {
+			get { return m_GroupCreateCommand ?? throw new MissingCommandException(); }
+			set { if (m_GroupCreateCommand == null) m_GroupCreateCommand = value; }
+		}
+
+		private ICommand? m_GroupCreateCommand;
+
+		public ICommand GroupDestroyCommand {
+			get { return m_GroupDestroyCommand ?? throw new MissingCommandException(); }
+			set { if (m_GroupDestroyCommand == null) m_GroupDestroyCommand = value; }
+		}
+
+		private ICommand? m_GroupDestroyCommand;
 
 		#endregion
 
@@ -64,8 +91,19 @@ namespace ViewModelExtended.ViewModel
 
 		#region Group Commands
 
-		public ICommand GroupNoteSelectCommand { get; set; }
-		public ICommand GroupNoteDestroyCommand { get; set; }
+		public ICommand GroupNoteSelectCommand {
+			get { return m_GroupNoteSelectCommand ?? throw new MissingCommandException(); }
+			set { if (m_GroupNoteSelectCommand == null) m_GroupNoteSelectCommand = value; }
+		}
+
+		private ICommand? m_GroupNoteSelectCommand;
+
+		public ICommand GroupNoteDestroyCommand {
+			get { return m_GroupNoteDestroyCommand ?? throw new MissingCommandException(); }
+			set { if (m_GroupNoteDestroyCommand == null) m_GroupNoteDestroyCommand = value; }
+		}
+
+		private ICommand? m_GroupNoteDestroyCommand;
 
 		#endregion
 
@@ -76,7 +114,44 @@ namespace ViewModelExtended.ViewModel
 		public GroupTabsViewModel (IViewModelResource resource)
 		{
 			Resource = resource;
+			m_SelectedGroupViewModel = null;
+			m_SelectedGroupNoteViewModel = null;
 			Resource.CommandBuilder.MakeGroupTabs(this);
+		}
+
+		#endregion
+
+
+
+		#region Load
+
+		public void Load ()
+		{
+			// NOTE: NOT creating a new group if none exist - must be done manually by design
+
+			if (Resource.GroupListViewModel.Items.Count() == 0) return;
+
+			// select the first group
+			SelectedGroupViewModel = Resource.GroupListViewModel.Items.First() as GroupListObjectViewModel;
+
+			if (SelectedGroupViewModel != null) {
+				SelectGroup(SelectedGroupViewModel);
+			}
+
+			// highlight the first group
+			Resource.GroupListViewModel.Highlighted = SelectedGroupViewModel;
+
+			// select the first note in the selected group
+			if (Resource.GroupContentsViewModel.Items.Count() == 0) return;
+
+			SelectedGroupNoteViewModel = Resource.GroupContentsViewModel.Items.First() as GroupObjectViewModel;
+
+			if (SelectedGroupNoteViewModel != null) {
+				SelectGroupNote(SelectedGroupNoteViewModel);
+			}
+
+			// highlight the first note in the selected group
+			Resource.GroupContentsViewModel.Highlighted = SelectedGroupNoteViewModel;
 		}
 
 		#endregion
@@ -94,10 +169,9 @@ namespace ViewModelExtended.ViewModel
 			SelectedGroupViewModel = groop;
 			SelectedGroupViewModel.IsSelected = true;
 
-			Resource.GroupContentsViewModel.ContentData = null;
 			Resource.GroupContentsViewModel.ContentData = groop;
 
-			Resource.GroupContentsViewModel.SetGroup(groop);
+			Resource.GroupContentsViewModel.SetGroup(groop.Model.Data);
 		}
 
 		/// <summary>
@@ -248,41 +322,6 @@ namespace ViewModelExtended.ViewModel
 			}
 
 			Resource.GroupContentsViewModel.Remove(input);
-		}
-
-		#endregion
-
-
-
-		#region Load
-
-		public void Load ()
-		{
-			// NOTE: NOT creating a new group if none exist - must be done manually by design
-
-			if (Resource.GroupListViewModel.Items.Count() == 0) return;
-
-			// select the first group
-			SelectedGroupViewModel = Resource.GroupListViewModel.Items.First() as GroupListObjectViewModel;
-			
-			if (SelectedGroupViewModel != null) {
-				SelectGroup(SelectedGroupViewModel);
-			}
-
-			// highlight the first group
-			Resource.GroupListViewModel.Highlighted = SelectedGroupViewModel;
-
-			// select the first note in the selected group
-			if (Resource.GroupContentsViewModel.Items.Count() == 0) return;
-
-			SelectedGroupNoteViewModel = Resource.GroupContentsViewModel.Items.First() as GroupObjectViewModel;
-			
-			if (SelectedGroupNoteViewModel != null) {
-				SelectGroupNote(SelectedGroupNoteViewModel);
-			}
-
-			// highlight the first note in the selected group
-			Resource.GroupContentsViewModel.Highlighted = SelectedGroupNoteViewModel;
 		}
 
 		#endregion

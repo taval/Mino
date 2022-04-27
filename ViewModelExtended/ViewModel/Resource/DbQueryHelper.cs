@@ -91,31 +91,43 @@ namespace ViewModelExtended.ViewModel
 					dbContext.CreateGroupObject(item, dbContext.CreateObjectRoot(fullNode, timestamp), groop, data));
 		}
 
-		public IEnumerable<IListItem> GetGroupObjectsOfNote (IDbContext dbContext, NoteListObjectViewModel target)
+		//public IQueryable<IListItem> GetGroupObjectsByNote (IDbContext dbContext, Note note)
+		//{
+		//	IQueryable<IListItem> groupObjects = Resource.DbQueryHelper.GetAllGroupObjects(dbContext);
+
+		//	Action<GroupObjectViewModel> action = (obj) =>
+		//	{
+		//		// get previous GroupObject
+		//		IQueryable<IListItem> previous = Resource.DbQueryHelper.GetGroupObjectByNodeId(
+		//			dbContext, obj.Model.Group, obj.Model.Node.PreviousId);
+
+		//		if (previous.Count() > 0) obj.Previous = previous?.First();
+
+		//		// get next GroupObject
+		//		IQueryable<IListItem> next = Resource.DbQueryHelper.GetGroupObjectByNodeId(
+		//			dbContext, obj.Model.Group, obj.Model.Node.NextId);
+
+		//		if (next.Count() > 0) obj.Next = next?.First();
+		//	};
+
+		//	// get all GroupObjects matching the NoteListObject
+		//	return
+		//		from groupObj in groupObjects
+		//		where ((GroupObjectViewModel)groupObj).Model.Data.Id == note.Id
+		//		select Resource.ViewModelCreator.CreateGroupObjectViewModel(
+		//			((GroupObjectViewModel)groupObj).Model, action);
+		//}
+
+		public IQueryable<IListItem> GetGroupObjectsByNote (IDbContext dbContext, Note note)
 		{
-			IQueryable<IListItem> groupObjects = Resource.DbQueryHelper.GetAllGroupObjects(dbContext);
-
-			Action<GroupObjectViewModel> action = (obj) =>
-			{
-				// get previous GroupObject
-				IQueryable<IListItem> previous = Resource.DbQueryHelper.GetGroupObjectByNodeId(
-					dbContext, obj.Model.Group, obj.Model.Node.PreviousId);
-
-				if (previous.Count() > 0) obj.Previous = previous?.First();
-
-				// get next GroupObject
-				IQueryable<IListItem> next = Resource.DbQueryHelper.GetGroupObjectByNodeId(
-					dbContext, obj.Model.Group, obj.Model.Node.NextId);
-
-				if (next.Count() > 0) obj.Next = next?.First();
-			};
-
-			// get all GroupObjects matching the NoteListObject
-			return
-				from groupObj in groupObjects
-				where ((GroupObjectViewModel)groupObj).Model.Data.Id == target.Model.Data.Id
+			return from item in dbContext.GetAllGroupItems()
+				join node in dbContext.Nodes on item.NodeId equals node.Id
+				join timestamp in dbContext.Timestamps on item.TimestampId equals timestamp.Id
+				join data in dbContext.Notes on item.ObjectId equals data.Id
+				join groop in dbContext.Groups on item.GroupId equals groop.Id
+				where data.Id == note.Id
 				select Resource.ViewModelCreator.CreateGroupObjectViewModel(
-					((GroupObjectViewModel)groupObj).Model, action);
+					dbContext.CreateGroupObject(item, dbContext.CreateObjectRoot(node, timestamp), groop, data));
 		}
 
 		#endregion

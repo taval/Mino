@@ -5,7 +5,7 @@ using System.Text;
 using System.Windows.Input;
 using ViewModelExtended.Model;
 
-
+// TODO: there should be allowed zero groups - zero groups would gray out the Contents tab
 
 namespace ViewModelExtended.ViewModel
 {
@@ -45,14 +45,14 @@ namespace ViewModelExtended.ViewModel
 		#region Commands
 
 		public ICommand ReorderCommand {
-			get { return m_ReorderCommand ?? throw new NullReferenceException("command not assigned"); }
+			get { return m_ReorderCommand ?? throw new MissingCommandException(); }
 			set { if (m_ReorderCommand == null) m_ReorderCommand = value; }
 		}
 
 		private ICommand? m_ReorderCommand;
 
 		public ICommand PreselectCommand {
-			get { return m_PreselectCommand ?? throw new NullReferenceException("command not assigned"); }
+			get { return m_PreselectCommand ?? throw new MissingCommandException(); }
 			set { if (m_PreselectCommand == null) m_PreselectCommand = value; }
 		}
 
@@ -67,8 +67,9 @@ namespace ViewModelExtended.ViewModel
 		public GroupListViewModel (IViewModelResource resource)
 		{
 			Resource = resource;
-			List = Resource.ViewModelCreator.CreateList();
 			Resource.CommandBuilder.MakeGroupList(this);
+			m_Highlighted = null;
+			List = Resource.ViewModelCreator.CreateList();
 
 			using (IDbContext dbContext = Resource.CreateDbContext()) {
 				IQueryable<IListItem> unsortedObjects = Resource.DbQueryHelper.GetAllGroupListObjects(dbContext);
@@ -120,9 +121,8 @@ namespace ViewModelExtended.ViewModel
 			using (IDbContext dbContext = Resource.CreateDbContext()) {
 				Resource.DbListHelper.UpdateAfterRemove(dbContext, input);
 				dbContext.Save();
+				Resource.ViewModelCreator.DestroyGroupListObjectViewModel(dbContext, input);
 			}
-
-			Resource.ViewModelCreator.DestroyGroupListObjectViewModel(input);
 		}
 
 		public int Index (GroupListObjectViewModel input)
@@ -143,7 +143,9 @@ namespace ViewModelExtended.ViewModel
 
 		public GroupListObjectViewModel Create ()
 		{
-			return Resource.ViewModelCreator.CreateGroupListObjectViewModel();
+			using (IDbContext dbContext = Resource.CreateDbContext()) {
+				return Resource.ViewModelCreator.CreateGroupListObjectViewModel(dbContext);
+			}
 		}
 
 		#endregion

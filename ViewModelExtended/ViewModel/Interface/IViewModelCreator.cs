@@ -18,16 +18,17 @@ namespace ViewModelExtended.ViewModel
 		public NoteListViewModel CreateNoteListViewModel ();
 
 		// new
-		public NoteListObjectViewModel CreateNoteListObjectViewModel ();
-		public NoteListObjectViewModel CreateNoteListObjectViewModel (Action<NoteListObjectViewModel> action);
+		public NoteListObjectViewModel CreateNoteListObjectViewModel (IDbContext dbContext);
+		public NoteListObjectViewModel CreateNoteListObjectViewModel (
+			IDbContext dbContext, Action<NoteListObjectViewModel> action);
 
 		// existing
 		public NoteListObjectViewModel CreateNoteListObjectViewModel (NoteListObject data);
 		public NoteListObjectViewModel CreateNoteListObjectViewModel (
-			NoteListObject data, Action<NoteListObjectViewModel> action);
+			NoteListObject data, IDbContext dbContext, Action<NoteListObjectViewModel> action);
 
 		// destroy
-		public void DestroyNoteListObjectViewModel (NoteListObjectViewModel target);
+		public void DestroyNoteListObjectViewModel (IDbContext dbContext, NoteListObjectViewModel target);
 		public void DestroyNoteListViewModel (NoteListViewModel target);
 
 		#endregion
@@ -39,16 +40,17 @@ namespace ViewModelExtended.ViewModel
 		public GroupListViewModel CreateGroupListViewModel ();
 
 		// new
-		public GroupListObjectViewModel CreateGroupListObjectViewModel ();
-		public GroupListObjectViewModel CreateGroupListObjectViewModel (Action<GroupListObjectViewModel> action);
+		public GroupListObjectViewModel CreateGroupListObjectViewModel (IDbContext dbContext);
+		public GroupListObjectViewModel CreateGroupListObjectViewModel (
+			IDbContext dbContext, Action<GroupListObjectViewModel> action);
 
 		// existing
 		public GroupListObjectViewModel CreateGroupListObjectViewModel (GroupListObject data);
 		public GroupListObjectViewModel CreateGroupListObjectViewModel (
-			GroupListObject data, Action<GroupListObjectViewModel> action);
+			GroupListObject data, IDbContext dbContext, Action<GroupListObjectViewModel> action);
 
 		// destroy
-		public void DestroyGroupListObjectViewModel (GroupListObjectViewModel target);
+		public void DestroyGroupListObjectViewModel (IDbContext dbContext, GroupListObjectViewModel target);
 		public void DestroyGroupListViewModel (GroupListViewModel target);
 
 		#endregion
@@ -57,22 +59,21 @@ namespace ViewModelExtended.ViewModel
 
 		#region GroupContents
 
-		//public GroupContentsViewModel CreateGroupContentsViewModel (Group groop);
-		public GroupContentsViewModel CreateGroupContentsViewModel (); // no group selected by default
+		public GroupContentsViewModel CreateGroupContentsViewModel ();
 
 		// new
 		// note there is no default for a GroupObject because it is dependent on an existing Group and specific Note
-		public GroupObjectViewModel CreateGroupObjectViewModel (Group groop, Note note);
+		public GroupObjectViewModel CreateGroupObjectViewModel (IDbContext dbContext, Group groop, Note note);
 		public GroupObjectViewModel CreateGroupObjectViewModel (
-			Group groop, Note note, Action<GroupObjectViewModel> action);
+			IDbContext dbContext, Group groop, Note note, Action<GroupObjectViewModel> action);
 
 		// existing
 		public GroupObjectViewModel CreateGroupObjectViewModel (GroupObject data);
 		public GroupObjectViewModel CreateGroupObjectViewModel (
-			GroupObject data, Action<GroupObjectViewModel> action);
+			GroupObject data, IDbContext dbContext, Action<GroupObjectViewModel> action);
 
 		// destroy
-		public void DestroyGroupObjectViewModel (GroupObjectViewModel target);
+		public void DestroyGroupObjectViewModel (IDbContext dbContext, GroupObjectViewModel target);
 		public void DestroyGroupContentsViewModel (GroupContentsViewModel target);
 
 		#endregion

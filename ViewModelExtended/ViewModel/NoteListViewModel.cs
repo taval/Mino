@@ -5,7 +5,7 @@ using System.Text;
 using System.Windows.Input;
 using ViewModelExtended.Model;
 
-
+// TODO: there should be allowed zero notes - zero notes would close or block the NoteTextView
 
 namespace ViewModelExtended.ViewModel
 {
@@ -44,14 +44,14 @@ namespace ViewModelExtended.ViewModel
 		#region Commands
 
 		public ICommand ReorderCommand {
-			get { return m_ReorderCommand ?? throw new NullReferenceException("command not assigned"); }
+			get { return m_ReorderCommand ?? throw new MissingCommandException(); }
 			set { if (m_ReorderCommand == null) m_ReorderCommand = value; }
 		}
 
 		private ICommand? m_ReorderCommand;
 
 		public ICommand PreselectCommand {
-			get { return m_PreselectCommand ?? throw new NullReferenceException("command not assigned"); }
+			get { return m_PreselectCommand ?? throw new MissingCommandException(); }
 			set { if (m_PreselectCommand == null) m_PreselectCommand = value; }
 		}
 
@@ -66,8 +66,9 @@ namespace ViewModelExtended.ViewModel
 		public NoteListViewModel (IViewModelResource resource)
 		{
 			Resource = resource;
-			List = Resource.ViewModelCreator.CreateList();
 			Resource.CommandBuilder.MakeNoteList(this);
+			m_Highlighted = null;
+			List = Resource.ViewModelCreator.CreateList();
 
 			using (IDbContext dbContext = Resource.CreateDbContext()) {
 				IQueryable<IListItem> unsortedObjects = Resource.DbQueryHelper.GetAllNoteListObjects(dbContext);
@@ -118,9 +119,8 @@ namespace ViewModelExtended.ViewModel
 			using (IDbContext dbContext = Resource.CreateDbContext()) {
 				Resource.DbListHelper.UpdateAfterRemove(dbContext, input);
 				dbContext.Save();
+				Resource.ViewModelCreator.DestroyNoteListObjectViewModel(dbContext, input);
 			}
-
-			Resource.ViewModelCreator.DestroyNoteListObjectViewModel(input);
 		}
 
 		public int Index (NoteListObjectViewModel input)
@@ -141,7 +141,9 @@ namespace ViewModelExtended.ViewModel
 
 		public NoteListObjectViewModel Create ()
 		{
-			return Resource.ViewModelCreator.CreateNoteListObjectViewModel();
+			using (IDbContext dbContext = Resource.CreateDbContext()) {
+				return Resource.ViewModelCreator.CreateNoteListObjectViewModel(dbContext);
+			}
 		}
 
 		#endregion

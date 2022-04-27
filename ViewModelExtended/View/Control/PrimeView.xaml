@@ -10,11 +10,11 @@
 	xmlns:i="http://schemas.microsoft.com/xaml/behaviors"
 	d:DesignHeight="480" d:DesignWidth="800">
 
-	<i:Interaction.Triggers>
+	<!--<i:Interaction.Triggers>
 		<i:EventTrigger EventName="Loaded">
 			<i:InvokeCommandAction Command="{ Binding Path=PrimeLoadCommand, Mode=OneWay }"/>
 		</i:EventTrigger>
-	</i:Interaction.Triggers>
+	</i:Interaction.Triggers>-->
 
 	<StackPanel>
 		<!-- Viewing window -->

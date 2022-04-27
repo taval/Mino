@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Text;
 using ViewModelExtended.ViewModel;
 
-
+// TODO: remove - currently unused
 
 namespace ViewModelExtended.Command
 {

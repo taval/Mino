@@ -44,6 +44,14 @@ namespace ViewModelExtended
 
 
 
+			#region Setup ViewModel
+
+			resource.PrimeViewModel.Load();
+
+			#endregion
+
+
+
 			#region Load Main Window
 
 			MainWindow = new MainWindow() { DataContext = resource.MainWindowViewModel };
@@ -81,30 +89,32 @@ namespace ViewModelExtended
 		/// <param name="resource"></param>
 		private void AddNoteListObjectTestData (IViewModelResource resource)
 		{
-			resource.PrimeViewModel.AddNote(resource.ViewModelCreator.CreateNoteListObjectViewModel(
-				c => { c.Title = "8:00 AM"; c.Text = "make video"; }));
-			resource.PrimeViewModel.AddNote(resource.ViewModelCreator.CreateNoteListObjectViewModel(
-				c => { c.Title = "9:00 AM"; c.Text = "walk the dog"; }));
-			resource.PrimeViewModel.AddNote(resource.ViewModelCreator.CreateNoteListObjectViewModel(
-				c => { c.Title = "9:30 AM"; c.Text = "eat dinner"; }));
-			resource.PrimeViewModel.AddNote(resource.ViewModelCreator.CreateNoteListObjectViewModel(
-				c => { c.Title = "10:15 AM"; c.Text = "watch tv"; }));
-			resource.PrimeViewModel.AddNote(resource.ViewModelCreator.CreateNoteListObjectViewModel(
-				c => { c.Title = "11:30 AM"; c.Text = "jog"; }));
-			resource.PrimeViewModel.AddNote(resource.ViewModelCreator.CreateNoteListObjectViewModel(
-				c => { c.Title = "12:00 PM"; c.Text = "mop"; }));
-			resource.PrimeViewModel.AddNote(resource.ViewModelCreator.CreateNoteListObjectViewModel(
-				c => { c.Title = "1:00 PM"; c.Text = "kick it"; }));
-			resource.PrimeViewModel.AddNote(resource.ViewModelCreator.CreateNoteListObjectViewModel(
-				c => { c.Title = "2:45 PM"; c.Text = "throw things"; }));
-			resource.PrimeViewModel.AddNote(resource.ViewModelCreator.CreateNoteListObjectViewModel(
-				c => { c.Title = "7:00 PM"; c.Text = "sweep"; }));
-			resource.PrimeViewModel.AddNote(resource.ViewModelCreator.CreateNoteListObjectViewModel(
-				c => { c.Title = "7:30 PM"; c.Text = "chill"; }));
-			resource.PrimeViewModel.AddNote(resource.ViewModelCreator.CreateNoteListObjectViewModel(
-				c => { c.Title = "8:00 PM"; c.Text = "run"; }));
-			resource.PrimeViewModel.AddNote(resource.ViewModelCreator.CreateNoteListObjectViewModel(
-				c => { c.Title = "9:00 PM"; c.Text = "also run"; }));
+			using (IDbContext dbContext = resource.CreateDbContext()) {
+				resource.PrimeViewModel.AddNote(resource.ViewModelCreator.CreateNoteListObjectViewModel(
+					dbContext, c => { c.Title = "8:00 AM"; c.Text = "make video"; }));
+				resource.PrimeViewModel.AddNote(resource.ViewModelCreator.CreateNoteListObjectViewModel(
+					dbContext, c => { c.Title = "9:00 AM"; c.Text = "walk the dog"; }));
+				resource.PrimeViewModel.AddNote(resource.ViewModelCreator.CreateNoteListObjectViewModel(
+					dbContext, c => { c.Title = "9:30 AM"; c.Text = "eat dinner"; }));
+				resource.PrimeViewModel.AddNote(resource.ViewModelCreator.CreateNoteListObjectViewModel(
+					dbContext, c => { c.Title = "10:15 AM"; c.Text = "watch tv"; }));
+				resource.PrimeViewModel.AddNote(resource.ViewModelCreator.CreateNoteListObjectViewModel(
+					dbContext, c => { c.Title = "11:30 AM"; c.Text = "jog"; }));
+				resource.PrimeViewModel.AddNote(resource.ViewModelCreator.CreateNoteListObjectViewModel(
+					dbContext, c => { c.Title = "12:00 PM"; c.Text = "mop"; }));
+				resource.PrimeViewModel.AddNote(resource.ViewModelCreator.CreateNoteListObjectViewModel(
+					dbContext, c => { c.Title = "1:00 PM"; c.Text = "kick it"; }));
+				resource.PrimeViewModel.AddNote(resource.ViewModelCreator.CreateNoteListObjectViewModel(
+					dbContext, c => { c.Title = "2:45 PM"; c.Text = "throw things"; }));
+				resource.PrimeViewModel.AddNote(resource.ViewModelCreator.CreateNoteListObjectViewModel(
+					dbContext, c => { c.Title = "7:00 PM"; c.Text = "sweep"; }));
+				resource.PrimeViewModel.AddNote(resource.ViewModelCreator.CreateNoteListObjectViewModel(
+					dbContext, c => { c.Title = "7:30 PM"; c.Text = "chill"; }));
+				resource.PrimeViewModel.AddNote(resource.ViewModelCreator.CreateNoteListObjectViewModel(
+					dbContext, c => { c.Title = "8:00 PM"; c.Text = "run"; }));
+				resource.PrimeViewModel.AddNote(resource.ViewModelCreator.CreateNoteListObjectViewModel(
+					dbContext, c => { c.Title = "9:00 PM"; c.Text = "also run"; }));
+			}
 		}
 
 		/// <summary>
@@ -113,12 +123,14 @@ namespace ViewModelExtended
 		/// <param name="resource"></param>
 		private void AddGroupListObjectTestData (IViewModelResource resource)
 		{
-			resource.GroupTabsViewModel.AddGroup(resource.ViewModelCreator.CreateGroupListObjectViewModel(
-				c => { c.Title = "Chores"; }));
-			resource.GroupTabsViewModel.AddGroup(resource.ViewModelCreator.CreateGroupListObjectViewModel(
-				c => { c.Title = "Exercises"; }));
-			resource.GroupTabsViewModel.AddGroup(resource.ViewModelCreator.CreateGroupListObjectViewModel(
-				c => { c.Title = "Leisure"; }));
+			using (IDbContext dbContext = resource.CreateDbContext()) {
+				resource.GroupTabsViewModel.AddGroup(resource.ViewModelCreator.CreateGroupListObjectViewModel(
+					dbContext, c => { c.Title = "Chores"; }));
+				resource.GroupTabsViewModel.AddGroup(resource.ViewModelCreator.CreateGroupListObjectViewModel(
+					dbContext, c => { c.Title = "Exercises"; }));
+				resource.GroupTabsViewModel.AddGroup(resource.ViewModelCreator.CreateGroupListObjectViewModel(
+					dbContext, c => { c.Title = "Leisure"; }));
+			}
 		}
 
 		#endregion

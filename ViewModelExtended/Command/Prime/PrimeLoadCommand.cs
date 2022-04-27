@@ -5,7 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using ViewModelExtended.ViewModel;
 
-
+// TODO: remove - currently unused
 
 namespace ViewModelExtended.Command
 {
