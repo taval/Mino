@@ -228,13 +228,33 @@ namespace ViewModelExtended.ViewModel
 
 		#region Set Group
 
+		/// <summary>
+		/// destroy a Group's contents and the associated list
+		/// </summary>
+		/// <param name="groop"></param>
+		public void DestroyGroup (Group groop)
+		{
+			using (IDbContext dbContext = Resource.CreateDbContext()) {
+				IObservableList groupObjs = Lists[groop];
+				foreach (GroupObjectViewModel obj in groupObjs.Items) {
+					Remove(obj);
+				}
+				Lists.Remove(groop);
+			}
+		}
+
+		/// <summary>
+		/// removes all dependent GroupObjects (notes) associated with a given NoteListObject
+		/// </summary>
+		/// <param name="note"></param>
+		/// <exception cref="NullReferenceException"></exception>
 		public void RemoveGroupObjectsByNote (Note note)
 		{
 			using (IDbContext dbContext = Resource.CreateDbContext()) {
 				// get the unbound data objects
 				IQueryable<IListItem> groupObjectsByNote = Resource.DbQueryHelper.GetGroupObjectsByNote(dbContext, note);
 
-				// for each group represented in original query (can just iterate over the query since one group exists per group object
+				// for each group represented in original query (can just iterate over the query since one group exists per group object)
 				foreach (GroupObjectViewModel obj in groupObjectsByNote) {
 					IObservableList? list = null;
 
@@ -272,6 +292,37 @@ namespace ViewModelExtended.ViewModel
 			}
 		}
 
+		/// <summary>
+		/// adds a dependent GroupObject converted from given owner NoteListObject
+		/// </summary>
+		/// <param name="input"></param>
+		public void AddNoteToGroup (NoteListObjectViewModel input)
+		{
+			// if no group is selected, bail out
+			if (ContentData == null) {
+				return;
+			}
+
+			// if Note already exists in Group, bail out
+			if (Items.Contains(input, new GroupObjectEqualityComparer())) {
+				return;
+			}
+
+			using (IDbContext dbContext = Resource.CreateDbContext()) {
+				// associate a newly created GroupObject with the given NoteListObject
+				GroupObjectViewModel groupNote =
+					Resource.ViewModelCreator.CreateGroupObjectViewModel(
+						dbContext, ContentData.Model.Data, input.Model.Data);
+
+				// add the GroupObject to the contents list
+				Add(groupNote);
+			}
+		}
+
+		/// <summary>
+		/// set the displayed Group contents
+		/// </summary>
+		/// <param name="groop"></param>
 		public void SetGroup (Group groop)
 		{
 			using (IDbContext dbContext = Resource.CreateDbContext()) {
@@ -282,6 +333,12 @@ namespace ViewModelExtended.ViewModel
 			}
 		}
 
+		/// <summary>
+		/// set the given list with all sorted GroupObjects (notes) within a Group
+		/// </summary>
+		/// <param name="dbContext"></param>
+		/// <param name="list"></param>
+		/// <param name="groop"></param>
 		private void PopulateGroup (IDbContext dbContext, IObservableList list, Group groop)
 		{
 			IQueryable<IListItem> unsortedObjects = Resource.DbQueryHelper.GetGroupObjectsInGroup(dbContext, groop);
@@ -289,6 +346,11 @@ namespace ViewModelExtended.ViewModel
 			Resource.DbQueryHelper.GetSortedListObjects(unsortedObjects, list);
 		}
 
+		/// <summary>
+		/// gets the list by using Group as key
+		/// </summary>
+		/// <param name="groop"></param>
+		/// <returns>the GroupObject list associated with the given Group key</returns>
 		private IObservableList GetListByGroupKey (Group groop)
 		{
 			IEnumerable<KeyValuePair<Group, IObservableList>> selectedList = Lists.Where((kv) => kv.Key == groop);

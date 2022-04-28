@@ -95,20 +95,6 @@ namespace ViewModelExtended.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "States",
-                columns: table => new
-                {
-                    Id = table.Column<int>(nullable: false)
-                        .Annotation("Sqlite:Autoincrement", true),
-                    SKey = table.Column<string>(nullable: false),
-                    SValue = table.Column<int>(nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_States", x => x.Id);
-                });
-
-            migrationBuilder.CreateTable(
                 name: "Timestamps",
                 columns: table => new
                 {
@@ -144,9 +130,6 @@ namespace ViewModelExtended.Migrations
 
             migrationBuilder.DropTable(
                 name: "Notes");
-
-            migrationBuilder.DropTable(
-                name: "States");
 
             migrationBuilder.DropTable(
                 name: "Timestamps");

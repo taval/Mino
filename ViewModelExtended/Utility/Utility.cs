@@ -61,7 +61,7 @@ namespace ViewModelExtended
             return ((DateTimeOffset)DateTime.Now).ToUnixTimeSeconds();
         }
 
-        // TODO: this is to trigger a NotifyPropertyChanged event for each obj in order for the index display to be updated. Displaying a massive amount of indices could be a drag. A mitigation would be to use a range (all adjacent nodes, for instance). In mean time, remove calls to this method and displaying of indices if it becomes a problem
+        // TODO: this is to trigger a NotifyPropertyChanged event for each obj in order for the index display to be updated. Displaying a massive amount of indices could be very slow. A mitigation would be to use a range (all adjacent nodes, for instance). In mean time, remove calls to this method and displaying of indices if it becomes a problem
 		/// <summary>
 		/// refresh list display
 		/// </summary>

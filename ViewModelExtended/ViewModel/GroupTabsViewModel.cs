@@ -9,8 +9,6 @@ using ViewModelExtended.Model;
 
 // TODO: DragOver gets confused and will trigger the ListView Receive command instead of ListViewItem Reorder command. Incoming must be nullified on resolution to allow prevention of erroneous receive.
 
-// TODO: destroying a Group should also destroy all GroupObjects within it
-
 namespace ViewModelExtended.ViewModel
 {
 	public class GroupTabsViewModel : ViewModelBase
@@ -182,11 +180,12 @@ namespace ViewModelExtended.ViewModel
 		{
 			Resource.GroupListViewModel.Add(input);
 
-			// make changes to database
-			using (IDbContext dbContext = Resource.CreateDbContext()) {
-				Resource.DbListHelper.UpdateAfterAdd(dbContext, input);
-				dbContext.Save();
-			}
+			//// make changes to database
+			//using (IDbContext dbContext = Resource.CreateDbContext()) {
+			//	Resource.DbListHelper.UpdateAfterAdd(dbContext, input);
+			//	dbContext.Save();
+			//}
+
 		}
 
 		/// <summary>
@@ -258,6 +257,10 @@ namespace ViewModelExtended.ViewModel
 				Resource.GroupListViewModel.Highlighted = newGroup;
 			}
 
+			// destroy the GroupObjects (dependent Notes) in the group
+			Resource.GroupContentsViewModel.DestroyGroup(input.Model.Data);
+
+			// destroy the Group
 			Resource.GroupListViewModel.Remove(input);
 
 			//Resource.GroupListViewModel.RefreshListView();

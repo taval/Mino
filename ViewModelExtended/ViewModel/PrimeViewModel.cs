@@ -261,24 +261,7 @@ namespace ViewModelExtended.ViewModel
 				Resource.NoteListViewModel.Highlighted = newNote;
 			}
 
-			//// find any existing note objects residing in the displayed group
-			//GroupObjectViewModel? groupObj = null;
-
-			//if (Resource.GroupContentsViewModel.Items.Count() > 0) {
-			//	IEnumerable<IListItem>? groupObjsInGroup = Resource.GroupContentsViewModel.Items.Where(
-			//		(c) => ((GroupObjectViewModel)c).Model.Data.Id == input.Model.Data.Id);
-
-			//	if (groupObjsInGroup != null && groupObjsInGroup.Count() > 0) {
-			//		groupObj = (GroupObjectViewModel?)groupObjsInGroup?.First();
-			//	}
-			//}
-
-			//if (groupObj != null) {
-			//	Resource.GroupContentsViewModel.Remove(groupObj);
-			//}
-
-			// find any existing note objects matching the input in any of the groups
-			
+			// remove any existing note objects matching the input in any of the groups
 			Resource.GroupContentsViewModel.RemoveGroupObjectsByNote(input.Model.Data);
 
 			// remove the note
@@ -296,27 +279,7 @@ namespace ViewModelExtended.ViewModel
 		// Receive
 		public void AddNoteToGroup (NoteListObjectViewModel input)
 		{
-			// if no group is selected, bail out
-			if (Resource.GroupContentsViewModel.ContentData == null) {
-				return;
-			}
-
-			// if Note already exists in Group, bail out
-			if (Resource.GroupContentsViewModel.Items.Contains(input, new GroupObjectEqualityComparer())) {
-				return;
-			}
-
-			// TODO: not sure why AddNoteToGroup shouldn't just be a wrapper for GroupContentsViewModel.AddNoteToGroup.
-			//       having this dbContext the sole one outside of the listviewmodels seems like a code smell/antipattern.
-			using (IDbContext dbContext = Resource.CreateDbContext()) {
-				// associate a newly created GroupObject with the given NoteListObject
-				GroupObjectViewModel groupNote =
-					Resource.ViewModelCreator.CreateGroupObjectViewModel(
-						dbContext, Resource.GroupContentsViewModel.ContentData.Model.Data, input.Model.Data);
-
-				// add the GroupObject to the contents list
-				Resource.GroupContentsViewModel.Add(groupNote);
-			}
+			Resource.GroupContentsViewModel.AddNoteToGroup(input);
 		}
 
 		#endregion

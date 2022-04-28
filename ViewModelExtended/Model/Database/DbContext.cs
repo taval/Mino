@@ -248,12 +248,12 @@ namespace ViewModelExtended.Model
 
 		public void DeleteNoteListItem (NoteListItem target)
 		{
-			// remove any GroupItems derived from the Note data point
-			foreach (GroupItem groupItem in GroupItems) {
-				if (groupItem.ObjectId == target.ObjectId) {
-					DeleteGroupItem(groupItem);
-				}
-			}
+			//// remove any GroupItems derived from the Note data point
+			//foreach (GroupItem groupItem in GroupItems) {
+			//	if (groupItem.ObjectId == target.ObjectId) {
+			//		DeleteGroupItem(groupItem);
+			//	}
+			//}
 			DeleteNode(Nodes.Find(target.NodeId));
 			DeleteTimestamp(Timestamps.Find(target.TimestampId));
 			DeleteNote(Notes.Find(target.ObjectId));
@@ -281,11 +281,11 @@ namespace ViewModelExtended.Model
 
 		public void DeleteGroupListItem (GroupListItem target)
 		{
-			IQueryable<GroupItem> groupItems = GetGroupItemsInGroup(Groups.Find(target.ObjectId));
+			//IQueryable<GroupItem> groupItems = GetGroupItemsInGroup(Groups.Find(target.ObjectId));
 
-			foreach (GroupItem item in groupItems) {
-				DeleteGroupItem(item);
-			}
+			//foreach (GroupItem item in groupItems) {
+			//	DeleteGroupItem(item);
+			//}
 			DeleteNode(Nodes.Find(target.NodeId));
 			DeleteTimestamp(Timestamps.Find(target.TimestampId));
 			DeleteGroup(Groups.Find(target.ObjectId));
@@ -459,7 +459,6 @@ namespace ViewModelExtended.Model
 			sqlSequence("Groups");
 			sqlSequence("Nodes");
 			sqlSequence("NoteListItems");
-			sqlSequence("States");
 			sqlSequence("Timestamps");
 
 			//GroupItems.RemoveRange(GroupItems);
@@ -467,7 +466,6 @@ namespace ViewModelExtended.Model
 			//Groups.RemoveRange(Groups);
 			//Nodes.RemoveRange(Nodes);
 			//NoteListItems.RemoveRange(NoteListItems);
-			//States.RemoveRange(States);
 			//Timestamps.RemoveRange(Timestamps);
 		}
 

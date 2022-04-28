@@ -19,8 +19,6 @@ namespace ViewModelExtended.Model
 
 		#region Tables
 
-		//public DbSet<State> States { get; set; }
-
 		public DbSet<Node> Nodes { get; set; }
 		public DbSet<Timestamp> Timestamps { get; set; }
 		public DbSet<Note> Notes { get; set; }
@@ -37,13 +35,6 @@ namespace ViewModelExtended.Model
 		public IQueryable<GroupListItem> GetAllGroupListItems ();
 		public IQueryable<GroupItem> GetAllGroupItems ();
 		public IQueryable<GroupItem> GetGroupItemsInGroup (Group groop);
-
-		#endregion
-
-		#region State
-
-		//public void RefreshState ();
-		//public int GetLastId (string sKey);
 
 		#endregion
 
