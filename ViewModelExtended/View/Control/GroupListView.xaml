@@ -16,7 +16,7 @@
 
 		<ListView
 			FontSize="9"
-			x:Name="ListViewLinkables"
+			x:Name="ListView_GroupListView"
 			AllowDrop="True"
 			SelectedItem="{ Binding Highlighted }"
 			ItemsSource="{ Binding Items, UpdateSourceTrigger=PropertyChanged }">
@@ -73,7 +73,7 @@
 
 						<i:Interaction.Triggers>
 
-							<i:EventTrigger
+							<!--<i:EventTrigger
 								EventName="PreviewMouseLeftButtonDown"
 								SourceObject="{ Binding RelativeSource={ RelativeSource AncestorType={ x:Type ListViewItem } } }">
 								<i:InvokeCommandAction
@@ -81,9 +81,18 @@
 									Command="{ Binding
 										Path=DataContext.PreselectCommand,
 										RelativeSource={ RelativeSource AncestorType={ x:Type local:GroupListView } } }" />
-							</i:EventTrigger>
+							</i:EventTrigger>-->
+                            <i:EventTrigger
+								EventName="MouseMove"
+								SourceObject="{ Binding RelativeSource={ RelativeSource AncestorType={ x:Type ListViewItem } } }">
+                                <i:InvokeCommandAction
+									PassEventArgsToCommand="True"
+									Command="{ Binding
+										Path=DataContext.PickupCommand,
+										RelativeSource={ RelativeSource AncestorType={ x:Type local:GroupListView } } }" />
+                            </i:EventTrigger>
 
-							<i:EventTrigger
+                            <i:EventTrigger
 								EventName="DragOver"
 								SourceObject="{ Binding RelativeSource={ RelativeSource AncestorType={ x:Type ListViewItem } } }">
 								<i:InvokeCommandAction

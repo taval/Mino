@@ -14,7 +14,7 @@ namespace ViewModelExtended.Model
 
 		#region IObject interface
 
-		public INode Node {
+		public Node Node {
 			get { return Root.Node; }
 		}
 

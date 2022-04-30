@@ -51,12 +51,19 @@ namespace ViewModelExtended.ViewModel
 
 		private ICommand? m_ReorderCommand;
 
-		public ICommand PreselectCommand {
-			get { return m_PreselectCommand ?? throw new MissingCommandException(); }
-			set { if (m_PreselectCommand == null) m_PreselectCommand = value; }
+		//public ICommand PreselectCommand {
+		//	get { return m_PreselectCommand ?? throw new MissingCommandException(); }
+		//	set { if (m_PreselectCommand == null) m_PreselectCommand = value; }
+		//}
+
+		//private ICommand? m_PreselectCommand;
+
+		public ICommand PickupCommand {
+			get { return m_PickupCommand ?? throw new MissingCommandException(); }
+			set { if (m_PickupCommand == null) m_PickupCommand = value; }
 		}
 
-		private ICommand? m_PreselectCommand;
+		private ICommand? m_PickupCommand;
 
 		#endregion
 

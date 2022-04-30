@@ -8,10 +8,10 @@ namespace ViewModelExtended.Model
 {
 	public class ObjectRoot : IObject
 	{
-		public INode Node { get; private set; }
+		public Node Node { get; private set; }
 		public Timestamp Timestamp { get; private set; }
 
-		public ObjectRoot (INode node, Timestamp timestamp)
+		public ObjectRoot (Node node, Timestamp timestamp)
 		{
 			Node = node;
 			Timestamp = timestamp;

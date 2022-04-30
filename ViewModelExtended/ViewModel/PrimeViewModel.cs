@@ -8,7 +8,7 @@ using System.Windows;
 using System.Windows.Input;
 using ViewModelExtended.Model;
 
-
+// TODO: incomplete/invalid Notes should be disallowed from GroupContentsViewModel addition/insertion
 
 namespace ViewModelExtended.ViewModel
 {
@@ -27,41 +27,25 @@ namespace ViewModelExtended.ViewModel
 
 		private NoteListObjectViewModel? m_SelectedNoteViewModel;
 
-		/// <summary>
-		/// the NoteListObjectViewModel sent to an external list, e.g. to GroupContentsViewModel
-		/// </summary>
-		public NoteListObjectViewModel? OutgoingNoteViewModel {
-			get { return m_OutgoingNoteViewModel; }
-			set { Set(ref m_OutgoingNoteViewModel, value); }
-		}
-
-		private NoteListObjectViewModel? m_OutgoingNoteViewModel;
-
 		#endregion
 
 
 
 		#region Commands
 
-		/// <summary>
-		/// sends a Note to a Group
-		/// </summary>
-		public ICommand NoteSendCommand {
-			get { return m_NoteSendCommand ?? throw new MissingCommandException(); }
-			set { if (m_NoteSendCommand == null) m_NoteSendCommand = value; }
+		public ICommand GroupNoteHoldCommand {
+			get { return m_GroupNoteHoldCommand ?? throw new MissingCommandException(); }
+			set { if (m_GroupNoteHoldCommand == null) m_GroupNoteHoldCommand = value; }
 		}
 
-		private ICommand? m_NoteSendCommand;
+		private ICommand? m_GroupNoteHoldCommand;
 
-		/// <summary>
-		/// receives a Note from NoteList
-		/// </summary>
-		public ICommand NoteReceiveCommand {
-			get { return m_NoteReceiveCommand ?? throw new MissingCommandException(); }
-			set { if (m_NoteReceiveCommand == null) m_NoteReceiveCommand = value; }
+		public ICommand GroupNoteDropCommand {
+			get { return m_GroupNoteDropCommand ?? throw new MissingCommandException(); }
+			set { if (m_GroupNoteDropCommand == null) m_GroupNoteDropCommand = value; }
 		}
 
-		private ICommand? m_NoteReceiveCommand;
+		private ICommand? m_GroupNoteDropCommand;
 
 		/// <summary>
 		/// selects a Note in the NoteList
@@ -121,7 +105,6 @@ namespace ViewModelExtended.ViewModel
 		{
 			Resource = resource;
 			m_SelectedNoteViewModel = null;
-			m_OutgoingNoteViewModel = null;
 			Resource.CommandBuilder.MakePrime(this);
 		}
 
@@ -158,7 +141,7 @@ namespace ViewModelExtended.ViewModel
 
 
 
-		#region Events: NoteList
+		#region Events
 
 		/// <summary>
 		/// adds external data to the NoteList, e.g. test data
@@ -167,18 +150,6 @@ namespace ViewModelExtended.ViewModel
 		public void AddNote (NoteListObjectViewModel input)
 		{
 			Resource.NoteListViewModel.Add(input);
-		}
-
-
-		/// <summary>
-		/// // set the Text viewer to the selected note (this is generally the SelectedNote passed in from NoteList to Prime)
-		/// </summary>
-		/// <param name="note"></param>
-		public void SelectNote (NoteListObjectViewModel note)
-		{
-			SelectedNoteViewModel = note;
-			Resource.NoteTextViewModel.ContentData = note;
-			Resource.NoteTextViewModel.ContentData.IsSelected = true;
 		}
 
 		/// <summary>
@@ -213,7 +184,16 @@ namespace ViewModelExtended.ViewModel
 			SelectNote(input);
 		}
 
-
+		/// <summary>
+		/// // set the Text viewer to the selected note (this is generally the SelectedNote passed in from NoteList to Prime)
+		/// </summary>
+		/// <param name="note"></param>
+		public void SelectNote (NoteListObjectViewModel note)
+		{
+			SelectedNoteViewModel = note;
+			Resource.NoteTextViewModel.ContentData = note;
+			Resource.NoteTextViewModel.ContentData.IsSelected = true;
+		}
 
 		/// <summary>
 		/// removes target object from list
@@ -221,6 +201,47 @@ namespace ViewModelExtended.ViewModel
 		/// </summary>
 		/// <param name="obj"></param>
 		public void DestroyNote (NoteListObjectViewModel input)
+		{
+			AutoSelectFailSafe(input);
+
+			// add a list item if none remain
+			if (Resource.NoteListViewModel.Items.Count() == 1) {
+				NoteListObjectViewModel newNote = Resource.NoteListViewModel.Create();
+				CreateNote(null, newNote);
+				SelectNote(newNote);
+				Resource.NoteListViewModel.Highlighted = newNote;
+			}
+
+			// remove any existing note objects matching the input in any of the groups
+			Resource.GroupTabsViewModel.RemoveGroupObjectsByNote(input.Model.Data);
+
+			// remove the note
+			Resource.NoteListViewModel.Remove(input);
+		}
+
+
+		//// Receive
+		//public void AddNoteToGroup (NoteListObjectViewModel input)
+		//{
+		//	Resource.GroupTabsViewModel.AddNoteToGroup(input);
+		//}
+
+		// Receive
+		public void AddNoteToGroup ()
+		{
+			Resource.GroupTabsViewModel.AddNoteToGroup();
+		}
+
+		public void HoldGroupNote ()
+		{
+			Resource.GroupTabsViewModel.HoldGroupNote();
+		}
+
+		/// <summary>
+		/// selects anything other than the input, for if/when the input becomes unavailable
+		/// </summary>
+		/// <param name="input"></param>
+		private void AutoSelectFailSafe (NoteListObjectViewModel input)
 		{
 			// don't let lack of highlighted item cause deleted item to not be de-selected
 			if (Resource.NoteListViewModel.Highlighted == null) {
@@ -252,34 +273,6 @@ namespace ViewModelExtended.ViewModel
 					//Target = null;
 				}
 			}
-
-			// add a list item if none remain
-			if (Resource.NoteListViewModel.Items.Count() == 1) {
-				NoteListObjectViewModel newNote = Resource.NoteListViewModel.Create();
-				CreateNote(null, newNote);
-				SelectNote(newNote);
-				Resource.NoteListViewModel.Highlighted = newNote;
-			}
-
-			// remove any existing note objects matching the input in any of the groups
-			Resource.GroupContentsViewModel.RemoveGroupObjectsByNote(input.Model.Data);
-
-			// remove the note
-			Resource.NoteListViewModel.Remove(input);
-		}
-
-
-
-		// Send
-		public void SetOutgoing (NoteListObjectViewModel input)
-		{
-			OutgoingNoteViewModel = input;
-		}
-
-		// Receive
-		public void AddNoteToGroup (NoteListObjectViewModel input)
-		{
-			Resource.GroupContentsViewModel.AddNoteToGroup(input);
 		}
 
 		#endregion
@@ -287,11 +280,25 @@ namespace ViewModelExtended.ViewModel
 
 
 
-	class GroupObjectEqualityComparer : IEqualityComparer<IListItem>
+	internal class GroupNoteObjectEqualityComparer : IEqualityComparer<IListItem>
 	{
 		public bool Equals (IListItem? lhs, IListItem? rhs)
 		{
-			return ((GroupObjectViewModel?)lhs)?.Model.Data == ((NoteListObjectViewModel?)rhs)?.Model.Data;
+			return ((GroupObjectViewModel?)lhs)?.Model.Data.Id == ((NoteListObjectViewModel?)rhs)?.Model.Data.Id;
+
+		}
+
+		public int GetHashCode ([DisallowNull] IListItem obj)
+		{
+			return obj.GetHashCode();
+		}
+	}
+
+	internal class GroupObjectEqualityComparer : IEqualityComparer<IListItem>
+	{
+		public bool Equals (IListItem? lhs, IListItem? rhs)
+		{
+			return ((GroupObjectViewModel?)lhs)?.Model.Data.Id == ((GroupObjectViewModel?)rhs)?.Model.Data.Id;
 
 		}
 

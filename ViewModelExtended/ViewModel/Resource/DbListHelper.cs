@@ -42,7 +42,7 @@ namespace ViewModelExtended.ViewModel
 				IListItem? previous = item.Previous;
 				IListItem? next = item.Next;
 
-				dbContext.UpdateNode(current.Node, previous?.Node, next?.Node);
+				dbContext.UpdateNode((Node)current.Node, (Node?)previous?.Node, (Node?)next?.Node);
 			}
 		}
 	}

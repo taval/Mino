@@ -72,6 +72,12 @@ namespace ViewModelExtended.ViewModel
 		public GroupObjectViewModel CreateGroupObjectViewModel (
 			GroupObject data, IDbContext dbContext, Action<GroupObjectViewModel> action);
 
+		// copy
+		//public GroupObjectViewModel CreateGroupObjectViewModel (IDbContext dbContext, GroupObjectViewModel input);
+
+		// temp
+		public GroupObjectViewModel CreateTempGroupObjectViewModel (IDbContext dbContext, Group groop, Note note);
+
 		// destroy
 		public void DestroyGroupObjectViewModel (IDbContext dbContext, GroupObjectViewModel target);
 		public void DestroyGroupContentsViewModel (GroupContentsViewModel target);

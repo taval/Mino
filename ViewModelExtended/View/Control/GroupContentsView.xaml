@@ -18,7 +18,7 @@
 			DragOver="List_DragOver"-->
 		<ListView
 			FontSize="9"
-			x:Name="ListViewLinkables"
+			x:Name="ListView_GroupContentsView"
 			AllowDrop="True"
 			
 			SelectedItem="{ Binding Highlighted }"
@@ -40,28 +40,34 @@
             <i:Interaction.Triggers>
 
                 <i:EventTrigger
-					EventName="DragOver"
+					EventName="DragEnter"
 					SourceObject="{ Binding RelativeSource={ RelativeSource AncestorType={ x:Type ListView } } }">
                     <i:InvokeCommandAction
-						CommandParameter="{ Binding
-							Path=(local:ListState.Incoming),
-							RelativeSource={ RelativeSource AncestorType={ x:Type local:GroupContentsView } } }"
+						PassEventArgsToCommand="True"
 						Command="{ Binding
-							Path=(local:ListAction.ReceiveCommand),
+							Path=DataContext.NoteReceiveCommand,
 							RelativeSource={ RelativeSource AncestorType={ x:Type local:GroupContentsView } } }" />
                 </i:EventTrigger>
 
-                <!--<i:EventTrigger
+                <i:EventTrigger
 					EventName="DragLeave"
 					SourceObject="{ Binding RelativeSource={ RelativeSource AncestorType={ x:Type ListView } } }">
                     <i:InvokeCommandAction
-						CommandParameter="{ Binding
-							Path=(local:ListState.Incoming),
-							RelativeSource={ RelativeSource AncestorType={ x:Type local:GroupContentsView } } }"
+						PassEventArgsToCommand="True"
 						Command="{ Binding
-							Path=(local:ListAction.RemoveCommand),
+							Path=(local:ListAction.HoldCommand),
 							RelativeSource={ RelativeSource AncestorType={ x:Type local:GroupContentsView } } }" />
-                </i:EventTrigger>-->
+                </i:EventTrigger>
+
+                <i:EventTrigger
+					EventName="Drop"
+					SourceObject="{ Binding RelativeSource={ RelativeSource AncestorType={ x:Type ListView } } }">
+                    <i:InvokeCommandAction
+						PassEventArgsToCommand="True"
+						Command="{ Binding
+							Path=(local:ListAction.DropCommand),
+							RelativeSource={ RelativeSource AncestorType={ x:Type local:GroupContentsView } } }" />
+                </i:EventTrigger>
 
             </i:Interaction.Triggers>
 
@@ -91,7 +97,7 @@
 
 						<i:Interaction.Triggers>
 
-							<i:EventTrigger
+							<!--<i:EventTrigger
 								EventName="PreviewMouseLeftButtonDown"
 								SourceObject="{ Binding RelativeSource={ RelativeSource AncestorType={ x:Type ListViewItem } } }">
 								<i:InvokeCommandAction
@@ -99,7 +105,16 @@
 									Command="{ Binding
 										Path=DataContext.PreselectCommand,
 										RelativeSource={ RelativeSource AncestorType={ x:Type local:GroupContentsView } } }" />
-							</i:EventTrigger>
+							</i:EventTrigger>-->
+                            <i:EventTrigger
+								EventName="MouseMove"
+								SourceObject="{ Binding RelativeSource={ RelativeSource AncestorType={ x:Type ListViewItem } } }">
+                                <i:InvokeCommandAction
+									PassEventArgsToCommand="True"
+									Command="{ Binding
+										Path=DataContext.PickupCommand,
+										RelativeSource={ RelativeSource AncestorType={ x:Type local:GroupContentsView } } }" />
+                            </i:EventTrigger>
 
                             <i:EventTrigger
 								EventName="DragOver"

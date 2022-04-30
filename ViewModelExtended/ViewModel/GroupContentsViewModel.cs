@@ -5,13 +5,7 @@ using System.Text;
 using System.Windows.Input;
 using ViewModelExtended.Model;
 
-
-
-// TODO: incomplete/invalid Notes should be disallowed from GroupContentsViewModel addition/insertion
-
-// TODO: DragOver and MouseUp after DragOver should be two separate operations: DragOver should set a real value for Incoming (not an attached proxy for Outgoing called Incoming, as is currently extant). As outgoing is the NoteListObject, incoming should be GroupObject. This way, if MouseUp event is fired before DragLeave, the GroupObject save operation is performed. If DragLeave is triggered, delete the GroupObject.
-
-// TODO: DragLeave on GroupContentsView should remove the dragged item from the list before dropping it (this means every time an item is dragged it will create and destroy a new item - this would be an instance where not saving the object first could be useful)
+// TODO: Use IObject for interfaces - testing Node without INode interface because some ghosty things are happening when trying to remove a dropped GroupNote
 
 namespace ViewModelExtended.ViewModel
 {
@@ -99,6 +93,11 @@ namespace ViewModelExtended.ViewModel
 
 		private GroupObjectViewModel? m_Highlighted;
 
+		/// <summary>
+		/// the NoteListObjectViewModel received from an external list, e.g. from NoteListViewModel
+		/// </summary>
+		private GroupObjectViewModel? IncomingNoteViewModel { get; set; }
+
 		#endregion
 
 
@@ -112,12 +111,29 @@ namespace ViewModelExtended.ViewModel
 
 		private ICommand? m_ReorderCommand;
 
-		public ICommand PreselectCommand {
-			get { return m_PreselectCommand ?? throw new MissingCommandException(); }
-			set { if (m_PreselectCommand == null) m_PreselectCommand = value; }
+		//public ICommand PreselectCommand {
+		//	get { return m_PreselectCommand ?? throw new MissingCommandException(); }
+		//	set { if (m_PreselectCommand == null) m_PreselectCommand = value; }
+		//}
+
+		//private ICommand? m_PreselectCommand;
+
+		public ICommand PickupCommand {
+			get { return m_PickupCommand ?? throw new MissingCommandException(); }
+			set { if (m_PickupCommand == null) m_PickupCommand = value; }
 		}
 
-		private ICommand? m_PreselectCommand;
+		private ICommand? m_PickupCommand;
+
+		/// <summary>
+		/// sends a Note to a Group
+		/// </summary>
+		public ICommand NoteReceiveCommand {
+			get { return m_NoteReceiveCommand ?? throw new MissingCommandException(); }
+			set { if (m_NoteReceiveCommand == null) m_NoteReceiveCommand = value; }
+		}
+
+		private ICommand? m_NoteReceiveCommand;
 
 		#endregion
 
@@ -235,10 +251,14 @@ namespace ViewModelExtended.ViewModel
 		public void DestroyGroup (Group groop)
 		{
 			using (IDbContext dbContext = Resource.CreateDbContext()) {
+				if (!Lists.ContainsKey(groop)) return;
+
 				IObservableList groupObjs = Lists[groop];
+
 				foreach (GroupObjectViewModel obj in groupObjs.Items) {
 					Remove(obj);
 				}
+
 				Lists.Remove(groop);
 			}
 		}
@@ -260,7 +280,9 @@ namespace ViewModelExtended.ViewModel
 
 					// check if temp list is same as displayed list to prevent populating same list twice
 					// select the list of the particular group or the display group
-					if (obj.Model.Group.Id == ContentData?.Model.Data.Id) {
+					bool isActiveGroup = obj.Model.Group.Id == ContentData?.Model.Data.Id;
+
+					if (isActiveGroup) {
 						list = List;
 					}
 					else {
@@ -271,8 +293,10 @@ namespace ViewModelExtended.ViewModel
 						throw new NullReferenceException("temporary Group contents list could not be set");
 					}
 
-					// populate the viewmodel list of that group
-					PopulateGroup(dbContext, list, obj.Model.Group);
+					if (!isActiveGroup) {
+						// populate the viewmodel list of that group
+						PopulateGroup(dbContext, list, obj.Model.Group);
+					}
 
 					// select bound group object matching the unbound group object in the original query
 					IEnumerable<IListItem> match =
@@ -280,14 +304,51 @@ namespace ViewModelExtended.ViewModel
 
 					// remove the bound group object from the output list
 					if (match.Count() > 0) {
-						IListItem item = match.First();
-						list.Remove(item);
+						GroupObjectViewModel item = (GroupObjectViewModel)match.First();
 
+						list.Remove(item);
 						Resource.DbListHelper.UpdateAfterRemove(dbContext, item);
 						dbContext.Save();
-
-						Resource.ViewModelCreator.DestroyGroupObjectViewModel(dbContext, (GroupObjectViewModel)item);
+						Resource.ViewModelCreator.DestroyGroupObjectViewModel(dbContext, item);
 					}
+				}
+				
+			}
+		}
+
+		/// <summary>
+		/// 
+		/// </summary>
+		/// <param name="input"></param>
+		public void ReceiveGroupNote (NoteListObjectViewModel input)
+		{
+			using (IDbContext dbContext = Resource.CreateDbContext()) {
+				// if no group is selected, bail out
+				if (ContentData == null) {
+					return;
+				}
+
+				// if Note already exists in Group, bail out
+				if (Items.Contains(input, new GroupNoteObjectEqualityComparer())) {
+					return;
+				}
+
+				// create a temporary GroupObject with the given NoteListObject
+				GroupObjectViewModel groupNote =
+					Resource.ViewModelCreator.CreateTempGroupObjectViewModel(
+						dbContext, ContentData.Model.Data, input.Model.Data);
+
+				IncomingNoteViewModel = groupNote;
+				List.Add(groupNote);
+			}
+		}
+
+		public void HoldGroupNote ()
+		{
+			using (IDbContext dbContext = Resource.CreateDbContext()) {
+				if (IncomingNoteViewModel != null) {
+					List.Remove(IncomingNoteViewModel);
+					IncomingNoteViewModel = null;
 				}
 			}
 		}
@@ -296,23 +357,45 @@ namespace ViewModelExtended.ViewModel
 		/// adds a dependent GroupObject converted from given owner NoteListObject
 		/// </summary>
 		/// <param name="input"></param>
-		public void AddNoteToGroup (NoteListObjectViewModel input)
-		{
-			// if no group is selected, bail out
-			if (ContentData == null) {
-				return;
-			}
+		//public void AddNoteToGroup (NoteListObjectViewModel input)
+		//{
+		//	// if no group is selected, bail out
+		//	if (ContentData == null) {
+		//		return;
+		//	}
 
-			// if Note already exists in Group, bail out
-			if (Items.Contains(input, new GroupObjectEqualityComparer())) {
-				return;
-			}
+		//	// if Note already exists in Group, bail out
+		//	if (Items.Contains(input, new GroupObjectEqualityComparer())) {
+		//		return;
+		//	}
+
+		//	using (IDbContext dbContext = Resource.CreateDbContext()) {
+		//		// associate a newly created GroupObject with the given NoteListObject
+		//		GroupObjectViewModel groupNote =
+		//			Resource.ViewModelCreator.CreateGroupObjectViewModel(
+		//				dbContext, ContentData.Model.Data, input.Model.Data);
+
+		//		// add the GroupObject to the contents list
+		//		Add(groupNote);
+		//	}
+		//}
+
+		public void AddNoteToGroup ()
+		{
+			if (ContentData == null || IncomingNoteViewModel == null) return;
 
 			using (IDbContext dbContext = Resource.CreateDbContext()) {
-				// associate a newly created GroupObject with the given NoteListObject
+				// remove the temp from list
+				List.Remove(IncomingNoteViewModel);
+
+				Group groop = ContentData.Model.Data;
+				Note note = IncomingNoteViewModel.Model.Data;
+
+				IncomingNoteViewModel = null;
+
+				// associate a newly created GroupObject with the given temporary GroupObject
 				GroupObjectViewModel groupNote =
-					Resource.ViewModelCreator.CreateGroupObjectViewModel(
-						dbContext, ContentData.Model.Data, input.Model.Data);
+					Resource.ViewModelCreator.CreateGroupObjectViewModel(dbContext, groop, note);
 
 				// add the GroupObject to the contents list
 				Add(groupNote);

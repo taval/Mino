@@ -11,7 +11,7 @@ namespace ViewModelExtended.Model
 	/// </summary>
 	public interface IObject
 	{
-		public INode Node { get; }
+		public Node Node { get; }
 		public Timestamp Timestamp { get; }
 	}
 }

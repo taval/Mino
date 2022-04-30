@@ -22,16 +22,20 @@ namespace ViewModelExtended
 
 		public void MakeGroup (GroupContentsViewModel target)
 		{
+			target.NoteReceiveCommand = new NoteReceiveCommand(target);
+
 			target.ReorderCommand = new GroupNoteReorderCommand(target);
 			//target.RemoveCommand = new GroupNoteRemoveCommand(target); // TODO: don't think this is used anymore, also, does this one need RefreshCommand?
-			target.PreselectCommand = new GroupNotePreselectCommand(target);
+			//target.PreselectCommand = new GroupNotePreselectCommand(target);
+			target.PickupCommand = new GroupNotePickupCommand(target);
 		}
 
 		public void MakeGroupList (GroupListViewModel target)
 		{
 			target.ReorderCommand = new GroupReorderCommand(target);
 			//target.RefreshCommand = new GroupRefreshCommand(target);
-			target.PreselectCommand = new GroupPreselectCommand(target);
+			//target.PreselectCommand = new GroupPreselectCommand(target);
+			target.PickupCommand = new GroupPickupCommand(target);
 		}
 
 		public void MakeGroupTabs (GroupTabsViewModel target)
@@ -48,9 +52,11 @@ namespace ViewModelExtended
 
 		public void MakeNoteList (NoteListViewModel target)
 		{
+			target.PickupCommand = new NotePickupCommand(target);
+
 			target.ReorderCommand = new NoteReorderCommand(target);
 			//target.RefreshCommand = new NoteRefreshCommand(target);
-			target.PreselectCommand = new NotePreselectCommand(target);
+			//target.PreselectCommand = new NotePreselectCommand(target);
 		}
 
 		public void MakePrime (PrimeViewModel target)
@@ -61,8 +67,9 @@ namespace ViewModelExtended
 			target.NoteCreateCommand = new NoteCreateCommand(target);
 			target.NoteDestroyCommand = new NoteDestroyCommand(target);
 
-			target.NoteSendCommand = new NoteSendCommand(target);
-			target.NoteReceiveCommand = new NoteReceiveCommand(target);
+			
+			target.GroupNoteHoldCommand = new GroupNoteHoldCommand(target);
+			target.GroupNoteDropCommand = new GroupNoteDropCommand(target);
 		}
 
 		public void MakeMainWindow (MainWindowViewModel target)

@@ -58,24 +58,6 @@ namespace ViewModelExtended
 		public static object GetTarget (DependencyObject o) => (object)o.GetValue(Target);
 		public static void SetTarget (DependencyObject o, object val) => o.SetValue(Target, val);
 
-		/// <summary>
-		/// an item to be sent to an outside list from here (NOT a newly CREATED item)
-		/// <summary>
-		public static readonly DependencyProperty Outgoing = DependencyProperty.RegisterAttached(
-			nameof(Outgoing), typeof(object), typeof(ListState), new FrameworkPropertyMetadata(
-				defaultValue: null, flags: FrameworkPropertyMetadataOptions.BindsTwoWayByDefault));
-		public static object GetOutgoing (DependencyObject o) => (object)o.GetValue(Outgoing);
-		public static void SetOutgoing (DependencyObject o, object val) => o.SetValue(Outgoing, val);
-
-		/// <summary>
-		/// an item to be added to the list from somewhere else (NOT a newly CREATED item)
-		/// <summary>
-		public static readonly DependencyProperty Incoming = DependencyProperty.RegisterAttached(
-			nameof(Incoming), typeof(object), typeof(ListState), new FrameworkPropertyMetadata(
-				defaultValue: null, flags: FrameworkPropertyMetadataOptions.BindsTwoWayByDefault));
-		public static object GetIncoming (DependencyObject o) => (object)o.GetValue(Incoming);
-		public static void SetIncoming (DependencyObject o, object val) => o.SetValue(Incoming, val);
-
 		/// </summary>
 		/// an item to be removed
 		/// <summary>

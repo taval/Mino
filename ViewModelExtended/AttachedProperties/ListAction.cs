@@ -27,7 +27,7 @@ namespace ViewModelExtended
 		public static void SetReorderCommand (DependencyObject o, ICommand val) => o.SetValue(ReorderCommand, val);
 
 		/// <summary>
-		/// add an item from an external source
+		/// send an item to add from an external source
 		/// </summary>
 		public static readonly DependencyProperty SendCommand = DependencyProperty.RegisterAttached(
 			nameof(SendCommand), typeof(ICommand), typeof(ListAction), new PropertyMetadata(null));
@@ -35,12 +35,28 @@ namespace ViewModelExtended
 		public static void SetSendCommand (DependencyObject o, ICommand val) => o.SetValue(SendCommand, val);
 
 		/// <summary>
-		/// add an item from an external source
+		/// receive an item to add from an external source
 		/// </summary>
 		public static readonly DependencyProperty ReceiveCommand = DependencyProperty.RegisterAttached(
 			nameof(ReceiveCommand), typeof(ICommand), typeof(ListAction), new PropertyMetadata(null));
 		public static ICommand GetReceiveCommand (DependencyObject o) => (ICommand)o.GetValue(ReceiveCommand);
 		public static void SetReceiveCommand (DependencyObject o, ICommand val) => o.SetValue(ReceiveCommand, val);
+
+		/// <summary>
+		/// temporarily back out and hold onto item to be added from an external source
+		/// </summary>
+		public static readonly DependencyProperty HoldCommand = DependencyProperty.RegisterAttached(
+			nameof(HoldCommand), typeof(ICommand), typeof(ListAction), new PropertyMetadata(null));
+		public static ICommand GetHoldCommand (DependencyObject o) => (ICommand)o.GetValue(HoldCommand);
+		public static void SetHoldCommand (DependencyObject o, ICommand val) => o.SetValue(HoldCommand, val);
+
+		/// <summary>
+		/// commit the added item from an external source
+		/// </summary>
+		public static readonly DependencyProperty DropCommand = DependencyProperty.RegisterAttached(
+			nameof(DropCommand), typeof(ICommand), typeof(ListAction), new PropertyMetadata(null));
+		public static ICommand GetDropCommand (DependencyObject o) => (ICommand)o.GetValue(DropCommand);
+		public static void SetDropCommand (DependencyObject o, ICommand val) => o.SetValue(DropCommand, val);
 
 		/// <summary>
 		/// remove an item from the list
@@ -92,7 +108,7 @@ namespace ViewModelExtended
 		public static void SetDummyCommand (DependencyObject o, ICommand val) => o.SetValue(DummyCommand, val);
 
 		/// <summary>
-		/// 
+		/// captures the highlighted item
 		/// </summary>
 		public static readonly DependencyProperty PreselectCommand = DependencyProperty.RegisterAttached(
 			nameof(PreselectCommand), typeof(ICommand), typeof(ListAction), new PropertyMetadata(null));

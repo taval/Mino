@@ -39,7 +39,7 @@ namespace ViewModelExtended.ViewModel
 		{
 			// create basic data components
 			Note note = dbContext.CreateNote("", "");
-			INode node = dbContext.CreateNode(null, null);
+			Node node = dbContext.CreateNode(null, null);
 			Timestamp timestamp = dbContext.CreateTimestamp();
 			dbContext.Save();
 
@@ -102,7 +102,7 @@ namespace ViewModelExtended.ViewModel
 		{
 			// create basic data components
 			Group data = dbContext.CreateGroup("", "#999");
-			INode node = dbContext.CreateNode(null, null);
+			Node node = dbContext.CreateNode(null, null);
 			Timestamp timestamp = dbContext.CreateTimestamp();
 			dbContext.Save();
 
@@ -164,7 +164,7 @@ namespace ViewModelExtended.ViewModel
 		public GroupObjectViewModel CreateGroupObjectViewModel (IDbContext dbContext, Group groop, Note data)
 		{
 			// create basic data components
-			INode node = dbContext.CreateNode(null, null);
+			Node node = dbContext.CreateNode(null, null);
 			Timestamp timestamp = dbContext.CreateTimestamp();
 			dbContext.Save();
 
@@ -211,6 +211,50 @@ namespace ViewModelExtended.ViewModel
 
 			return output;
 		}
+
+		public GroupObjectViewModel CreateTempGroupObjectViewModel (IDbContext dbContext, Group groop, Note data)
+		{
+			// create basic data components
+			Node node = dbContext.CreateNode(null, null);
+			dbContext.Entry(node).State = Microsoft.EntityFrameworkCore.EntityState.Detached;
+
+			Timestamp timestamp = dbContext.CreateTimestamp();
+			dbContext.Entry(timestamp).State = Microsoft.EntityFrameworkCore.EntityState.Detached;
+
+			// create root object
+			IObject root = dbContext.CreateObjectRoot(node, timestamp);
+
+			// create item context
+			GroupItem item = dbContext.CreateGroupItem(root, groop, data);
+			dbContext.Entry(item).State = Microsoft.EntityFrameworkCore.EntityState.Detached;
+
+			dbContext.Save();
+
+			// create model instance wrapper
+			GroupObject model = dbContext.CreateGroupObject(item, root, groop, data);
+
+			return new GroupObjectViewModel(model);
+		}
+
+		//public GroupObjectViewModel CreateGroupObjectViewModel (IDbContext dbContext, GroupObjectViewModel viewModel)
+		//{
+		//	// create basic data components
+		//	INode node = dbContext.CreateNode(null, null);
+		//	Timestamp timestamp = dbContext.CreateTimestamp();
+		//	dbContext.Save();
+
+		//	// create root object
+		//	IObject root = dbContext.CreateObjectRoot(node, timestamp);
+
+		//	// create item context
+		//	GroupItem item = dbContext.CreateGroupItem(root, viewModel.Model.Group, viewModel.Model.Data);
+		//	dbContext.Save();
+
+		//	// create model instance wrapper
+		//	GroupObject model = dbContext.CreateGroupObject(item, root, viewModel.Model.Group, viewModel.Model.Data);
+
+		//	return new GroupObjectViewModel(model);
+		//}
 
 		#endregion
 

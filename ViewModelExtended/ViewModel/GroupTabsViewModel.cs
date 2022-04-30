@@ -7,7 +7,6 @@ using System.Windows.Input;
 using ViewModelExtended.Model;
 
 
-// TODO: DragOver gets confused and will trigger the ListView Receive command instead of ListViewItem Reorder command. Incoming must be nullified on resolution to allow prevention of erroneous receive.
 
 namespace ViewModelExtended.ViewModel
 {
@@ -46,18 +45,6 @@ namespace ViewModelExtended.ViewModel
 
 		#endregion
 
-
-
-		//#region Load Command
-
-		//public ICommand GroupTabsLoadCommand {
-		//	get { return m_GroupTabsLoadCommand ?? throw new MissingCommandException(); }
-		//	set { if (m_GroupTabsLoadCommand == null) m_GroupTabsLoadCommand = value; }
-		//}
-
-		//private ICommand? m_GroupTabsLoadCommand;
-
-		//#endregion
 
 
 		#region GroupList Commands
@@ -159,33 +146,12 @@ namespace ViewModelExtended.ViewModel
 		#region Events: GroupList
 
 		/// <summary>
-		/// set the Contents viewer to the selected group (this is generally the Highlighted item passed from GroupList to GroupTabs)
-		/// </summary>
-		/// <param name="group"></param>
-		public void SelectGroup (GroupListObjectViewModel groop)
-		{
-			SelectedGroupViewModel = groop;
-			SelectedGroupViewModel.IsSelected = true;
-
-			Resource.GroupContentsViewModel.ContentData = groop;
-
-			Resource.GroupContentsViewModel.SetGroup(groop.Model.Data);
-		}
-
-		/// <summary>
 		/// adds a Group at the end of the group list
 		/// </summary>
 		/// <param name="input"></param>
 		public void AddGroup (GroupListObjectViewModel input)
 		{
 			Resource.GroupListViewModel.Add(input);
-
-			//// make changes to database
-			//using (IDbContext dbContext = Resource.CreateDbContext()) {
-			//	Resource.DbListHelper.UpdateAfterAdd(dbContext, input);
-			//	dbContext.Save();
-			//}
-
 		}
 
 		/// <summary>
@@ -209,6 +175,20 @@ namespace ViewModelExtended.ViewModel
 
 			// set selected group to display
 			SelectGroup(input);
+		}
+
+		/// <summary>
+		/// set the Contents viewer to the selected group (this is generally the Highlighted item passed from GroupList to GroupTabs)
+		/// </summary>
+		/// <param name="group"></param>
+		public void SelectGroup (GroupListObjectViewModel groop)
+		{
+			SelectedGroupViewModel = groop;
+			SelectedGroupViewModel.IsSelected = true;
+
+			Resource.GroupContentsViewModel.ContentData = groop;
+
+			Resource.GroupContentsViewModel.SetGroup(groop.Model.Data);
 		}
 
 		/// <summary>
@@ -272,6 +252,24 @@ namespace ViewModelExtended.ViewModel
 
 		#region Events: Group
 
+		public void HoldGroupNote ()
+		{
+			Resource.GroupContentsViewModel.HoldGroupNote();
+		}
+
+		/// <summary>
+		/// adds a dependent note to a group as a GroupObject
+		/// </summary>
+		/// <param name="input"></param>
+		//public void AddNoteToGroup (NoteListObjectViewModel input)
+		//{
+		//	Resource.GroupContentsViewModel.AddNoteToGroup(input);
+		//}
+		public void AddNoteToGroup ()
+		{
+			Resource.GroupContentsViewModel.AddNoteToGroup();
+		}
+
 		/// <summary>
 		/// // assign Group's selected note
 		/// </summary>
@@ -280,6 +278,28 @@ namespace ViewModelExtended.ViewModel
 		{
 			SelectedGroupNoteViewModel = note;
 			SelectedGroupNoteViewModel.IsSelected = true;
+		}
+
+		/// <summary>
+		/// removes all dependent GroupObjects (notes) associated with a given NoteListObject
+		/// </summary>
+		/// <param name="note"></param>
+		/// <exception cref="NullReferenceException"></exception>
+		public void RemoveGroupObjectsByNote (Note note)
+		{
+			GroupObjectViewModel? match = null;
+			IEnumerable <IListItem> visibleGroupObj = Resource.GroupContentsViewModel.Items.Where(
+				(item) => ((GroupObjectViewModel)item).Model.Data.Id == note.Id);
+
+			if (visibleGroupObj.Count() > 0) {
+				match = (GroupObjectViewModel?)visibleGroupObj?.First();
+			}
+
+			if (match != null) {
+				AutoSelectFailSafe(match);
+			}
+
+			Resource.GroupContentsViewModel.RemoveGroupObjectsByNote(note);
 		}
 
 		/// <summary>
@@ -293,6 +313,17 @@ namespace ViewModelExtended.ViewModel
 				throw new NullReferenceException("no Group is selected from which to remove a Note");
 			}
 
+			AutoSelectFailSafe(input);
+
+			Resource.GroupContentsViewModel.Remove(input);
+		}
+
+		/// <summary>
+		/// selects anything other than the input, for if/when the input becomes unavailable
+		/// </summary>
+		/// <param name="input"></param>
+		private void AutoSelectFailSafe (GroupObjectViewModel input)
+		{
 			// don't let lack of highlighted item cause deleted item to not be de-selected
 			if (Resource.GroupContentsViewModel.Highlighted == null) {
 				Resource.GroupContentsViewModel.Highlighted = SelectedGroupNoteViewModel;
@@ -323,18 +354,8 @@ namespace ViewModelExtended.ViewModel
 					//Target = null;
 				}
 			}
-
-			Resource.GroupContentsViewModel.Remove(input);
 		}
 
 		#endregion
 	}
 }
-
-
-
-
-
-
-
-

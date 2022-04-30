@@ -1,5 +1,6 @@
 ﻿using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.ChangeTracking;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -60,6 +61,7 @@ namespace ViewModelExtended.Model
 
 		public DbContext ()
 		{
+
 			// set db name and location
 			var folder = Environment.SpecialFolder.LocalApplicationData;
 			var path = Environment.GetFolderPath(folder);
@@ -107,7 +109,7 @@ namespace ViewModelExtended.Model
 
 		#region Data Objects (temporary)
 
-		public Node CreateNode (INode? previous, INode? next)
+		public Node CreateNode (Node? previous, Node? next)
 		{
 			Node output = new Node() { PreviousId = previous?.Id, NextId = next?.Id };
 
@@ -116,27 +118,27 @@ namespace ViewModelExtended.Model
 			return output;
 		}
 
-		public void UpdateNode (INode target, INode? previous, INode? next)
+		public void UpdateNode (Node target, Node? previous, Node? next)
 		{
 			// always assign even if null
 			target.PreviousId = previous?.Id;
 			target.NextId = next?.Id;
 
-			Nodes.Update((Node)target);
+			Nodes.Update(target);
 
 			if (previous != null) {
 				previous.NextId = target.Id;
-				Nodes.Update((Node)previous);
+				Nodes.Update(previous);
 			}
 			if (next != null) {
 				next.PreviousId = target.Id;
-				Nodes.Update((Node)next);
+				Nodes.Update(next);
 			}
 		}
 
-		public void DeleteNode (INode target)
+		public void DeleteNode (Node target)
 		{
-			Nodes.Remove((Node)target);
+			Nodes.Remove(target);
 		}
 
 		public Timestamp CreateTimestamp ()
@@ -316,7 +318,8 @@ namespace ViewModelExtended.Model
 		{
 			DeleteNode(Nodes.Find(target.NodeId));
 			DeleteTimestamp(Timestamps.Find(target.TimestampId));
-			GroupItems.Remove(target);
+			//GroupItems.Remove(target);
+			GroupItems.Remove(GroupItems.Find(target.Id)); // TODO/NOTE: this only works if the item is found again using the id; passing the object gives a duplicate tracking error which so far can't simply be resolved by detaching the temp entities from db upon creation.
 		}
 
 		#endregion
@@ -325,7 +328,7 @@ namespace ViewModelExtended.Model
 
 		#region Instance Objects: Create
 
-		public ObjectRoot CreateObjectRoot (INode node, Timestamp timestamp)
+		public ObjectRoot CreateObjectRoot (Node node, Timestamp timestamp)
 		{
 			return new ObjectRoot(node, timestamp);
 		}
@@ -370,7 +373,7 @@ namespace ViewModelExtended.Model
 
 		public void UpdateObjectRoot (IObject target)
 		{
-			Nodes.Update((Node)target.Node);
+			Nodes.Update(target.Node);
 			Timestamps.Update(target.Timestamp);
 		}
 
@@ -395,6 +398,8 @@ namespace ViewModelExtended.Model
 			DeleteGroupItem(target.Item);
 		}
 
+		
+
 		// NOTE: of limited use if the list items delete the nodes and timestamps already
 		public void DeleteObjectRoot (IObject target)
 		{
@@ -413,7 +418,10 @@ namespace ViewModelExtended.Model
 		/// </summary>
 		/// <param name="options"></param>
 		protected override void OnConfiguring (DbContextOptionsBuilder options)
-			=> options.UseSqlite($"Data Source={ DbPath }");
+		{
+			options.UseSqlite($"Data Source={ DbPath }");
+			options.EnableSensitiveDataLogging(true); // TODO: remove logging in production
+		}
 
 		/// <summary>
 		/// configure model with custom columns and data

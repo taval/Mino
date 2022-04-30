@@ -24,6 +24,10 @@ namespace ViewModelExtended.ViewModel
 			get { return Model.Node; }
 		}
 
+		public Timestamp Timestamp {
+			get { return Model.Timestamp; }
+		}
+
 		public int? PreviousId {
 			get { return Node.PreviousId; }
 		}
@@ -32,9 +36,7 @@ namespace ViewModelExtended.ViewModel
 			get { return Node.NextId; }
 		}
 
-		public Timestamp Timestamp {
-			get { return Model.Timestamp; }
-		}
+		
 
 		public string Title {
 			get { return Model.Data.Title; }

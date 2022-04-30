@@ -33,11 +33,6 @@
 				Margin="8 0 4 0"
 				DataContext="{ Binding Resource.NoteListViewModel, diag:PresentationTraceSources.TraceLevel=High }"
 
-				local:ListAction.SendCommand="{ Binding
-					RelativeSource={ RelativeSource AncestorType={ x:Type local:PrimeView } },
-					Path=DataContext.NoteSendCommand,
-					diag:PresentationTraceSources.TraceLevel=High }"
-
 				local:ListAction.InsertCommand="{ Binding
 					RelativeSource={ RelativeSource AncestorType={ x:Type local:PrimeView } },
 					Path=DataContext.NoteCreateCommand,
@@ -58,20 +53,24 @@
 				Grid.Column="1"
 				DataContext="{ Binding Resource.NoteTextViewModel }" />
 
+            <!--local:ListAction.ReceiveCommand="{ Binding
+					RelativeSource={ RelativeSource AncestorType={ x:Type local:PrimeView } },
+					Path=DataContext.NoteReceiveCommand,
+					diag:PresentationTraceSources.TraceLevel=High }"-->
 			<local:GroupTabsView
 				Margin="4 0 8 0"
 				Grid.Column="2"
 				DataContext="{ Binding Resource.GroupTabsViewModel }"
-				
-				local:ListState.Incoming="{ Binding
+
+                local:ListAction.HoldCommand="{ Binding
 					RelativeSource={ RelativeSource AncestorType={ x:Type local:PrimeView } },
-					Path=DataContext.OutgoingNoteViewModel,
+					Path=DataContext.GroupNoteHoldCommand,
 					diag:PresentationTraceSources.TraceLevel=High }"
-				
-				local:ListAction.ReceiveCommand="{ Binding
+
+				local:ListAction.DropCommand="{ Binding
 					RelativeSource={ RelativeSource AncestorType={ x:Type local:PrimeView } },
-					Path=DataContext.NoteReceiveCommand,
-					diag:PresentationTraceSources.TraceLevel=High }"/>
+					Path=DataContext.GroupNoteDropCommand,
+					diag:PresentationTraceSources.TraceLevel=High }" />
 
 		</Grid>
 		<!-- footer -->

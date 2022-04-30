@@ -92,11 +92,7 @@
 					</StackPanel>
 				</TabItem.Header>
 
-				<local:GroupContentsView
-					x:Name="GroupContentsView"
-					DataContext="{ Binding Resource.GroupContentsViewModel }"
-
-					local:ListState.Incoming="{ Binding
+                <!--local:ListState.Incoming="{ Binding
 						RelativeSource={ RelativeSource AncestorType={ x:Type local:GroupTabsView } },
 						Path=(local:ListState.Incoming),
 						diag:PresentationTraceSources.TraceLevel=High }"
@@ -104,8 +100,21 @@
 					local:ListAction.ReceiveCommand="{ Binding
 						RelativeSource={ RelativeSource AncestorType={ x:Type local:GroupTabsView } },
 						Path=(local:ListAction.ReceiveCommand),
+						diag:PresentationTraceSources.TraceLevel=High }"-->
+				<local:GroupContentsView
+					x:Name="GroupContentsView"
+					DataContext="{ Binding Resource.GroupContentsViewModel }"
+
+                    local:ListAction.HoldCommand="{ Binding
+						RelativeSource={ RelativeSource AncestorType={ x:Type local:GroupTabsView } },
+						Path=(local:ListAction.HoldCommand),
 						diag:PresentationTraceSources.TraceLevel=High }"
-					
+
+					local:ListAction.DropCommand="{ Binding
+						RelativeSource={ RelativeSource AncestorType={ x:Type local:GroupTabsView } },
+						Path=(local:ListAction.DropCommand),
+						diag:PresentationTraceSources.TraceLevel=High }"
+
 					local:ListAction.SelectCommand="{ Binding
 						RelativeSource={ RelativeSource AncestorType={ x:Type local:GroupTabsView } },
 						Path=DataContext.GroupNoteSelectCommand,

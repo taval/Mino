@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Linq;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.ChangeTracking;
 
 
 
@@ -14,7 +15,13 @@ namespace ViewModelExtended.Model
 	/// </summary>
 	public interface IDbContext : IDisposable
 	{
+		// expose identity tracking
+		public EntityEntry<TEntity> Entry<TEntity> (TEntity entity) where TEntity : class;
+
+		// save changes
 		public void Save ();
+
+		// flush entire db
 		public void Reset ();
 
 		#region Tables
@@ -40,9 +47,9 @@ namespace ViewModelExtended.Model
 
 		#region Simple Table Objects
 
-		public Node CreateNode (INode? previous, INode? next);
-		public void UpdateNode (INode target, INode? previous, INode? next);
-		public void DeleteNode (INode target);
+		public Node CreateNode (Node? previous, Node? next);
+		public void UpdateNode (Node target, Node? previous, Node? next);
+		public void DeleteNode (Node target);
 
 		public Timestamp CreateTimestamp ();
 		public void UpdateTimestamp (Timestamp target, long? userModified, long? userIndexed, long? autoModified);
@@ -88,7 +95,7 @@ namespace ViewModelExtended.Model
 		public void UpdateGroupObject (GroupObject target);
 		public void DeleteGroupObject (GroupObject target);
 
-		public ObjectRoot CreateObjectRoot (INode node, Timestamp timestamp);
+		public ObjectRoot CreateObjectRoot (Node node, Timestamp timestamp);
 		public void UpdateObjectRoot (IObject target);
 		public void DeleteObjectRoot (IObject target);
 

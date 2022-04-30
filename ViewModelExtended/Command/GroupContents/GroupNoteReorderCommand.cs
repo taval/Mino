@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
+using System.Windows.Controls;
 using ViewModelExtended.ViewModel;
 
 
@@ -21,24 +22,34 @@ namespace ViewModelExtended.Command
 
 		public override void Execute (object parameter)
 		{
-			DragEventArgs? e = parameter as DragEventArgs;
+			// get event args
+			DragEventArgs e = (DragEventArgs)parameter;
 
-			if (e == null) {
-				return;
-			}
+			// prevent close button from performing operation
+			Button? closeButton = UIHelper.FindChild<Button>(((FrameworkElement)e.Source).Parent, "RemoveItemButton");
+			if (!(e.Source is FrameworkElement) || closeButton?.IsMouseOver == true) return;
 
-			FrameworkElement? element = e.Source as FrameworkElement;
+			// get the event source element
+			FrameworkElement element = (FrameworkElement)e.Source;
 
-			if (element == null) {
-				return;
-			}
+			// get the data from DragDrop operation
+			Tuple<string, object> data = (Tuple<string, object>)e.Data.GetData(DataFormats.Serializable);
 
+			// if the item comes from the same ListView, bail out
+			string itemListName = data.Item1;
+			if (!itemListName.Equals("ListView_GroupContentsView")) return;
+
+			// get target
 			GroupObjectViewModel? target = element.DataContext as GroupObjectViewModel;
-			GroupObjectViewModel? source = e.Data.GetData(DataFormats.Serializable) as GroupObjectViewModel;
+			
+			// check source for correct type
+			if (target == null || data.Item2 == null || !(data.Item2 is GroupObjectViewModel)) return;
 
-			if (source != null && target != null) {
-				m_ListViewModel.Reorder(source, target);
-			}
+			// get source
+			GroupObjectViewModel source = (GroupObjectViewModel)data.Item2;
+
+			// reorder
+			m_ListViewModel.Reorder(source, target);
 
 			// refresh list data
 			//m_ListViewModel.RefreshListView();
