@@ -40,19 +40,26 @@
 		<!-- the Add Note button -->
 
 		<Grid Height="32" Margin="0 16 0 8">
-			<Grid.ColumnDefinitions>
-				<ColumnDefinition Width="*" />
-				<ColumnDefinition Width="*" />
-			</Grid.ColumnDefinitions>
-			<Grid.RowDefinitions>
-				<RowDefinition Height="*" />
-			</Grid.RowDefinitions>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="*" />
+            </Grid.ColumnDefinitions>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="*" />
+                <RowDefinition Height="*" />
+            </Grid.RowDefinitions>
 
-			<TextBlock
-				FontSize="24"
+            <TextBlock
+                FontWeight="Bold"
+				FontSize="12"
 				Text="Notes" />
+            <TextBlock
+                Grid.Row="1"
+                FontSize="9"
+                Text="{ Binding Highlighted.Title }" />
 			<Button
 				Grid.Column="1"
+                Grid.RowSpan="2"
 				Template="{ StaticResource buttonTemplate }"
 				Style="{ StaticResource buttonStyle }"
 				Name="AddButton"
@@ -106,19 +113,12 @@
 								RelativeSource={ RelativeSource AncestorType={ x:Type local:NoteListView } } }" />
 
 						<StackPanel Grid.Column="1">
-                            <TextBlock Text="{ Binding ItemId, StringFormat='ItemId: {0}', UpdateSourceTrigger=PropertyChanged }" />
-							<!--<TextBlock Text="{ Binding Idx, UpdateSourceTrigger=PropertyChanged }" />-->
-
-                            <TextBlock Text="{ Binding Title, StringFormat='Title: {0}' }" />
-                            <TextBlock Text="{ Binding Text, StringFormat='Text: {0}' }" />
-
-                            <!--<TextBlock Text="{ Binding Previous.Node.Id, StringFormat='Last nodeId: {0}', UpdateSourceTrigger=PropertyChanged }" />-->
-                            <TextBlock Text="{ Binding PreviousId, StringFormat='Last NodeId: {0}', UpdateSourceTrigger=PropertyChanged }" />
-                            
-							<!--<TextBlock Text="Next Id:" />-->
-                            <TextBlock Text="{ Binding NextId, StringFormat='Next NodeId: {0}', UpdateSourceTrigger=PropertyChanged }" />
-							<!--<TextBlock Text="{ Binding NextId, UpdateSourceTrigger=PropertyChanged }" />-->
-						</StackPanel>
+                            <TextBlock Text="{ Binding ItemId, StringFormat='Id: {0}', UpdateSourceTrigger=PropertyChanged }" />
+                            <TextBlock Text="{ Binding PreviousId, StringFormat='PreviousId: {0}', UpdateSourceTrigger=PropertyChanged }" />
+                            <TextBlock Text="{ Binding NextId, StringFormat='NextId: {0}', UpdateSourceTrigger=PropertyChanged }" />
+                            <TextBlock FontWeight="Bold" Text="{ Binding Title }" />
+                            <TextBlock Text="{ Binding Text }" />
+                        </StackPanel>
 
 						<!-- NOTE: in contrast with other bindings outside interaction triggers, 'Path' property must be explicit within one -->
 						<i:Interaction.Triggers>

@@ -9,18 +9,19 @@ namespace ViewModelExtended.ViewModel
 {
 	public class GroupListObjectViewModel : ViewModelBase, IListItem, ISelectable
 	{
+		#region Model
+
 		public GroupListObject Model {
 			get { return m_Model; }
 		}
 
 		private readonly GroupListObject m_Model;
 
-		public int ItemId {
-			get { return Model.Item.Id; }
-			private set { Model.Item.Id = value; }
-		}
+		#endregion
 
-		public INode Node {
+		#region IObject
+
+		public Node Node {
 			get { return Model.Node; }
 		}
 
@@ -28,40 +29,21 @@ namespace ViewModelExtended.ViewModel
 			get { return Model.Timestamp; }
 		}
 
-		public int? PreviousId {
-			get { return Node.PreviousId; }
+		#endregion
+
+		#region IListItem
+
+		public int ItemId {
+			get { return Model.Item.Id; }
+			private set { Model.Item.Id = value; }
 		}
 
-		public int? NextId {
-			get { return Node.NextId; }
-		}
-
-		
-
-		public string Title {
-			get { return Model.Data.Title; }
-			set {
-				Set(ref m_Title, value);
-				Model.Data.Title = m_Title;
-			}
-		}
-
-		private string m_Title;
-
-		public string Color {
-			get { return Model.Data.Color; }
-			set {
-				Set(ref m_Color, value);
-				Model.Data.Color = m_Color;
-			}
-		}
-
-		private string m_Color;
-
-		// ViewModel link
-		public IListItem Value => this;
 		public IListItem? Previous { get; set; }
 		public IListItem? Next { get; set; }
+
+		#endregion
+
+		#region ISelectable
 
 		public bool IsSelected {
 			get { return m_IsSelected; }
@@ -70,7 +52,37 @@ namespace ViewModelExtended.ViewModel
 
 		private bool m_IsSelected;
 
-		//public int Idx => throw new NotImplementedException();
+		#endregion
+
+		//public int? PreviousId {
+		//	get { return Node.PreviousId; }
+		//}
+
+		//public int? NextId {
+		//	get { return Node.NextId; }
+		//}
+
+		public string Title {
+			get { return Model.Data.Title; }
+			set {
+				//Set(ref m_Title, value);
+				Model.Data.Title = value;
+				Set(ref m_Title, value);
+			}
+		}
+
+		private string m_Title;
+
+		public string Color {
+			get { return Model.Data.Color; }
+			set {
+				//Set(ref m_Color, value);
+				Model.Data.Color = value;
+				Set(ref m_Color, value);
+			}
+		}
+
+		private string m_Color;
 
 		public GroupListObjectViewModel (GroupListObject model)
 		{

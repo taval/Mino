@@ -1,8 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using ViewModelExtended.ViewModel;
@@ -11,29 +9,29 @@ using ViewModelExtended.ViewModel;
 
 namespace ViewModelExtended.Command
 {
-	public class GroupSelectCommand : CommandBase
+	public class SwitchTabsCommand : CommandBase
 	{
 		private readonly GroupTabsViewModel m_GroupTabsViewModel;
 
-		public GroupSelectCommand (GroupTabsViewModel groupTabsViewModel)
+		public SwitchTabsCommand (GroupTabsViewModel groupTabsViewModel)
 		{
 			m_GroupTabsViewModel = groupTabsViewModel;
 		}
 
 		public override void Execute (object parameter)
 		{
-			m_GroupTabsViewModel.SelectGroup((GroupListObjectViewModel)parameter);
-
-			// focus on the GroupList tab
 			TabControl? tabControl = UIHelper.FindChild<TabControl>(Application.Current.MainWindow, "GroupTabControl");
-			if (tabControl == null) {
-				return;
-			}
+			if (tabControl == null) return;
 			TabItem? tabItem = (TabItem)tabControl.FindName("GroupContentsTab");
-			if (tabItem == null) {
-				return;
+			if (tabItem == null) return;
+
+			if (m_GroupTabsViewModel.Resource.GroupContentsViewModel.HasGroup == false) {
+				// prevent tab switch
+				if (tabControl.SelectedItem == tabItem) {
+					tabControl.SelectedIndex = m_GroupTabsViewModel.SelectedTabIndex;
+				}
 			}
-			tabControl.SelectedItem = tabItem;
+			m_GroupTabsViewModel.SelectedTabIndex = tabControl.SelectedIndex;
 		}
 	}
 }

@@ -6,7 +6,7 @@ using System.Text;
 
 namespace ViewModelExtended.Model
 {
-	public class Node : INode
+	public class Node : IIdentifiable
 	{
 		public int Id { get; set; }
 		public int? PreviousId { get; set; }

@@ -14,13 +14,37 @@ namespace ViewModelExtended.ViewModel
 	{
 		#region Cross-View Data
 
+		public int SelectedTabIndex {
+			get { return m_SelectedTabIndex; }
+			set { Set(ref m_SelectedTabIndex, value); }
+		}
+
+		private int m_SelectedTabIndex;
+
 		/// <summary>
 		/// the GroupViewModel (data displayed by GroupView)
 		/// NOTE: this is bound for purpose of GroupView population operation
 		/// </summary>
 		public GroupListObjectViewModel? SelectedGroupViewModel {
 			get { return m_SelectedGroupViewModel; }
-			set { Set(ref m_SelectedGroupViewModel, value); }
+			set {
+				Set(ref m_SelectedGroupViewModel, value);
+				NotifyPropertyChanged("GroupTitle");
+				if (m_SelectedGroupViewModel == null) return;
+				m_SelectedGroupViewModel.PropertyChanged += (sender, e) =>
+				{
+					if (e.PropertyName == "Title") {
+						NotifyPropertyChanged("GroupTitle");
+					}
+				};
+			}
+		}
+
+		/// <summary>
+		/// the selected group's title
+		/// </summary>
+		public string GroupTitle {
+			get { return (SelectedGroupViewModel != null) ? SelectedGroupViewModel.Title : string.Empty; }
 		}
 
 		private GroupListObjectViewModel? m_SelectedGroupViewModel;
@@ -48,6 +72,13 @@ namespace ViewModelExtended.ViewModel
 
 
 		#region GroupList Commands
+
+		public ICommand SwitchTabsCommand {
+			get { return m_SwitchTabsCommand ?? throw new MissingCommandException(); }
+			set { if (m_SwitchTabsCommand == null) m_SwitchTabsCommand = value; }
+		}
+
+		private ICommand? m_SwitchTabsCommand;
 
 		public ICommand GroupSelectCommand {
 			get { return m_GroupSelectCommand ?? throw new MissingCommandException(); }
@@ -101,6 +132,7 @@ namespace ViewModelExtended.ViewModel
 			Resource = resource;
 			m_SelectedGroupViewModel = null;
 			m_SelectedGroupNoteViewModel = null;
+			SelectedTabIndex = 0;
 			Resource.CommandBuilder.MakeGroupTabs(this);
 		}
 
@@ -181,14 +213,14 @@ namespace ViewModelExtended.ViewModel
 		/// set the Contents viewer to the selected group (this is generally the Highlighted item passed from GroupList to GroupTabs)
 		/// </summary>
 		/// <param name="group"></param>
-		public void SelectGroup (GroupListObjectViewModel groop)
+		public void SelectGroup (GroupListObjectViewModel? groop)
 		{
 			SelectedGroupViewModel = groop;
-			SelectedGroupViewModel.IsSelected = true;
+			if (SelectedGroupViewModel != null) SelectedGroupViewModel.IsSelected = true;
 
 			Resource.GroupContentsViewModel.ContentData = groop;
-
-			Resource.GroupContentsViewModel.SetGroup(groop.Model.Data);
+			//Group? data = groop?.Model.Data;
+			//Resource.GroupContentsViewModel.SetGroup(data);
 		}
 
 		/// <summary>
@@ -230,15 +262,19 @@ namespace ViewModelExtended.ViewModel
 			}
 
 			// add a list item if none remain
+			//if (Resource.GroupListViewModel.Items.Count() == 1) {
+			//	GroupListObjectViewModel newGroup = Resource.GroupListViewModel.Create();
+			//	CreateGroup(null, newGroup);
+			//	SelectGroup(newGroup);
+			//	Resource.GroupListViewModel.Highlighted = newGroup;
+			//}
 			if (Resource.GroupListViewModel.Items.Count() == 1) {
-				GroupListObjectViewModel newGroup = Resource.GroupListViewModel.Create();
-				CreateGroup(null, newGroup);
-				SelectGroup(newGroup);
-				Resource.GroupListViewModel.Highlighted = newGroup;
+				SelectGroup(null);
+				Resource.GroupListViewModel.Highlighted = null;
 			}
 
 			// destroy the GroupObjects (dependent Notes) in the group
-			Resource.GroupContentsViewModel.DestroyGroup(input.Model.Data);
+			Resource.GroupContentsViewModel.ClearGroupContents(input.Model.Data);
 
 			// destroy the Group
 			Resource.GroupListViewModel.Remove(input);
@@ -319,7 +355,7 @@ namespace ViewModelExtended.ViewModel
 		}
 
 		/// <summary>
-		/// selects anything other than the input, for if/when the input becomes unavailable
+		/// selects another object linked to the input, for if/when the input becomes unavailable
 		/// </summary>
 		/// <param name="input"></param>
 		private void AutoSelectFailSafe (GroupObjectViewModel input)

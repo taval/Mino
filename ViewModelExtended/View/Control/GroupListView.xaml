@@ -60,7 +60,8 @@
                             MinWidth="16pt"
 							Background="Transparent"
 							BorderBrush="Transparent"
-							Text="{ Binding Title, UpdateSourceTrigger=PropertyChanged }" />
+							FontWeight="Bold"
+                            Text="{ Binding Title, UpdateSourceTrigger=PropertyChanged }" />
 						<!--<StackPanel Grid.Column="1">
 							<TextBlock Text="{ Binding Id,UpdateSourceTrigger=PropertyChanged }" />
 							<TextBlock Text="{ Binding Idx, UpdateSourceTrigger=PropertyChanged }" />

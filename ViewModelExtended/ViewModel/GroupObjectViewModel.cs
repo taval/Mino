@@ -9,32 +9,58 @@ namespace ViewModelExtended.ViewModel
 {
 	public class GroupObjectViewModel : ViewModelBase, IListItem, ISelectable
 	{
+		#region Model
+
 		public GroupObject Model {
 			get { return m_Model; }
 		}
 
 		private readonly GroupObject m_Model;
 
-		public int ItemId {
-			get { return Model.Item.Id; }
-			private set { Model.Item.Id = value; }
-		}
+		#endregion
 
-		public INode Node {
+		#region IObject
+
+		public Node Node {
 			get { return Model.Node; }
-		}
-
-		public int? PreviousId {
-			get { return Node.PreviousId; }
-		}
-
-		public int? NextId {
-			get { return Node.NextId; }
 		}
 
 		public Timestamp Timestamp {
 			get { return Model.Timestamp; }
 		}
+
+		#endregion
+
+		#region IListItem
+
+		public int ItemId {
+			get { return Model.Item.Id; }
+			private set { Model.Item.Id = value; }
+		}
+
+		public IListItem? Previous { get; set; }
+		public IListItem? Next { get; set; }
+
+		#endregion
+
+		#region ISelectable
+
+		public bool IsSelected {
+			get { return m_IsSelected; }
+			set { Set(ref m_IsSelected, value); }
+		}
+
+		private bool m_IsSelected;
+
+		#endregion
+
+		//public int? PreviousId {
+		//	get { return Node.PreviousId; }
+		//}
+
+		//public int? NextId {
+		//	get { return Node.NextId; }
+		//}
 
 		public string Title {
 			get {
@@ -55,18 +81,6 @@ namespace ViewModelExtended.ViewModel
 		}
 
 		private string m_Text;
-
-		// ViewModel link
-		public IListItem Value => this;
-		public IListItem? Previous { get; set; }
-		public IListItem? Next { get; set; }
-
-		public bool IsSelected {
-			get { return m_IsSelected; }
-			set { Set(ref m_IsSelected, value); }
-		}
-
-		private bool m_IsSelected;
 
 		//public int Idx => throw new NotImplementedException();
 

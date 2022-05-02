@@ -5,36 +5,12 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 
-
-
-/* NOTE:
- * using DbContext looks like a Builder pattern, e.g.
- *
- * // create
- * Note note = CreateNote("Hello", "World");
- * Node node = CreateNode(null, null);
- * Timestamp timestamp = CreateTimestamp();
- * CreateNoteListItem(note, node, timestamp);
- *
- * // update
- * UpdateNote(note, "GoodBye", null);
- * UpdateNode(node, node, node);
- * UpdateNoteListItem();
- */
-
-
+// TODO/NOTE: EntityXItemRemove only works if the item is found again using the id; passing the object gives a duplicate tracking error which so far can't simply be resolved by detaching the temp entities from db upon creation. The problem is probably not here but some object from send/receive that is setting a temporary id somehow
 
 namespace ViewModelExtended.Model
 {
 	public class DbContext : Microsoft.EntityFrameworkCore.DbContext, IDbContext
 	{
-		public void Save ()
-		{
-			SaveChanges();
-		}
-
-
-
 		#region	Path
 
 		private string DbPath { get; set; }
@@ -61,7 +37,6 @@ namespace ViewModelExtended.Model
 
 		public DbContext ()
 		{
-
 			// set db name and location
 			var folder = Environment.SpecialFolder.LocalApplicationData;
 			var path = Environment.GetFolderPath(folder);
@@ -109,30 +84,30 @@ namespace ViewModelExtended.Model
 
 		#region Data Objects (temporary)
 
-		public Node CreateNode (Node? previous, Node? next)
+		public Node CreateNode (Node? previous, Node? next, bool temporary = false)
 		{
 			Node output = new Node() { PreviousId = previous?.Id, NextId = next?.Id };
 
-			Nodes.Add(output);
+			if (temporary == false) Nodes.Add(output);
 
 			return output;
 		}
 
-		public void UpdateNode (Node target, Node? previous, Node? next)
+		public void UpdateNode (Node target, Node? previous, Node? next, bool temporary = false)
 		{
 			// always assign even if null
 			target.PreviousId = previous?.Id;
 			target.NextId = next?.Id;
 
-			Nodes.Update(target);
+			if (temporary == false) Nodes.Update(target);
 
 			if (previous != null) {
 				previous.NextId = target.Id;
-				Nodes.Update(previous);
+				if (temporary == false) Nodes.Update(previous);
 			}
 			if (next != null) {
 				next.PreviousId = target.Id;
-				Nodes.Update(next);
+				if (temporary == false) Nodes.Update(next);
 			}
 		}
 
@@ -141,31 +116,24 @@ namespace ViewModelExtended.Model
 			Nodes.Remove(target);
 		}
 
-		public Timestamp CreateTimestamp ()
+		public Timestamp CreateTimestamp (bool temporary = false)
 		{
 			Timestamp output = new Timestamp();
 
-			Timestamps.Add(output);
+			if (temporary == false) Timestamps.Add(output);
 
 			return output;
 		}
 
-		public void UpdateTimestamp (Timestamp target, long? userModified, long? userIndexed, long? autoModified)
+		public void UpdateTimestamp (
+			Timestamp target, long? userModified, long? userIndexed, long? autoModified, bool temporary = false)
 		{
 			// only assign if not null
-			if (userModified == null && userIndexed == null && autoModified == null) {
-				return;
-			}
-			if (userModified != null) {
-				target.UserModified = userModified;
-			}
-			if (userIndexed != null) {
-				target.UserIndexed = userIndexed;
-			}
-			if (autoModified != null) {
-				target.AutoModified = autoModified;
-			}
-			Timestamps.Update(target);
+			if (userModified == null && userIndexed == null && autoModified == null) return;
+			if (userModified != null) target.UserModified = userModified;
+			if (userIndexed != null) target.UserIndexed = userIndexed;
+			if (autoModified != null) target.AutoModified = autoModified;
+			if (temporary == false) Timestamps.Update(target);
 		}
 
 		public void DeleteTimestamp (Timestamp target)
@@ -173,16 +141,16 @@ namespace ViewModelExtended.Model
 			Timestamps.Remove(target);
 		}
 
-		public Note CreateNote (string title, string text)
+		public Note CreateNote (string title, string text, bool temporary = false)
 		{
 			Note output = new Note() { Title = title, Text = text };
 
-			Notes.Add(output);
+			if (temporary == false) Notes.Add(output);
 
 			return output;
 		}
 
-		public void UpdateNote (Note target, string? title, string? text)
+		public void UpdateNote (Note target, string? title, string? text, bool temporary = false)
 		{
 			if (title != null) {
 				target.Title = title;
@@ -190,7 +158,7 @@ namespace ViewModelExtended.Model
 			if (text != null) {
 				target.Text = text;
 			}
-			Notes.Update(target);
+			if (temporary == false) Notes.Update(target);
 		}
 
 		public void DeleteNote (Note target)
@@ -198,16 +166,16 @@ namespace ViewModelExtended.Model
 			Notes.Remove(target);
 		}
 
-		public Group CreateGroup (string title, string color)
+		public Group CreateGroup (string title, string color, bool temporary = false)
 		{
 			Group output = new Group() { Title = title, Color = color };
 
-			Groups.Add(output);
+			if (temporary == false) Groups.Add(output);
 
 			return output;
 		}
 
-		public void UpdateGroup (Group target, string? title, string? color)
+		public void UpdateGroup (Group target, string? title, string? color, bool temporary = false)
 		{
 			if (title != null) {
 				target.Title = title;
@@ -215,7 +183,7 @@ namespace ViewModelExtended.Model
 			if (color != null) {
 				target.Color = color;
 			}
-			Groups.Update(target);
+			if (temporary == false) Groups.Update(target);
 		}
 
 		public void DeleteGroup (Group target)
@@ -229,21 +197,21 @@ namespace ViewModelExtended.Model
 
 		#region Composite Objects (persistent / interface)
 
-		public NoteListItem CreateNoteListItem (IObject root, Note data)
+		public NoteListItem CreateNoteListItem (IObject root, Note data, bool temporary = false)
 		{
 			NoteListItem output = new NoteListItem()
 			{
-				ObjectId = data.Id,
 				NodeId = root.Node.Id,
-				TimestampId = root.Timestamp.Id
+				TimestampId = root.Timestamp.Id,
+				ObjectId = data.Id
 			};
 
-			NoteListItems.Add(output);
+			if (temporary == false) NoteListItems.Add(output);
 
 			return output;
 		}
 
-		public void UpdateNoteListItem ()
+		public void UpdateNoteListItem (bool temporary = false)
 		{
 			//SaveChanges();
 		}
@@ -259,10 +227,11 @@ namespace ViewModelExtended.Model
 			DeleteNode(Nodes.Find(target.NodeId));
 			DeleteTimestamp(Timestamps.Find(target.TimestampId));
 			DeleteNote(Notes.Find(target.ObjectId));
-			NoteListItems.Remove(target);
+			//NoteListItems.Remove(target);
+			NoteListItems.Remove(NoteListItems.Find(target.Id));
 		}
 
-		public GroupListItem CreateGroupListItem (IObject root, Group data)
+		public GroupListItem CreateGroupListItem (IObject root, Group data, bool temporary = false)
 		{
 			GroupListItem output = new GroupListItem()
 			{
@@ -271,12 +240,12 @@ namespace ViewModelExtended.Model
 				TimestampId = root.Timestamp.Id
 			};
 
-			GroupListItems.Add(output);
+			if (temporary == false) GroupListItems.Add(output);
 
 			return output;
 		}
 
-		public void UpdateGroupListItem ()
+		public void UpdateGroupListItem (bool temporary = false)
 		{
 			//SaveChanges();
 		}
@@ -291,10 +260,11 @@ namespace ViewModelExtended.Model
 			DeleteNode(Nodes.Find(target.NodeId));
 			DeleteTimestamp(Timestamps.Find(target.TimestampId));
 			DeleteGroup(Groups.Find(target.ObjectId));
-			GroupListItems.Remove(target);
+			//GroupListItems.Remove(target);
+			GroupListItems.Remove(GroupListItems.Find(target.Id));
 		}
 
-		public GroupItem CreateGroupItem (IObject root, Group groop, Note data)
+		public GroupItem CreateGroupItem (IObject root, Group groop, Note data, bool temporary = false)
 		{
 			GroupItem output = new GroupItem()
 			{
@@ -304,12 +274,12 @@ namespace ViewModelExtended.Model
 				TimestampId = root.Timestamp.Id
 			};
 
-			GroupItems.Add(output);
+			if (temporary == false) GroupItems.Add(output);
 
 			return output;
 		}
 
-		public void UpdateGroupItem ()
+		public void UpdateGroupItem (bool temporary = false)
 		{
 			//SaveChanges();
 		}
@@ -319,7 +289,7 @@ namespace ViewModelExtended.Model
 			DeleteNode(Nodes.Find(target.NodeId));
 			DeleteTimestamp(Timestamps.Find(target.TimestampId));
 			//GroupItems.Remove(target);
-			GroupItems.Remove(GroupItems.Find(target.Id)); // TODO/NOTE: this only works if the item is found again using the id; passing the object gives a duplicate tracking error which so far can't simply be resolved by detaching the temp entities from db upon creation.
+			GroupItems.Remove(GroupItems.Find(target.Id));
 		}
 
 		#endregion
@@ -354,27 +324,27 @@ namespace ViewModelExtended.Model
 
 		#region Instance Objects: Update
 
-		public void UpdateNoteListObject (NoteListObject target)
+		public void UpdateNoteListObject (NoteListObject target, bool temporary = false)
 		{
 			UpdateObjectRoot(target);
-			Notes.Update(target.Data);
+			if (temporary == false) Notes.Update(target.Data);
 		}
 
-		public void UpdateGroupListObject (GroupListObject target)
+		public void UpdateGroupListObject (GroupListObject target, bool temporary = false)
 		{
 			UpdateObjectRoot(target);
-			Groups.Update(target.Data);
+			if (temporary == false) Groups.Update(target.Data);
 		}
 
-		public void UpdateGroupObject (GroupObject target)
+		public void UpdateGroupObject (GroupObject target, bool temporary = false)
 		{
 			UpdateObjectRoot(target);
 		}
 
-		public void UpdateObjectRoot (IObject target)
+		public void UpdateObjectRoot (IObject target, bool temporary = false)
 		{
 			Nodes.Update(target.Node);
-			Timestamps.Update(target.Timestamp);
+			if (temporary == false) Timestamps.Update(target.Timestamp);
 		}
 
 		#endregion
@@ -411,6 +381,17 @@ namespace ViewModelExtended.Model
 
 
 
+		#region Save
+
+		public void Save ()
+		{
+			SaveChanges();
+		}
+
+		#endregion
+
+
+
 		#region Configuration
 
 		/// <summary>
@@ -420,7 +401,7 @@ namespace ViewModelExtended.Model
 		protected override void OnConfiguring (DbContextOptionsBuilder options)
 		{
 			options.UseSqlite($"Data Source={ DbPath }");
-			options.EnableSensitiveDataLogging(true); // TODO: remove logging in production
+			//options.EnableSensitiveDataLogging(true); // TODO: remove logging in production
 		}
 
 		/// <summary>
@@ -490,5 +471,5 @@ namespace ViewModelExtended.Model
 // NOTE - in general, attributes should be attached to the input interface, e.g. View and its cooresponding ViewModel. Model validation should remain in the model.
 
 // TODO: DbSets (table representations) don't need to be publicly accessible, however the IQueryable interface is output from the methods which will be publicly accessible.
-// Furthermore those returns could be further refined to only return exactly the data needed by the viewmodel and could be facaded away
+// Furthermore those returns could be further refined to only return exactly the data needed by the viewmodel and could be facaded away. To this end, create a class to encapsulate DbContext, DbQueryHelper, and ViewModelCreator. ViewModelResource could act as not just a data struct but as the frontend for these objects. 
 

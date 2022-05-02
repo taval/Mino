@@ -4,14 +4,13 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Input;
-
-
+using ViewModelExtended.Model;
 
 namespace ViewModelExtended.ViewModel
 {
 	public class NoteTextViewModel : ViewModelBase
 	{
-		private IViewModelResource Resource { get; set; }
+		public IViewModelResource Resource { get; private set; }
 
 
 
@@ -26,7 +25,7 @@ namespace ViewModelExtended.ViewModel
 			}
 		}
 
-		private NoteListObjectViewModel? m_ContentData = null;
+		private NoteListObjectViewModel? m_ContentData;
 
 		#endregion
 
@@ -66,11 +65,59 @@ namespace ViewModelExtended.ViewModel
 
 
 
+		#region Commands
+
+		public ICommand ChangeTitleCommand {
+			get { return m_ChangeTitleCommand ?? throw new MissingCommandException(); }
+			set { if (m_ChangeTitleCommand == null) m_ChangeTitleCommand = value; }
+		}
+
+		private ICommand? m_ChangeTitleCommand;
+
+		public ICommand ChangeTextCommand {
+			get { return m_ChangeTextCommand ?? throw new MissingCommandException(); }
+			set { if (m_ChangeTextCommand == null) m_ChangeTextCommand = value; }
+		}
+
+		private ICommand? m_ChangeTextCommand;
+
+		#endregion
+
+
+
 		#region Constructor
 
 		public NoteTextViewModel (IViewModelResource resource)
 		{
 			Resource = resource;
+			Resource.CommandBuilder.MakeNoteText(this);
+			m_ContentData = null;
+		}
+
+		#endregion
+
+
+
+		#region Update
+
+		public void UpdateTitle ()
+		{
+			if (m_ContentData == null) return;
+
+			using (IDbContext dbContext = Resource.CreateDbContext()) {
+				dbContext.UpdateNote(m_ContentData.Model.Data, Title, null);
+				dbContext.Save();
+			}
+		}
+
+		public void UpdateText ()
+		{
+			if (m_ContentData == null) return;
+
+			using (IDbContext dbContext = Resource.CreateDbContext()) {
+				dbContext.UpdateNote(m_ContentData.Model.Data, null, Text);
+				dbContext.Save();
+			}
 		}
 
 		#endregion

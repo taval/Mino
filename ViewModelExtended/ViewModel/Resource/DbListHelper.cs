@@ -42,7 +42,44 @@ namespace ViewModelExtended.ViewModel
 				IListItem? previous = item.Previous;
 				IListItem? next = item.Next;
 
-				dbContext.UpdateNode((Node)current.Node, (Node?)previous?.Node, (Node?)next?.Node);
+				dbContext.UpdateNode(current.Node, previous?.Node, next?.Node);
+			}
+		}
+
+		/// <summary>
+		/// create the relationship between Notes in a linked list
+		/// assumes note begin/end nodes will correctly contain null upon immediate construction
+		/// </summary>
+		/// <param name="items"></param>
+		public static void LinkAll (IEnumerable<IListItem> items)
+		{
+			IListItem? prev = null;
+			IListItem? current = null;
+			IListItem? next = null;
+
+			foreach (IListItem note in items) {
+				// set first node
+				if (prev == null) {
+					prev = note;
+					continue;
+				}
+
+				// set second node
+				if (prev != null && current == null) {
+					current = note;
+					continue;
+				}
+
+				// connect subsequent nodes
+				if (prev != null && current != null) {
+					next = note;
+					prev.Next = current;
+					current.Previous = prev;
+					current.Next = next;
+					next.Previous = current;
+					prev = current;
+					current = next;
+				}
 			}
 		}
 	}

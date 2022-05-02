@@ -215,20 +215,23 @@ namespace ViewModelExtended.ViewModel
 		public GroupObjectViewModel CreateTempGroupObjectViewModel (IDbContext dbContext, Group groop, Note data)
 		{
 			// create basic data components
-			Node node = dbContext.CreateNode(null, null);
-			dbContext.Entry(node).State = Microsoft.EntityFrameworkCore.EntityState.Detached;
+			//Node node = dbContext.CreateNode(null, null);
+			Node node = dbContext.CreateNode(null, null, true);
+			//dbContext.Entry(node).State = Microsoft.EntityFrameworkCore.EntityState.Detached;
 
-			Timestamp timestamp = dbContext.CreateTimestamp();
-			dbContext.Entry(timestamp).State = Microsoft.EntityFrameworkCore.EntityState.Detached;
+			//Timestamp timestamp = dbContext.CreateTimestamp();
+			Timestamp timestamp = dbContext.CreateTimestamp(true);
+			//dbContext.Entry(timestamp).State = Microsoft.EntityFrameworkCore.EntityState.Detached;
 
 			// create root object
 			IObject root = dbContext.CreateObjectRoot(node, timestamp);
 
 			// create item context
-			GroupItem item = dbContext.CreateGroupItem(root, groop, data);
-			dbContext.Entry(item).State = Microsoft.EntityFrameworkCore.EntityState.Detached;
+			//GroupItem item = dbContext.CreateGroupItem(root, groop, data);
+			GroupItem item = dbContext.CreateGroupItem(root, groop, data, true);
+			//dbContext.Entry(item).State = Microsoft.EntityFrameworkCore.EntityState.Detached;
 
-			dbContext.Save();
+			//dbContext.Save();
 
 			// create model instance wrapper
 			GroupObject model = dbContext.CreateGroupObject(item, root, groop, data);

@@ -9,20 +9,67 @@ namespace ViewModelExtended.ViewModel
 {
 	public class NoteListObjectViewModel : ViewModelBase, IListItem, ISelectable
 	{
+		#region Model
+
 		public NoteListObject Model {
 			get { return m_Model; }
 		}
 
 		private readonly NoteListObject m_Model;
 
+		#endregion
+
+		#region IObject
+
+		public Node Node {
+			get { return Model.Node; }
+		}
+
+		public Timestamp Timestamp {
+			get { return Model.Timestamp; }
+		}
+
+		#endregion
+
+		#region IListItem
+
 		public int ItemId {
 			get { return Model.Item.Id; }
 			private set { Model.Item.Id = value; }
 		}
 
-		public INode Node {
-			get { return Model.Node; }
+		public IListItem? Previous {
+			get { return m_Previous; }
+			set {
+				Set(ref m_Previous, value);
+				NotifyPropertyChanged(nameof(PreviousId));
+			}
 		}
+
+		private IListItem? m_Previous;
+
+		public IListItem? Next {
+			get { return m_Next; }
+			set {
+				Set(ref m_Next, value);
+				NotifyPropertyChanged(nameof(NextId));
+			}
+		}
+
+		private IListItem? m_Next;
+
+		#endregion
+
+		#region ISelectable
+
+		public bool IsSelected {
+			get { return m_IsSelected; }
+			set { Set(ref m_IsSelected, value); }
+		}
+
+		private bool m_IsSelected;
+
+		#endregion
 
 		public int? PreviousId {
 			get { return Node.PreviousId; }
@@ -30,10 +77,6 @@ namespace ViewModelExtended.ViewModel
 
 		public int? NextId {
 			get { return Node.NextId; }
-		}
-
-		public Timestamp Timestamp {
-			get { return Model.Timestamp; }
 		}
 
 		public string Title {
@@ -55,20 +98,6 @@ namespace ViewModelExtended.ViewModel
 		}
 
 		private string m_Text;
-
-		// ViewModel link
-		public IListItem Value => this;
-		public IListItem? Previous { get; set; }
-		public IListItem? Next { get; set; }
-
-		public bool IsSelected {
-			get { return m_IsSelected; }
-			set { Set(ref m_IsSelected, value); }
-		}
-
-		private bool m_IsSelected;
-
-		//public int Idx => throw new NotImplementedException();
 
 		public NoteListObjectViewModel (NoteListObject model)
 		{

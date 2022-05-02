@@ -53,7 +53,7 @@ namespace ViewModelExtended.Command
 				new DataObject(
 					DataFormats.Serializable,
 					new Tuple<string, object>(listName, dataContext)),
-				DragDropEffects.Link);
+				DragDropEffects.Copy);
 		}
 	}
 }

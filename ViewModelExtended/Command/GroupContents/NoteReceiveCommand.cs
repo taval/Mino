@@ -44,7 +44,8 @@ namespace ViewModelExtended.Command
 
 			NoteListObjectViewModel dataContext = (NoteListObjectViewModel)data.Item2;
 
-			m_GroupContentsViewModel.ReceiveGroupNote(dataContext);
+			//m_GroupContentsViewModel.ReceiveGroupNote(dataContext);
+			m_GroupContentsViewModel.Incoming = dataContext;
 		}
 	}
 }

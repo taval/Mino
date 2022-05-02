@@ -34,11 +34,9 @@ namespace ViewModelExtended.ViewModel
 			//       all are dependent on the helpers and factories
 			//       while its fine here, the classes internally should account for the fail cases in a clean way because it is hard to track what happens otherwise. Much of this could be alleviated by utilizing the attached properties between commands to reduce the ViewModels' dependency on each other
 
-			// TODO: (optional fix, unnecessary in production) Node display is inaccurate. This problem could be more significent however in other areas where bubbling notifications is necessary. In this instance, it may require making Node a viewModelBase-derived object and listening to its changes - however, making some modifications to Previous and Next in the same viewmodel may suffice. See desktop doc prop_events.cs for details of solution.
-
 			// TODO: Testing only: truncating the table and resetting id auto-increment - remove this in production
 			using (IDbContext dbContext = CreateDbContext()) {
-				dbContext.Reset();
+				//dbContext.Reset();
 			}
 
 			DbListHelper = new DbListHelper();

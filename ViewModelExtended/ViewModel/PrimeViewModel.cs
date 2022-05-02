@@ -238,7 +238,7 @@ namespace ViewModelExtended.ViewModel
 		}
 
 		/// <summary>
-		/// selects anything other than the input, for if/when the input becomes unavailable
+		/// selects another object linked to the input, for if/when the input becomes unavailable
 		/// </summary>
 		/// <param name="input"></param>
 		private void AutoSelectFailSafe (NoteListObjectViewModel input)

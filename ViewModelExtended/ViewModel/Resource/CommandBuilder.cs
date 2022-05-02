@@ -42,6 +42,8 @@ namespace ViewModelExtended
 		{
 			//target.GroupTabsLoadCommand = new GroupTabsLoadCommand(target);
 
+			target.SwitchTabsCommand = new SwitchTabsCommand(target);
+
 			target.GroupSelectCommand = new GroupSelectCommand(target);
 			target.GroupCreateCommand = new GroupCreateCommand(target);
 			target.GroupDestroyCommand = new GroupDestroyCommand(target);
@@ -75,6 +77,12 @@ namespace ViewModelExtended
 		public void MakeMainWindow (MainWindowViewModel target)
 		{
 			target.CloseCommand = new MainWindowCloseCommand(target);
+		}
+
+		public void MakeNoteText (NoteTextViewModel target)
+		{
+			target.ChangeTitleCommand = new NoteChangeTitleCommand(target);
+			target.ChangeTextCommand = new NoteChangeTextCommand(target);
 		}
 	}
 }

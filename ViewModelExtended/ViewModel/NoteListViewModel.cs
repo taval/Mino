@@ -50,13 +50,6 @@ namespace ViewModelExtended.ViewModel
 
 		private ICommand? m_ReorderCommand;
 
-		//public ICommand PreselectCommand {
-		//	get { return m_PreselectCommand ?? throw new MissingCommandException(); }
-		//	set { if (m_PreselectCommand == null) m_PreselectCommand = value; }
-		//}
-
-		//private ICommand? m_PreselectCommand;
-
 		public ICommand PickupCommand {
 			get { return m_PickupCommand ?? throw new MissingCommandException(); }
 			set { if (m_PickupCommand == null) m_PickupCommand = value; }
@@ -152,25 +145,6 @@ namespace ViewModelExtended.ViewModel
 				return Resource.ViewModelCreator.CreateNoteListObjectViewModel(dbContext);
 			}
 		}
-
-		#endregion
-
-
-
-		#region Refresh
-
-		public void Refresh ()
-		{
-			Utility.RefreshListView(List.Items);
-		}
-
-		#endregion
-
-
-
-		#region Events
-
-
 
 		#endregion
 	}

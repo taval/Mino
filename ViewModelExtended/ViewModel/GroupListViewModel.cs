@@ -5,7 +5,13 @@ using System.Text;
 using System.Windows.Input;
 using ViewModelExtended.Model;
 
-// TODO: there should be allowed zero groups - zero groups would gray out the Contents tab
+// TODO: modified group data is not persisted
+
+// TODO: zero groups should gray out the Contents tab. An existing group should colorize it.
+
+// TODO: a group's title's ability to be edited should be prevented unless the same item that is being edited is the same one that is being selected.
+
+// TODO: related to above: double-clicking the group's title should only select an item upon the first double-click. Subsequent double-clicks should cause it to edit the text.
 
 namespace ViewModelExtended.ViewModel
 {
@@ -50,13 +56,6 @@ namespace ViewModelExtended.ViewModel
 		}
 
 		private ICommand? m_ReorderCommand;
-
-		//public ICommand PreselectCommand {
-		//	get { return m_PreselectCommand ?? throw new MissingCommandException(); }
-		//	set { if (m_PreselectCommand == null) m_PreselectCommand = value; }
-		//}
-
-		//private ICommand? m_PreselectCommand;
 
 		public ICommand PickupCommand {
 			get { return m_PickupCommand ?? throw new MissingCommandException(); }
@@ -153,17 +152,6 @@ namespace ViewModelExtended.ViewModel
 			using (IDbContext dbContext = Resource.CreateDbContext()) {
 				return Resource.ViewModelCreator.CreateGroupListObjectViewModel(dbContext);
 			}
-		}
-
-		#endregion
-
-
-
-		#region Refresh
-
-		public void Refresh ()
-		{
-			Utility.RefreshListView(List.Items);
 		}
 
 		#endregion
