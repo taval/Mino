@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
 using System.Text;
+using System.Windows;
 using System.Windows.Input;
 using ViewModelExtended.Model;
 
@@ -314,16 +315,18 @@ namespace ViewModelExtended.ViewModel
 
 
 
-		#region Methods: Create
+		//#region Methods: Create
 
-		public GroupObjectViewModel Create (Group groop, Note data)
-		{
-			using (IDbContext dbContext = Resource.CreateDbContext()) {
-				return Resource.ViewModelCreator.CreateGroupObjectViewModel(dbContext, groop, data);
-			}
-		}
+		//public GroupObjectViewModel Create (Group groop, Note data)
+		//{
+		//	using (IDbContext dbContext = Resource.CreateDbContext()) {
+		//		return Resource.ViewModelCreator.CreateGroupObjectViewModel(dbContext, groop, data);
+		//	}
+		//}
 
-		#endregion
+		//#endregion
+
+		
 
 
 
@@ -400,9 +403,15 @@ namespace ViewModelExtended.ViewModel
 				// associate a newly created GroupObject with the given temporary GroupObject
 				GroupObjectViewModel groupNote =
 					Resource.ViewModelCreator.CreateGroupObjectViewModel(dbContext, groop, note);
-				
-				// TODO: this would probably work and yet might be totally unnecessary if changes were saved to the db!
-				// TODO: Enter key should trigger commits
+
+				/* TODO: this callback does not do as intended (never called):
+				 * need to update the GroupContents GroupObjectViewModel associated with the Incoming note
+				 * the only references within GroupObjectViewModel are not PropertyChanged-aware.
+				 * GroupObjectViewModel needs a reference to its owner NoteListViewModel to allow notifications.
+				 * 
+				 * UPDATE: its called if the object is added as an association, the event just needs to be added to the insert and add creation methods as well.
+				 */
+
 				Incoming.PropertyChanged += (sender, e) =>
 				{
 					if (e.PropertyName == "Title") {

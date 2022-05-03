@@ -5,7 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using ViewModelExtended.ViewModel;
 
-
+// TODO: refactor: unwind this away from prime viewmodel - prime view should call this via attached property
 
 namespace ViewModelExtended.Command
 {

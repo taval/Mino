@@ -5,13 +5,9 @@ using System.Text;
 using System.Windows.Input;
 using ViewModelExtended.Model;
 
-// TODO: modified group data is not persisted
-
 // TODO: zero groups should gray out the Contents tab. An existing group should colorize it.
 
-// TODO: a group's title's ability to be edited should be prevented unless the same item that is being edited is the same one that is being selected.
-
-// TODO: related to above: double-clicking the group's title should only select an item upon the first double-click. Subsequent double-clicks should cause it to edit the text.
+// TODO: double-clicking the group's title should only select an item upon the first double-click. Subsequent double-clicks should cause it to edit the text.
 
 namespace ViewModelExtended.ViewModel
 {
@@ -63,6 +59,27 @@ namespace ViewModelExtended.ViewModel
 		}
 
 		private ICommand? m_PickupCommand;
+
+		public ICommand ChangeTitleCommand {
+			get { return m_ChangeTitleCommand ?? throw new MissingCommandException(); }
+			set { if (m_ChangeTitleCommand == null) m_ChangeTitleCommand = value; }
+		}
+
+		private ICommand? m_ChangeTitleCommand;
+
+		public ICommand ChangeColorCommand {
+			get { return m_ChangeColorCommand ?? throw new MissingCommandException(); }
+			set { if (m_ChangeColorCommand == null) m_ChangeColorCommand = value; }
+		}
+
+		private ICommand? m_ChangeColorCommand;
+
+		public ICommand HighlightCommand {
+			get { return m_HighlightCommand ?? throw new MissingCommandException(); }
+			set { if (m_HighlightCommand == null) m_HighlightCommand = value; }
+		}
+
+		private ICommand? m_HighlightCommand;
 
 		#endregion
 
@@ -151,6 +168,32 @@ namespace ViewModelExtended.ViewModel
 		{
 			using (IDbContext dbContext = Resource.CreateDbContext()) {
 				return Resource.ViewModelCreator.CreateGroupListObjectViewModel(dbContext);
+			}
+		}
+
+		#endregion
+
+
+
+		#region Update
+
+		public void UpdateTitle ()
+		{
+			if (m_Highlighted == null) return;
+
+			using (IDbContext dbContext = Resource.CreateDbContext()) {
+				dbContext.UpdateGroup(m_Highlighted.Model.Data, m_Highlighted.Title, null);
+				dbContext.Save();
+			}
+		}
+
+		public void UpdateColor ()
+		{
+			if (m_Highlighted == null) return;
+
+			using (IDbContext dbContext = Resource.CreateDbContext()) {
+				dbContext.UpdateGroup(m_Highlighted.Model.Data, m_Highlighted.Color, null);
+				dbContext.Save();
 			}
 		}
 

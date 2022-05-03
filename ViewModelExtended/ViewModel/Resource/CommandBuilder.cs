@@ -36,6 +36,11 @@ namespace ViewModelExtended
 			//target.RefreshCommand = new GroupRefreshCommand(target);
 			//target.PreselectCommand = new GroupPreselectCommand(target);
 			target.PickupCommand = new GroupPickupCommand(target);
+
+			target.ChangeTitleCommand = new GroupChangeTitleCommand(target);
+			target.ChangeColorCommand = new GroupChangeColorCommand(target);
+
+			target.HighlightCommand = new GroupHighlightCommand(target);
 		}
 
 		public void MakeGroupTabs (GroupTabsViewModel target)
