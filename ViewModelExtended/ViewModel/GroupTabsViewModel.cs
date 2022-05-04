@@ -325,15 +325,11 @@ namespace ViewModelExtended.ViewModel
 		{
 			GroupObjectViewModel? match = null;
 			IEnumerable <IListItem> visibleGroupObj = Resource.GroupContentsViewModel.Items.Where(
-				(item) => ((GroupObjectViewModel)item).Model.Data.Id == note.Id);
+				(item) => item.DataId == note.Id);
 
-			if (visibleGroupObj.Count() > 0) {
-				match = (GroupObjectViewModel?)visibleGroupObj?.First();
-			}
+			if (visibleGroupObj.Count() > 0) match = (GroupObjectViewModel?)visibleGroupObj?.First();
 
-			if (match != null) {
-				AutoSelectFailSafe(match);
-			}
+			if (match != null) AutoSelectFailSafe(match);
 
 			Resource.GroupContentsViewModel.RemoveGroupObjectsByNote(note);
 		}

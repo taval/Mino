@@ -176,17 +176,10 @@ namespace ViewModelExtended.ViewModel
 				// if Note already exists in Group, bail out
 				if (Items.Contains(value, new GroupNoteObjectEqualityComparer())) return;
 
-				using (IDbContext dbContext = Resource.CreateDbContext()) {
-					// create a temporary GroupObject with the given NoteListObject
-					GroupObjectViewModel groupNote =
-						Resource.ViewModelCreator.CreateTempGroupObjectViewModel(
-							dbContext, ContentData.Model.Data, value.Model.Data);
+				// create a temporary GroupObject with the given NoteListObject
+				TempGroupObjectViewModel = CreateTemp(ContentData.Model.Data, value.Model.Data);
 
-					TempGroupObjectViewModel = groupNote;
-
-					List.Add(groupNote);
-				}
-
+				// set the incoming note for further reference
 				m_Incoming = value;
 			}
 		}
@@ -255,9 +248,25 @@ namespace ViewModelExtended.ViewModel
 
 		#region Methods: Access
 
+		public NoteListObjectViewModel Find (GroupObjectViewModel input)
+		{
+			if (!Resource.NoteListViewModel.Items.Contains(input, new NoteGroupObjectEqualityComparer())) {
+				throw new Exception(
+					"No associated NoteListObjectViewModel exists for the GroupObjectViewModel to associate with");
+			};
+
+			return
+				(NoteListObjectViewModel)Resource.NoteListViewModel.Items.Where(
+					(item) => item.DataId == input.DataId).First();
+		}
+
 		public void Add (GroupObjectViewModel input)
 		{
 			if (m_List == null) return;
+
+			NoteListObjectViewModel match = Find(input);
+
+			SetPropertyChangedEventHandler(match, input);
 
 			List.Add(input);
 
@@ -270,6 +279,10 @@ namespace ViewModelExtended.ViewModel
 		public void Insert (GroupObjectViewModel? target, GroupObjectViewModel input)
 		{
 			if (m_List == null) return;
+
+			NoteListObjectViewModel match = Find(input);
+
+			SetPropertyChangedEventHandler(match, input);
 
 			List.Insert(target, input);
 
@@ -315,18 +328,64 @@ namespace ViewModelExtended.ViewModel
 
 
 
-		//#region Methods: Create
+		#region Methods: Create
 
-		//public GroupObjectViewModel Create (Group groop, Note data)
-		//{
-		//	using (IDbContext dbContext = Resource.CreateDbContext()) {
-		//		return Resource.ViewModelCreator.CreateGroupObjectViewModel(dbContext, groop, data);
-		//	}
-		//}
+		/// <summary>
+		/// create a temporary GroupObject with the given NoteListObject
+		/// </summary>
+		/// <param name="groop"></param>
+		/// <param name="data"></param>
+		/// <returns></returns>
+		public GroupObjectViewModel CreateTemp (Group groop, Note data)
+		{
+			using (IDbContext dbContext = Resource.CreateDbContext()) {
+				GroupObjectViewModel output =
+					Resource.ViewModelCreator.CreateTempGroupObjectViewModel(dbContext, groop, data);
 
-		//#endregion
+				NoteListObjectViewModel match = Find(output);
 
-		
+				SetPropertyChangedEventHandler(match, output);
+
+				List.Add(output);
+
+				return output;
+			}
+		}
+
+		/// <summary>
+		/// create a persistent GroupObject with the given NoteListObject
+		/// </summary>
+		/// <param name="groop"></param>
+		/// <param name="data"></param>
+		/// <returns></returns>
+		public GroupObjectViewModel Create (Group groop, Note data)
+		{
+			using (IDbContext dbContext = Resource.CreateDbContext()) {
+				GroupObjectViewModel output =
+					Resource.ViewModelCreator.CreateGroupObjectViewModel(dbContext, groop, data);
+
+				Add(output);
+
+				return output;
+			}
+		}
+
+		public void SetPropertyChangedEventHandler (NoteListObjectViewModel subject, GroupObjectViewModel observer)
+		{
+			subject.PropertyChanged += (sender, e) =>
+			{
+				if (e.PropertyName == "Title") {
+					string _ = observer.Title;
+				}
+				else if (e.PropertyName == "Text") {
+					string _ = observer.Text;
+				}
+			};
+		}
+
+		#endregion
+
+
 
 
 
@@ -393,40 +452,18 @@ namespace ViewModelExtended.ViewModel
 		{
 			if (ContentData == null || Incoming == null || TempGroupObjectViewModel == null) return;
 
-			using (IDbContext dbContext = Resource.CreateDbContext()) {
-				// remove the temp from list
-				List.Remove(TempGroupObjectViewModel);
+			// remove the temp from list
+			List.Remove(TempGroupObjectViewModel);
 
-				Group groop = ContentData.Model.Data;
-				Note note = TempGroupObjectViewModel.Model.Data;
+			Group groop = ContentData.Model.Data;
+			Note note = TempGroupObjectViewModel.Model.Data;
 
-				// associate a newly created GroupObject with the given temporary GroupObject
-				GroupObjectViewModel groupNote =
-					Resource.ViewModelCreator.CreateGroupObjectViewModel(dbContext, groop, note);
+			// associate a newly created GroupObject with the given temporary GroupObject
+			GroupObjectViewModel groupNote = Create(groop, note);
 
-				/* TODO: this callback does not do as intended (never called):
-				 * need to update the GroupContents GroupObjectViewModel associated with the Incoming note
-				 * the only references within GroupObjectViewModel are not PropertyChanged-aware.
-				 * GroupObjectViewModel needs a reference to its owner NoteListViewModel to allow notifications.
-				 * 
-				 * UPDATE: its called if the object is added as an association, the event just needs to be added to the insert and add creation methods as well.
-				 */
-
-				Incoming.PropertyChanged += (sender, e) =>
-				{
-					if (e.PropertyName == "Title") {
-						string _ = groupNote.Title;
-					}
-					else if (e.PropertyName == "Text") {
-						string _ = groupNote.Text;
-					}
-				};
-				// add the GroupObject to the contents list
-				TempGroupObjectViewModel = null;
-				Incoming = null;
-
-				Add(groupNote);
-			}
+			// add the GroupObject to the contents list
+			TempGroupObjectViewModel = null;
+			Incoming = null;
 		}
 
 		/// <summary>
@@ -504,7 +541,7 @@ namespace ViewModelExtended.ViewModel
 
 					// select bound group object matching the unbound group object in the original query
 					IEnumerable<IListItem> match =
-						list.Items.Where((n) => ((GroupObjectViewModel)n).Model.Data.Id == note.Id);
+						list.Items.Where((n) => n.DataId == note.Id);
 
 					// remove the bound group object from the output list
 					if (match.Count() > 0) {
@@ -538,3 +575,19 @@ namespace ViewModelExtended.ViewModel
 		#endregion
 	}
 }
+
+
+
+/* TODO: this callback does not do as intended:
+ * need to update the GroupContents GroupObjectViewModel associated with the Incoming note
+ * the only references within GroupObjectViewModel are not PropertyChanged-aware.
+ * GroupObjectViewModel needs a reference to its owner NoteListViewModel to allow notifications.
+ * UPDATE: the event handler association should be declared in DbQueryHelper (loses type info after insertion?)
+ */
+// set event handlers for note association
+//foreach (IListItem item in list.Items) {
+//	GroupObjectViewModel observer = (GroupObjectViewModel)item;
+//	NoteListObjectViewModel subject = Find(observer);
+
+//	SetPropertyChangedEventHandler(subject, observer);
+//}

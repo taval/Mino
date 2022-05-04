@@ -35,7 +35,10 @@ namespace ViewModelExtended.ViewModel
 
 		public int ItemId {
 			get { return Model.Item.Id; }
-			private set { Model.Item.Id = value; }
+		}
+
+		public int DataId {
+			get { return Model.Data.Id; }
 		}
 
 		public IListItem? Previous {

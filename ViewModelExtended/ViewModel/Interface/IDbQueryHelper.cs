@@ -12,9 +12,7 @@ namespace ViewModelExtended.ViewModel
 	{
 		public IQueryable<IListItem> GetAllNoteListObjects (IDbContext dbContext);
 		public IQueryable<IListItem> GetAllGroupListObjects (IDbContext dbContext);
-		public IQueryable<IListItem> GetAllGroupObjects (IDbContext dbContext);
 		public IQueryable<IListItem> GetGroupObjectsInGroup (IDbContext dbContext, Group groop);
-		public IQueryable<IListItem> GetGroupObjectByNodeId (IDbContext dbContext, Group groop, int? nodeId);
 		public IQueryable<IListItem> GetGroupObjectsByNote (IDbContext dbContext, Note note);
 		public void GetSortedListObjects (IQueryable<IListItem> source, IObservableList target);
 	}

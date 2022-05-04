@@ -15,6 +15,8 @@ namespace ViewModelExtended.ViewModel
 	{
 		public int ItemId { get; }
 
+		public int DataId { get; }
+
 		//public INode Node { get; } // TODO: deprecate
 
 		/// <summary>

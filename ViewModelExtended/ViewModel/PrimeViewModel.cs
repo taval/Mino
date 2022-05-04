@@ -294,6 +294,20 @@ namespace ViewModelExtended.ViewModel
 		}
 	}
 
+	internal class NoteGroupObjectEqualityComparer : IEqualityComparer<IListItem>
+	{
+		public bool Equals (IListItem? lhs, IListItem? rhs)
+		{
+			return ((NoteListObjectViewModel?)lhs)?.Model.Data.Id == ((GroupObjectViewModel?)rhs)?.Model.Data.Id;
+
+		}
+
+		public int GetHashCode ([DisallowNull] IListItem obj)
+		{
+			return obj.GetHashCode();
+		}
+	}
+
 	internal class GroupObjectEqualityComparer : IEqualityComparer<IListItem>
 	{
 		public bool Equals (IListItem? lhs, IListItem? rhs)
