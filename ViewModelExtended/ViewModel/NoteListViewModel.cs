@@ -17,9 +17,9 @@ namespace ViewModelExtended.ViewModel
 		/// <summary>
 		/// the base ListViewModel
 		/// </summary>
-		private IObservableList List { get; set; }
+		private IObservableList<NoteListObjectViewModel> List { get; set; }
 
-		public IEnumerable<IListItem> Items {
+		public IEnumerable<NoteListObjectViewModel> Items {
 			get { return List.Items; }
 		}
 
@@ -68,11 +68,11 @@ namespace ViewModelExtended.ViewModel
 			Resource = resource;
 			Resource.CommandBuilder.MakeNoteList(this);
 			m_Highlighted = null;
-			List = Resource.ViewModelCreator.CreateList();
+			List = Resource.ViewModelCreator.CreateList<NoteListObjectViewModel>();
 
 			using (IDbContext dbContext = Resource.CreateDbContext()) {
-				IQueryable<IListItem> unsortedObjects = Resource.DbQueryHelper.GetAllNoteListObjects(dbContext);
-				Resource.DbQueryHelper.GetSortedListObjects(unsortedObjects, List);
+				IQueryable<NoteListObjectViewModel> unsortedObjects = Resource.DbQueryHelper.GetAllNoteListObjects(dbContext);
+				Resource.DbQueryHelper.GetSortedListObjects(unsortedObjects.ToList(), List);
 			}
 		}
 
@@ -130,7 +130,19 @@ namespace ViewModelExtended.ViewModel
 
 		public void Clear ()
 		{
+			RemoveAllEventHandlers();
 			List.Clear();
+		}
+
+		#endregion
+
+
+
+		#region Query
+
+		public NoteListObjectViewModel Find (Func<NoteListObjectViewModel, bool> predicate)
+		{
+			return List.Find(predicate);
 		}
 
 		#endregion

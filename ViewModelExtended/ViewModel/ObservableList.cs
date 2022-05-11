@@ -8,13 +8,13 @@ using System.Text;
 
 namespace ViewModelExtended.ViewModel
 {
-	public class ObservableList : IObservableList
+	public class ObservableList<T> : IObservableList<T> where T : IListItem
 	{
 		#region Collection
 
-		protected readonly ObservableCollection<IListItem> m_Observables = new ObservableCollection<IListItem>();
+		protected readonly ObservableCollection<T> m_Observables = new ObservableCollection<T>();
 
-		public IEnumerable<IListItem> Items {
+		public IEnumerable<T> Items {
 			get { return m_Observables; }
 		}
 
@@ -28,7 +28,7 @@ namespace ViewModelExtended.ViewModel
 
 		#region Methods
 
-		public void Add (IListItem input)
+		public void Add (T input)
 		{
 			if (Items.Contains(input)) {
 				return;
@@ -48,7 +48,7 @@ namespace ViewModelExtended.ViewModel
 			m_Observables.Add(input);
 		}
 
-		public void Insert (IListItem? target, IListItem input)
+		public void Insert (IListItem? target, T input)
 		{
 			if (Items.Contains(input)) {
 				return;
@@ -87,8 +87,8 @@ namespace ViewModelExtended.ViewModel
 				return;
 			}
 
-			int oldIdx = m_Observables.IndexOf(source);
-			int newIdx = m_Observables.IndexOf(target);
+			int oldIdx = m_Observables.IndexOf((T)source);
+			int newIdx = m_Observables.IndexOf((T)target);
 
 			IListItem? lhs = (oldIdx < newIdx) ? source.Previous : target.Previous;
 			IListItem? rhs = (oldIdx < newIdx) ? target.Next : source.Next;
@@ -139,7 +139,7 @@ namespace ViewModelExtended.ViewModel
 				oldNext.Previous = input.Previous;
 			}
 
-			m_Observables.Remove(input);
+			m_Observables.Remove((T)input);
 		}
 
 		public int Index (IListItem input)
@@ -150,6 +150,13 @@ namespace ViewModelExtended.ViewModel
 		public void Clear ()
 		{
 			m_Observables.Clear();
+		}
+
+		public T Find (Func<T, bool> predicate)
+		{
+			IEnumerable<T> match = m_Observables.Where(predicate);
+			if (!match.Any()) throw new Exception($"no matching { nameof(T) } records found");
+			return match.First();
 		}
 
 		//public void LinkAll ()

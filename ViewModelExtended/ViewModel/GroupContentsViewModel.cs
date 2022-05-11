@@ -7,7 +7,7 @@ using System.Windows;
 using System.Windows.Input;
 using ViewModelExtended.Model;
 
-// TODO: the note text in the GroupContentsView is not updated when it is edited in the NoteTextView.
+
 
 namespace ViewModelExtended.ViewModel
 {
@@ -32,7 +32,10 @@ namespace ViewModelExtended.ViewModel
 		/// <summary>
 		/// A dictionary of GroupContents lists
 		/// </summary>
-		private Dictionary<Group, IObservableList> Lists { get; set; }
+		private Dictionary<Group, IObservableList<GroupObjectViewModel>> Lists { get; set; }
+
+		private Dictionary<int, KeyValuePair<NoteListObjectViewModel, PropertyChangedEventHandler>>
+			Delegates { get; set; }
 
 		#endregion
 
@@ -56,7 +59,7 @@ namespace ViewModelExtended.ViewModel
 				HasGroup = true;
 
 				// populate the GroupContents list
-				IObservableList? list = null;
+				IObservableList<GroupObjectViewModel>? list = null;
 				Group groop = value.Model.Data;
 
 				using (IDbContext dbContext = Resource.CreateDbContext()) {
@@ -80,21 +83,21 @@ namespace ViewModelExtended.ViewModel
 		/// <summary>
 		/// the base ListViewModel
 		/// </summary>
-		private IObservableList List {
+		private IObservableList<GroupObjectViewModel> List {
 			get {
-				if (m_List == null) return Resource.ViewModelCreator.CreateList();
+				if (m_List == null) return Resource.ViewModelCreator.CreateList<GroupObjectViewModel>();
 				//if (m_List == null) throw new NullReferenceException("GroupObject list not set");
 
 				return m_List;
 			}
 		}
 
-		private IObservableList? m_List;
+		private IObservableList<GroupObjectViewModel>? m_List;
 
 		/// <summary>
 		/// the public enumerable interface for a list of GroupObjects
 		/// </summary>
-		public IEnumerable<IListItem> Items {
+		public IEnumerable<GroupObjectViewModel> Items {
 			get { return List.Items; }
 		}
 
@@ -174,7 +177,7 @@ namespace ViewModelExtended.ViewModel
 				if (ContentData == null) return;
 
 				// if Note already exists in Group, bail out
-				if (Items.Contains(value, new GroupNoteObjectEqualityComparer())) return;
+				if (Items.Contains(value, new ListDataEqualityComparer())) return;
 
 				// create a temporary GroupObject with the given NoteListObject
 				TempGroupObjectViewModel = CreateTemp(ContentData.Model.Data, value.Model.Data);
@@ -239,7 +242,25 @@ namespace ViewModelExtended.ViewModel
 			m_ContentData = null;
 			m_List = null;
 			m_Highlighted = null;
-			Lists = new Dictionary<Group, IObservableList>();
+			Lists = new Dictionary<Group, IObservableList<GroupObjectViewModel>>();
+			Delegates = new Dictionary<
+				int, KeyValuePair<NoteListObjectViewModel, PropertyChangedEventHandler>>();
+		}
+
+		#endregion
+
+
+
+		#region Query
+
+		public GroupObjectViewModel Find (Func<GroupObjectViewModel, bool> predicate)
+		{
+			return List.Find(predicate);
+		}
+
+		public NoteListObjectViewModel FindNote (GroupObjectViewModel input)
+		{
+			return Resource.NoteListViewModel.Find((noteListViewModel) => noteListViewModel.DataId == input.DataId);
 		}
 
 		#endregion
@@ -248,23 +269,11 @@ namespace ViewModelExtended.ViewModel
 
 		#region Methods: Access
 
-		public NoteListObjectViewModel Find (GroupObjectViewModel input)
-		{
-			if (!Resource.NoteListViewModel.Items.Contains(input, new NoteGroupObjectEqualityComparer())) {
-				throw new Exception(
-					"No associated NoteListObjectViewModel exists for the GroupObjectViewModel to associate with");
-			};
-
-			return
-				(NoteListObjectViewModel)Resource.NoteListViewModel.Items.Where(
-					(item) => item.DataId == input.DataId).First();
-		}
-
 		public void Add (GroupObjectViewModel input)
 		{
 			if (m_List == null) return;
 
-			NoteListObjectViewModel match = Find(input);
+			NoteListObjectViewModel match = FindNote(input);
 
 			SetPropertyChangedEventHandler(match, input);
 
@@ -280,7 +289,7 @@ namespace ViewModelExtended.ViewModel
 		{
 			if (m_List == null) return;
 
-			NoteListObjectViewModel match = Find(input);
+			NoteListObjectViewModel match = FindNote(input);
 
 			SetPropertyChangedEventHandler(match, input);
 
@@ -308,6 +317,7 @@ namespace ViewModelExtended.ViewModel
 		{
 			if (m_List == null) return;
 
+			UnsetPropertyChangedEventHandler(input);
 			List.Remove(input);
 
 			using (IDbContext dbContext = Resource.CreateDbContext()) {
@@ -342,16 +352,15 @@ namespace ViewModelExtended.ViewModel
 				GroupObjectViewModel output =
 					Resource.ViewModelCreator.CreateTempGroupObjectViewModel(dbContext, groop, data);
 
-				NoteListObjectViewModel match = Find(output);
-
-				SetPropertyChangedEventHandler(match, output);
-
 				List.Add(output);
 
 				return output;
 			}
 		}
 
+		//TODO: a Read method should have similar signature to Create but use a full NoteListObjectViewModel, which will:
+		// a) passes its Note model to CreateGroupObject
+		// b) assigns GroupObject's PropertyChanged event handler to NoteListViewModel
 		/// <summary>
 		/// create a persistent GroupObject with the given NoteListObject
 		/// </summary>
@@ -372,7 +381,11 @@ namespace ViewModelExtended.ViewModel
 
 		public void SetPropertyChangedEventHandler (NoteListObjectViewModel subject, GroupObjectViewModel observer)
 		{
-			subject.PropertyChanged += (sender, e) =>
+			int observerId = observer.ItemId;
+
+			if (Delegates.ContainsKey(observerId)) return;
+
+			PropertyChangedEventHandler handler = (sender, e) =>
 			{
 				if (e.PropertyName == "Title") {
 					string _ = observer.Title;
@@ -380,7 +393,32 @@ namespace ViewModelExtended.ViewModel
 				else if (e.PropertyName == "Text") {
 					string _ = observer.Text;
 				}
+				MessageBox.Show(
+					$"GroupObject: { observer.ItemId }\n" +
+					$"\tTitle: { observer.Title }\n" +
+					$"\tText: { observer.Text }\n" +
+					$"Note: { subject.ItemId }\n" +
+					$"\tTitle: { subject.Title }\n" +
+					$"\tText: { subject.Text }");
 			};
+
+			subject.PropertyChanged += handler;
+
+			Delegates.Add(
+				observerId, new KeyValuePair<NoteListObjectViewModel, PropertyChangedEventHandler>(subject, handler));
+
+			MessageBox.Show("delegate was added to NoteListViewModel");
+		}
+
+		public void UnsetPropertyChangedEventHandler (GroupObjectViewModel observer)
+		{
+			int observerId = observer.ItemId;
+			NoteListObjectViewModel subject = Delegates[observerId].Key;
+			PropertyChangedEventHandler handler = Delegates[observerId].Value;
+
+			subject.PropertyChanged -= handler;
+
+			Delegates.Remove(observerId);
 		}
 
 		#endregion
@@ -391,11 +429,48 @@ namespace ViewModelExtended.ViewModel
 
 		#region Methods: Clear
 
-		public void Clear ()
+		/// <summary>
+		/// destroy the selected Group's contents and the associated list
+		/// </summary>
+		public void ClearList ()
 		{
 			if (m_List == null) return;
 
-			List.Clear();
+			Group key = Lists.Where((list) => list.Value == m_List).Single().Key;
+
+			foreach (GroupObjectViewModel obj in m_List.Items) Remove(obj);
+
+			Lists.Remove(key);
+			//List.Clear();
+		}
+
+		/// <summary>
+		/// destroy a Group's contents and the associated list
+		/// </summary>
+		/// <param name="groop"></param>
+		public void ClearList (Group groop)
+		{
+			if (!Lists.ContainsKey(groop)) return;
+
+			IObservableList<GroupObjectViewModel> groupObjs = Lists[groop];
+
+			foreach (GroupObjectViewModel obj in groupObjs.Items) Remove(obj);
+
+			Lists.Remove(groop);
+		}
+
+		/// <summary>
+		/// clears all lists
+		/// </summary>
+		public void Clear ()
+		{
+			foreach (KeyValuePair<Group, IObservableList<GroupObjectViewModel>> groupObjs in Lists) {
+				foreach (GroupObjectViewModel obj in groupObjs.Value.Items) Remove(obj);
+
+				Lists.Remove(groupObjs.Key);
+			}
+
+			RemoveAllEventHandlers();
 		}
 
 		#endregion
@@ -472,11 +547,34 @@ namespace ViewModelExtended.ViewModel
 		/// <param name="dbContext"></param>
 		/// <param name="list"></param>
 		/// <param name="groop"></param>
-		private void PopulateGroup (IDbContext dbContext, IObservableList list, Group groop)
+		private void PopulateGroup (IDbContext dbContext, IObservableList<GroupObjectViewModel> list, Group groop)
 		{
-			IQueryable<IListItem> unsortedObjects = Resource.DbQueryHelper.GetGroupObjectsInGroup(dbContext, groop);
+			IQueryable<GroupObjectViewModel> unsortedObjects = Resource.DbQueryHelper.GetGroupObjectsInGroup(dbContext, groop);
+			IList<GroupObjectViewModel> tempList = unsortedObjects.ToList();
 
-			Resource.DbQueryHelper.GetSortedListObjects(unsortedObjects, list);
+			foreach (GroupObjectViewModel observer in tempList) {
+				NoteListObjectViewModel subject = FindNote(observer);
+
+				SetPropertyChangedEventHandler(subject, observer);
+			}
+
+			Resource.DbQueryHelper.GetSortedListObjects(tempList, list);
+
+			// TODO: for loaded GroupObjects, the note text in the GroupContentsView is not updated when it is edited in the NoteTextView.
+			//       inexplicably, the property changed handler on a NoteListViewModel for a GroupObjectViewModel loaded from the database never touches the
+			//       GroupObjectViewModel at any layer, in any order, despite the fact that it is definitely firing.
+			//       GroupObjects added from the NoteList in-session via drag-drop work fine.
+			//       some notes:
+			//			- NoteListObjectViewModel must already exist in the NoteListViewModel, which means its query has already run.
+			//			  trying to load NoteListObjectVM in GroupObjectVM query will fail for not being directly tied to existing NoteListVM objects
+			//            (for not existing at the query's runtime)
+
+			//			- implementing IObservable as an IEnumerable fails miserably, breaking everything. A problem with ObservableCollection, perhaps? since custom implementation of GetEnumerator has the same problem, would seem unlikely.
+
+			// possible untried solution: 
+			// UPDATE: is it because the Note object loaded in the query also has no relation to the Note object owned by NoteListObjectViewModel? ayup.
+			//         here is where to reconstitute an amalgamation of the query, a call to Read method which will create the GroupObject and GroupObjectViewModel
+
 		}
 
 		#endregion
@@ -490,15 +588,18 @@ namespace ViewModelExtended.ViewModel
 		/// </summary>
 		/// <param name="groop"></param>
 		/// <returns>the GroupObject list associated with the given Group key</returns>
-		private IObservableList GetListByGroupKey (Group groop)
+		private IObservableList<GroupObjectViewModel> GetListByGroupKey (Group groop)
 		{
-			IEnumerable<KeyValuePair<Group, IObservableList>> selectedList = Lists.Where((kv) => kv.Key == groop);
+			IEnumerable<KeyValuePair<Group, IObservableList<GroupObjectViewModel>>> selectedList =
+				Lists.Where((kv) => kv.Key == groop);
 
-			if (selectedList.Count() > 0) {
-				return selectedList.First().Value;
+			if (selectedList.Any()) {
+				return selectedList.Single().Value;
 			}
 			else {
-				IObservableList list = Resource.ViewModelCreator.CreateList();
+				IObservableList<GroupObjectViewModel> list =
+					Resource.ViewModelCreator.CreateList<GroupObjectViewModel>();
+
 				Lists.Add(groop, list);
 				return list;
 			}
@@ -513,11 +614,12 @@ namespace ViewModelExtended.ViewModel
 		{
 			using (IDbContext dbContext = Resource.CreateDbContext()) {
 				// get the unbound data objects
-				IQueryable<IListItem> groupObjectsByNote = Resource.DbQueryHelper.GetGroupObjectsByNote(dbContext, note);
+				IQueryable<GroupObjectViewModel> groupObjectsByNote =
+					Resource.DbQueryHelper.GetGroupObjectsByNote(dbContext, note);
 
 				// for each group represented in original query (can just iterate over the query since one group exists per group object)
 				foreach (GroupObjectViewModel obj in groupObjectsByNote) {
-					IObservableList? list = null;
+					IObservableList<GroupObjectViewModel>? list = null;
 
 					// check if temp list is same as displayed list to prevent populating same list twice
 					// select the list of the particular group or the display group
@@ -540,12 +642,12 @@ namespace ViewModelExtended.ViewModel
 					}
 
 					// select bound group object matching the unbound group object in the original query
-					IEnumerable<IListItem> match =
+					IEnumerable<GroupObjectViewModel> match =
 						list.Items.Where((n) => n.DataId == note.Id);
 
 					// remove the bound group object from the output list
-					if (match.Count() > 0) {
-						GroupObjectViewModel item = (GroupObjectViewModel)match.First();
+					if (match.Any()) {
+						GroupObjectViewModel item = match.Single();
 
 						list.Remove(item);
 						Resource.DbListHelper.UpdateAfterRemove(dbContext, item);
@@ -557,37 +659,6 @@ namespace ViewModelExtended.ViewModel
 			}
 		}
 
-		/// <summary>
-		/// destroy a Group's contents and the associated list
-		/// </summary>
-		/// <param name="groop"></param>
-		public void ClearGroupContents (Group groop)
-		{
-			if (!Lists.ContainsKey(groop)) return;
-
-			IObservableList groupObjs = Lists[groop];
-
-			foreach (GroupObjectViewModel obj in groupObjs.Items) Remove(obj);
-
-			Lists.Remove(groop);
-		}
-
 		#endregion
 	}
 }
-
-
-
-/* TODO: this callback does not do as intended:
- * need to update the GroupContents GroupObjectViewModel associated with the Incoming note
- * the only references within GroupObjectViewModel are not PropertyChanged-aware.
- * GroupObjectViewModel needs a reference to its owner NoteListViewModel to allow notifications.
- * UPDATE: the event handler association should be declared in DbQueryHelper (loses type info after insertion?)
- */
-// set event handlers for note association
-//foreach (IListItem item in list.Items) {
-//	GroupObjectViewModel observer = (GroupObjectViewModel)item;
-//	NoteListObjectViewModel subject = Find(observer);
-
-//	SetPropertyChangedEventHandler(subject, observer);
-//}

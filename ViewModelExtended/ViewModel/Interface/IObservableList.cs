@@ -6,25 +6,25 @@ using System.Text;
 
 namespace ViewModelExtended.ViewModel
 {
-	public interface IObservableList
+	public interface IObservableList<T> where T : IListItem
 	{
 		/// <summary>
 		/// the enumerable list of items
 		/// </summary>
-		public IEnumerable<IListItem> Items { get; }
+		public IEnumerable<T> Items { get; }
 
 		/// <summary>
 		/// add a new input to the end of the collection
 		/// </summary>
 		/// <param name="item"></param>
-		public void Add (IListItem item);
+		public void Add (T item);
 
 		/// <summary>
 		/// insert a new input at the target's position or default position
 		/// </summary>
 		/// <param name="target"></param>
 		/// <param name="input"></param>
-		public void Insert (IListItem? target, IListItem input);
+		public void Insert (IListItem? target, T input);
 
 		/// <summary>
 		/// place the existing source at the target's position
@@ -50,5 +50,7 @@ namespace ViewModelExtended.ViewModel
 		/// empty the list
 		/// </summary>
 		public void Clear ();
+
+		public T Find (Func<T, bool> predicate);
 	}
 }

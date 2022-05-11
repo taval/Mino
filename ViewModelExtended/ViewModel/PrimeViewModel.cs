@@ -125,7 +125,7 @@ namespace ViewModelExtended.ViewModel
 			}
 
 			// select the first note
-			SelectedNoteViewModel = Resource.NoteListViewModel.Items.First() as NoteListObjectViewModel;
+			SelectedNoteViewModel = Resource.NoteListViewModel.Items.First();
 			if (SelectedNoteViewModel != null) {
 				SelectNote(SelectedNoteViewModel);
 			}
@@ -277,54 +277,4 @@ namespace ViewModelExtended.ViewModel
 
 		#endregion
 	}
-
-
-
-	internal class GroupNoteObjectEqualityComparer : IEqualityComparer<IListItem>
-	{
-		public bool Equals (IListItem? lhs, IListItem? rhs)
-		{
-			return ((GroupObjectViewModel?)lhs)?.Model.Data.Id == ((NoteListObjectViewModel?)rhs)?.Model.Data.Id;
-
-		}
-
-		public int GetHashCode ([DisallowNull] IListItem obj)
-		{
-			return obj.GetHashCode();
-		}
-	}
-
-	internal class NoteGroupObjectEqualityComparer : IEqualityComparer<IListItem>
-	{
-		public bool Equals (IListItem? lhs, IListItem? rhs)
-		{
-			return ((NoteListObjectViewModel?)lhs)?.Model.Data.Id == ((GroupObjectViewModel?)rhs)?.Model.Data.Id;
-
-		}
-
-		public int GetHashCode ([DisallowNull] IListItem obj)
-		{
-			return obj.GetHashCode();
-		}
-	}
-
-	internal class GroupObjectEqualityComparer : IEqualityComparer<IListItem>
-	{
-		public bool Equals (IListItem? lhs, IListItem? rhs)
-		{
-			return ((GroupObjectViewModel?)lhs)?.Model.Data.Id == ((GroupObjectViewModel?)rhs)?.Model.Data.Id;
-
-		}
-
-		public int GetHashCode ([DisallowNull] IListItem obj)
-		{
-			return obj.GetHashCode();
-		}
-	}
-
-
 }
-
-
-
-

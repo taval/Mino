@@ -149,7 +149,7 @@ namespace ViewModelExtended.ViewModel
 			if (Resource.GroupListViewModel.Items.Count() == 0) return;
 
 			// select the first group
-			SelectedGroupViewModel = Resource.GroupListViewModel.Items.First() as GroupListObjectViewModel;
+			SelectedGroupViewModel = Resource.GroupListViewModel.Items.First();
 
 			if (SelectedGroupViewModel != null) {
 				SelectGroup(SelectedGroupViewModel);
@@ -161,7 +161,7 @@ namespace ViewModelExtended.ViewModel
 			// select the first note in the selected group
 			if (Resource.GroupContentsViewModel.Items.Count() == 0) return;
 
-			SelectedGroupNoteViewModel = Resource.GroupContentsViewModel.Items.First() as GroupObjectViewModel;
+			SelectedGroupNoteViewModel = Resource.GroupContentsViewModel.Items.First();
 
 			if (SelectedGroupNoteViewModel != null) {
 				SelectGroupNote(SelectedGroupNoteViewModel);
@@ -274,7 +274,7 @@ namespace ViewModelExtended.ViewModel
 			}
 
 			// destroy the GroupObjects (dependent Notes) in the group
-			Resource.GroupContentsViewModel.ClearGroupContents(input.Model.Data);
+			Resource.GroupContentsViewModel.ClearList(input.Model.Data);
 
 			// destroy the Group
 			Resource.GroupListViewModel.Remove(input);
@@ -324,10 +324,10 @@ namespace ViewModelExtended.ViewModel
 		public void RemoveGroupObjectsByNote (Note note)
 		{
 			GroupObjectViewModel? match = null;
-			IEnumerable <IListItem> visibleGroupObj = Resource.GroupContentsViewModel.Items.Where(
+			IEnumerable<GroupObjectViewModel> visibleGroupObj = Resource.GroupContentsViewModel.Items.Where(
 				(item) => item.DataId == note.Id);
 
-			if (visibleGroupObj.Count() > 0) match = (GroupObjectViewModel?)visibleGroupObj?.First();
+			if (visibleGroupObj.Any()) match = visibleGroupObj?.Single();
 
 			if (match != null) AutoSelectFailSafe(match);
 

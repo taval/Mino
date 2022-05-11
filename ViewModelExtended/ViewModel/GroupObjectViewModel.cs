@@ -19,6 +19,8 @@ namespace ViewModelExtended.ViewModel
 
 		#endregion
 
+
+
 		#region IObject
 
 		public Node Node {
@@ -30,6 +32,8 @@ namespace ViewModelExtended.ViewModel
 		}
 
 		#endregion
+
+
 
 		#region IListItem
 
@@ -46,6 +50,8 @@ namespace ViewModelExtended.ViewModel
 
 		#endregion
 
+
+
 		#region ISelectable
 
 		public bool IsSelected {
@@ -57,13 +63,9 @@ namespace ViewModelExtended.ViewModel
 
 		#endregion
 
-		//public int? PreviousId {
-		//	get { return Node.PreviousId; }
-		//}
 
-		//public int? NextId {
-		//	get { return Node.NextId; }
-		//}
+
+		#region Model Properties
 
 		public string Title {
 			get {
@@ -85,7 +87,11 @@ namespace ViewModelExtended.ViewModel
 
 		private string m_Text;
 
-		//public int Idx => throw new NotImplementedException();
+		#endregion
+
+
+
+		#region constructor
 
 		public GroupObjectViewModel (GroupObject model)
 		{
@@ -98,5 +104,7 @@ namespace ViewModelExtended.ViewModel
 			m_Text = Model.Data.Text;
 			Text = m_Text;
 		}
+
+		#endregion
 	}
 }

@@ -28,6 +28,17 @@ namespace ViewModelExtended.ViewModel
 
 
 
+		#region List
+
+		public IObservableList<T> CreateList<T> () where T : IListItem
+		{
+			return new ObservableList<T>();
+		}
+
+		#endregion
+
+
+
 		#region NoteList
 
 		public NoteListViewModel CreateNoteListViewModel ()
@@ -338,11 +349,6 @@ namespace ViewModelExtended.ViewModel
 		{
 			dbContext.DeleteGroupObject(target.Model);
 			dbContext.Save();
-		}
-
-		public IObservableList CreateList ()
-		{
-			return new ObservableList();
 		}
 
 		#endregion

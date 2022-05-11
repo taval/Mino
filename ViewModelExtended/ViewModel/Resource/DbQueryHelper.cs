@@ -27,7 +27,7 @@ namespace ViewModelExtended.ViewModel
 
 		#region NoteList
 
-		public IQueryable<IListItem> GetAllNoteListObjects (IDbContext dbContext)
+		public IQueryable<NoteListObjectViewModel> GetAllNoteListObjects (IDbContext dbContext)
 		{
 			return from item in dbContext.GetAllNoteListItems()
 				join node in dbContext.Nodes on item.NodeId equals node.Id
@@ -43,7 +43,7 @@ namespace ViewModelExtended.ViewModel
 
 		#region GroupList
 
-		public IQueryable<IListItem> GetAllGroupListObjects (IDbContext dbContext)
+		public IQueryable<GroupListObjectViewModel> GetAllGroupListObjects (IDbContext dbContext)
 		{
 			return from item in dbContext.GetAllGroupListItems()
 				join node in dbContext.Nodes on item.NodeId equals node.Id
@@ -60,23 +60,28 @@ namespace ViewModelExtended.ViewModel
 		#region Group
 
 		/// <summary>
-		/// experimental: associate NoteListObjects with each GroupObject
+		/// experimental: associate NoteListObjects with each GroupObject client-side - just load the base objects here
+		/// the end group is known client-side so not passing along to create the full GroupObject should be ok
 		/// </summary>
 		/// <param name="dbContext"></param>
 		/// <returns></returns>
-		//public IQueryable<IListItem> GetGroupObjectsInGroup (
-		//	IDbContext dbContext, IEnumerable<IListItem> notes, Group groop)
-		//{
-		//	return from item in dbContext.GetGroupItemsInGroup(groop)
-		//		join node in dbContext.Nodes on item.NodeId equals node.Id
-		//		join timestamp in dbContext.Timestamps on item.TimestampId equals timestamp.Id
-		//		join noteListViewModel in notes on item.ObjectId equals noteListViewModel.DataId
-		//		select Resource.ViewModelCreator.CreateGroupObjectViewModel(
-		//			dbContext.CreateGroupObject(
-		//				item, dbContext.CreateObjectRoot(node, timestamp), groop, noteListViewModel));
-		//}
+		public IQueryable<KeyValuePair<GroupItem, ObjectRoot>> GetGroupItemsInGroup (IDbContext dbContext, Group groop)
+		{
+			//dbContext.CreateGroupObject(item, root, groop, data)
+			//Resource.ViewModelCreator.CreateGroupObjectViewModel(
+			//join data in dbContext.Notes on item.ObjectId equals data.Id
+			//join node in dbContext.Nodes on item.NodeId equals node.Id
+			//	join timestamp in dbContext.Timestamps on item.TimestampId equals timestamp.Id
+			//	select dbContext.CreateObjectRoot(node, timestamp);
+			//dbContext.GetGroupItemsInGroup(groop);
+			return from item in dbContext.GetGroupItemsInGroup(groop)
+				join node in dbContext.Nodes on item.NodeId equals node.Id
+				join timestamp in dbContext.Timestamps on item.TimestampId equals timestamp.Id
+				join data in dbContext.Notes on item.ObjectId equals data.Id
+				select new KeyValuePair<GroupItem, ObjectRoot>(item, dbContext.CreateObjectRoot(node, timestamp));
+		}
 
-		public IQueryable<IListItem> GetGroupObjectsInGroup (IDbContext dbContext, Group groop)
+		public IQueryable<GroupObjectViewModel> GetGroupObjectsInGroup (IDbContext dbContext, Group groop)
 		{
 			return from item in dbContext.GetGroupItemsInGroup(groop)
 				join node in dbContext.Nodes on item.NodeId equals node.Id
@@ -86,7 +91,7 @@ namespace ViewModelExtended.ViewModel
 					dbContext.CreateGroupObject(item, dbContext.CreateObjectRoot(node, timestamp), groop, data));
 		}
 
-		public IQueryable<IListItem> GetGroupObjectsByNote (IDbContext dbContext, Note note)
+		public IQueryable<GroupObjectViewModel> GetGroupObjectsByNote (IDbContext dbContext, Note note)
 		{
 			return from item in dbContext.GetAllGroupItems()
 				join node in dbContext.Nodes on item.NodeId equals node.Id
@@ -104,37 +109,38 @@ namespace ViewModelExtended.ViewModel
 
 		#region Sort
 
-		public void GetSortedListObjects (IQueryable<IListItem> source, IObservableList target)
+		//public void GetSortedListObjects<T> (IQueryable<T> source, IObservableList<T> target) where T : IListItem
+		public void GetSortedListObjects<T> (IList<T> source, IObservableList<T> target) where T : IListItem
 		{
 			target.Clear();
-			List<IListItem> objectList = source.ToList();
+			//List<T> objectList = source.ToList(); // replaced objectList below w/ original source (now a list)
 
 			// first object
-			IListItem? firstObject = objectList.Find(obj => obj.Node.PreviousId == null);
+			IEnumerable<T> first = source.Where(obj => obj.Node.PreviousId == null);
 
-			if (firstObject == null) {
-				return;
-			}
+			if (!first.Any()) return;
+			T firstObject = first.Single();
 
 			target.Add(firstObject);
-			objectList.Remove(firstObject);
+			source.Remove(firstObject);
 
-			IListItem? currentObject = firstObject;
-			IListItem? nextObject = null;
+			T currentObject = firstObject;
 
 			// remaining objects
-			while (objectList.Count > 0) {
-				nextObject = objectList.Find(obj => obj.Node.Id == currentObject.Node.NextId);
-				currentObject.Next = nextObject;
+			while (source.Count > 0) {
+				IEnumerable<T> next = source.Where(obj => obj.Node.Id == currentObject.Node.NextId);
 
-				if (nextObject == null) {
+				if (!next.Any()) {
+					currentObject.Next = null;
 					return;
 				}
+				T nextObject = next.Single();
+				currentObject.Next = nextObject;
 
 				nextObject.Previous = currentObject;
 
 				target.Add(nextObject);
-				objectList.Remove(nextObject);
+				source.Remove(nextObject);
 
 				currentObject = nextObject;
 			}

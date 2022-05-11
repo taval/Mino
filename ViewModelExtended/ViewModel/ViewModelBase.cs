@@ -16,10 +16,13 @@ namespace ViewModelExtended.ViewModel
 	{
 		#region Constructor
 
+		#pragma warning disable CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider declaring as nullable.
 		public ViewModelBase ()
-		{
 
+		{
+			
 		}
+		#pragma warning restore CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider declaring as nullable.
 
 		#endregion
 
@@ -37,12 +40,20 @@ namespace ViewModelExtended.ViewModel
 		#endregion
 
 		#region Event Handlers
+
 		/// <summary>
 		/// to subscribe to this event for properties of a ViewModel:
 		/// _vm.PropertyChanged += OnViewModelPropertyChanged;
 		/// where OnViewModelPropertyChanged is the name of the particular handler for that event
 		/// </summary>
 		public event PropertyChangedEventHandler PropertyChanged;
+
+		protected void RemoveAllEventHandlers ()
+		{
+			foreach (Delegate d in PropertyChanged.GetInvocationList()) {
+				PropertyChanged -= (PropertyChangedEventHandler)d;
+			}
+		}
 
 		#endregion
 

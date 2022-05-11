@@ -9,7 +9,7 @@ namespace ViewModelExtended.ViewModel
 {
 	public interface IViewModelCreator
 	{
-		public IObservableList CreateList ();
+		public IObservableList<T> CreateList<T> () where T : IListItem;
 
 		// ListObjects have two input methods: new data and existing data
 

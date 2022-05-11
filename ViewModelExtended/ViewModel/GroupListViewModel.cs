@@ -19,9 +19,9 @@ namespace ViewModelExtended.ViewModel
 		/// <summary>
 		/// the base ListViewModel
 		/// </summary>
-		private IObservableList List { get; set; }
+		private IObservableList<GroupListObjectViewModel> List { get; set; }
 
-		public IEnumerable<IListItem> Items {
+		public IEnumerable<GroupListObjectViewModel> Items {
 			get { return List.Items; }
 		}
 
@@ -92,11 +92,11 @@ namespace ViewModelExtended.ViewModel
 			Resource = resource;
 			Resource.CommandBuilder.MakeGroupList(this);
 			m_Highlighted = null;
-			List = Resource.ViewModelCreator.CreateList();
+			List = Resource.ViewModelCreator.CreateList<GroupListObjectViewModel>();
 
 			using (IDbContext dbContext = Resource.CreateDbContext()) {
-				IQueryable<IListItem> unsortedObjects = Resource.DbQueryHelper.GetAllGroupListObjects(dbContext);
-				Resource.DbQueryHelper.GetSortedListObjects(unsortedObjects, List);
+				IQueryable<GroupListObjectViewModel> unsortedObjects = Resource.DbQueryHelper.GetAllGroupListObjects(dbContext);
+				Resource.DbQueryHelper.GetSortedListObjects(unsortedObjects.ToList(), List);
 			}
 		}
 
@@ -155,7 +155,19 @@ namespace ViewModelExtended.ViewModel
 
 		public void Clear ()
 		{
+			RemoveAllEventHandlers();
 			List.Clear();
+		}
+
+		#endregion
+
+
+
+		#region Query
+
+		public GroupListObjectViewModel Find (Func<GroupListObjectViewModel, bool> predicate)
+		{
+			return List.Find(predicate);
 		}
 
 		#endregion
