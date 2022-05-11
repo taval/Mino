@@ -358,9 +358,6 @@ namespace ViewModelExtended.ViewModel
 			}
 		}
 
-		//TODO: a Read method should have similar signature to Create but use a full NoteListObjectViewModel, which will:
-		// a) passes its Note model to CreateGroupObject
-		// b) assigns GroupObject's PropertyChanged event handler to NoteListViewModel
 		/// <summary>
 		/// create a persistent GroupObject with the given NoteListObject
 		/// </summary>
@@ -393,13 +390,13 @@ namespace ViewModelExtended.ViewModel
 				else if (e.PropertyName == "Text") {
 					string _ = observer.Text;
 				}
-				MessageBox.Show(
-					$"GroupObject: { observer.ItemId }\n" +
-					$"\tTitle: { observer.Title }\n" +
-					$"\tText: { observer.Text }\n" +
-					$"Note: { subject.ItemId }\n" +
-					$"\tTitle: { subject.Title }\n" +
-					$"\tText: { subject.Text }");
+				//MessageBox.Show(
+				//	$"GroupObject: { observer.ItemId }\n" +
+				//	$"\tTitle: { observer.Title }\n" +
+				//	$"\tText: { observer.Text }\n" +
+				//	$"Note: { subject.ItemId }\n" +
+				//	$"\tTitle: { subject.Title }\n" +
+				//	$"\tText: { subject.Text }");
 			};
 
 			subject.PropertyChanged += handler;
@@ -407,7 +404,7 @@ namespace ViewModelExtended.ViewModel
 			Delegates.Add(
 				observerId, new KeyValuePair<NoteListObjectViewModel, PropertyChangedEventHandler>(subject, handler));
 
-			MessageBox.Show("delegate was added to NoteListViewModel");
+			//MessageBox.Show("delegate was added to NoteListViewModel");
 		}
 
 		public void UnsetPropertyChangedEventHandler (GroupObjectViewModel observer)
@@ -549,31 +546,47 @@ namespace ViewModelExtended.ViewModel
 		/// <param name="groop"></param>
 		private void PopulateGroup (IDbContext dbContext, IObservableList<GroupObjectViewModel> list, Group groop)
 		{
-			IQueryable<GroupObjectViewModel> unsortedObjects = Resource.DbQueryHelper.GetGroupObjectsInGroup(dbContext, groop);
-			IList<GroupObjectViewModel> tempList = unsortedObjects.ToList();
+			//IQueryable<GroupObjectViewModel> unsortedObjects = Resource.DbQueryHelper.GetGroupObjectsInGroup(dbContext, groop);
+			//IList<GroupObjectViewModel> tempList = unsortedObjects.ToList();
 
-			foreach (GroupObjectViewModel observer in tempList) {
-				NoteListObjectViewModel subject = FindNote(observer);
+			//foreach (GroupObjectViewModel observer in tempList) {
+			//	NoteListObjectViewModel subject = FindNote(observer);
+
+			//	SetPropertyChangedEventHandler(subject, observer);
+			//}
+
+			//Resource.DbQueryHelper.GetSortedListObjects(tempList, list);
+
+			/** a GroupObjectViewModel loaded from db is constructed partially from live data.
+			 * - iterate through the database items for ObjectId used to identify the associated Note data
+			 * - construct the GroupObjectViewModel
+			 * - set GroupObjectViewModel's event handler on NoteListObjectViewModel
+			 * - add it to list
+			 */
+			IQueryable<Tuple<GroupItem, ObjectRoot>> unsortedObjects =
+				Resource.DbQueryHelper.GetGroupItemsInGroup(dbContext, groop);
+			IList<Tuple<GroupItem, ObjectRoot>> groupItemsInGroup = unsortedObjects.ToList();
+			IList<GroupObjectViewModel> tempList = new List<GroupObjectViewModel>();
+
+			foreach (Tuple<GroupItem, ObjectRoot> item in groupItemsInGroup) {
+				IEnumerable<NoteListObjectViewModel> noteMatch =
+					Resource.NoteListViewModel.Items.Where((noteVM) => noteVM.DataId == item.Item1.ObjectId);
+
+				if (!noteMatch.Any()) {
+					throw new Exception("no NoteListObjectViewModel matching the GroupObjectViewModel could be found");
+				}
+
+				NoteListObjectViewModel subject = noteMatch.Single();
+
+				GroupObjectViewModel observer = Resource.ViewModelCreator.CreateGroupObjectViewModel(
+					dbContext.CreateGroupObject(item.Item1, item.Item2,groop, subject.Model.Data));
 
 				SetPropertyChangedEventHandler(subject, observer);
+
+				tempList.Add(observer);
 			}
 
 			Resource.DbQueryHelper.GetSortedListObjects(tempList, list);
-
-			// TODO: for loaded GroupObjects, the note text in the GroupContentsView is not updated when it is edited in the NoteTextView.
-			//       inexplicably, the property changed handler on a NoteListViewModel for a GroupObjectViewModel loaded from the database never touches the
-			//       GroupObjectViewModel at any layer, in any order, despite the fact that it is definitely firing.
-			//       GroupObjects added from the NoteList in-session via drag-drop work fine.
-			//       some notes:
-			//			- NoteListObjectViewModel must already exist in the NoteListViewModel, which means its query has already run.
-			//			  trying to load NoteListObjectVM in GroupObjectVM query will fail for not being directly tied to existing NoteListVM objects
-			//            (for not existing at the query's runtime)
-
-			//			- implementing IObservable as an IEnumerable fails miserably, breaking everything. A problem with ObservableCollection, perhaps? since custom implementation of GetEnumerator has the same problem, would seem unlikely.
-
-			// possible untried solution: 
-			// UPDATE: is it because the Note object loaded in the query also has no relation to the Note object owned by NoteListObjectViewModel? ayup.
-			//         here is where to reconstitute an amalgamation of the query, a call to Read method which will create the GroupObject and GroupObjectViewModel
 
 		}
 

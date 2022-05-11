@@ -65,7 +65,7 @@ namespace ViewModelExtended.ViewModel
 		/// </summary>
 		/// <param name="dbContext"></param>
 		/// <returns></returns>
-		public IQueryable<KeyValuePair<GroupItem, ObjectRoot>> GetGroupItemsInGroup (IDbContext dbContext, Group groop)
+		public IQueryable<Tuple<GroupItem, ObjectRoot>> GetGroupItemsInGroup (IDbContext dbContext, Group groop)
 		{
 			//dbContext.CreateGroupObject(item, root, groop, data)
 			//Resource.ViewModelCreator.CreateGroupObjectViewModel(
@@ -78,7 +78,7 @@ namespace ViewModelExtended.ViewModel
 				join node in dbContext.Nodes on item.NodeId equals node.Id
 				join timestamp in dbContext.Timestamps on item.TimestampId equals timestamp.Id
 				join data in dbContext.Notes on item.ObjectId equals data.Id
-				select new KeyValuePair<GroupItem, ObjectRoot>(item, dbContext.CreateObjectRoot(node, timestamp));
+				select new Tuple<GroupItem, ObjectRoot>(item, dbContext.CreateObjectRoot(node, timestamp));
 		}
 
 		public IQueryable<GroupObjectViewModel> GetGroupObjectsInGroup (IDbContext dbContext, Group groop)

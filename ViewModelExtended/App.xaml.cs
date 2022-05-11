@@ -8,7 +8,7 @@ using System.Windows;
 using ViewModelExtended.Model;
 using ViewModelExtended.ViewModel;
 
-
+// TODO: reorder fails due to unknown circumstances causing lost nodes. regression or oversight unknown. must call dbContext.Reset() until error source is determined
 
 namespace ViewModelExtended
 {
@@ -37,8 +37,8 @@ namespace ViewModelExtended
 
 			#region Load Test Data
 
-			//AddNoteListObjectTestData(resource);
-			//AddGroupListObjectTestData(resource);
+			AddNoteListObjectTestData(resource);
+			AddGroupListObjectTestData(resource);
 
 			#endregion
 

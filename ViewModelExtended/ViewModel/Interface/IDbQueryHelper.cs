@@ -13,7 +13,7 @@ namespace ViewModelExtended.ViewModel
 		public IQueryable<NoteListObjectViewModel> GetAllNoteListObjects (IDbContext dbContext);
 		public IQueryable<GroupListObjectViewModel> GetAllGroupListObjects (IDbContext dbContext);
 
-		public IQueryable<KeyValuePair<GroupItem, ObjectRoot>> GetGroupItemsInGroup (IDbContext dbContext, Group groop);
+		public IQueryable<Tuple<GroupItem, ObjectRoot>> GetGroupItemsInGroup (IDbContext dbContext, Group groop);
 
 		public IQueryable<GroupObjectViewModel> GetGroupObjectsInGroup (IDbContext dbContext, Group groop);
 		public IQueryable<GroupObjectViewModel> GetGroupObjectsByNote (IDbContext dbContext, Note note);

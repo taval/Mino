@@ -22,7 +22,7 @@ namespace ViewModelExtended.ViewModel
 
 		#region Constructor
 
-		public ObservableList () { } // TODO
+		public ObservableList () { } // TODO: make a constructor for observablelist w/ data
 
 		#endregion
 
