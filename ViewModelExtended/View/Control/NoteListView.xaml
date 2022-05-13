@@ -165,7 +165,26 @@
 										RelativeSource={ RelativeSource AncestorType={ x:Type local:NoteListView } } }" />
 							</i:EventTrigger>
 
-						</i:Interaction.Triggers>
+                            <i:EventTrigger
+								EventName="Drop"
+								SourceObject="{ Binding RelativeSource={ RelativeSource AncestorType={ x:Type ListView } } }">
+                                <i:InvokeCommandAction
+									PassEventArgsToCommand="True"
+									Command="{ Binding
+										Path=DataContext.DropCommand,
+										RelativeSource={ RelativeSource AncestorType={ x:Type local:NoteListView } } }" />
+                            </i:EventTrigger>
+
+                            <i:EventTrigger
+								EventName="DragLeave"
+								SourceObject="{ Binding RelativeSource={ RelativeSource AncestorType={ x:Type ListView } } }">
+                                <i:InvokeCommandAction
+									PassEventArgsToCommand="True"
+									Command="{ Binding
+										Path=DataContext.CancelDropCommand,
+										RelativeSource={ RelativeSource AncestorType={ x:Type local:NoteListView } } }" />
+                            </i:EventTrigger>
+                        </i:Interaction.Triggers>
 					</Grid>
 				</DataTemplate>
 			</ListView.ItemTemplate>

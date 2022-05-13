@@ -8,7 +8,9 @@ using System.Windows;
 using ViewModelExtended.Model;
 using ViewModelExtended.ViewModel;
 
-// TODO: reorder fails due to unknown circumstances causing lost nodes. regression or oversight unknown. must call dbContext.Reset() until error source is determined
+/** TODO: reorder fails due to unknown circumstances causing lost nodes. regression or oversight unknown. must call dbContext.Reset() until error source is determined
+ * UPDATE: is not clear but unlikely the issue is related to the reorder algorithm but rather the usage of DragDrop event for calling Reorder. Try separating visual dragdrop from data commit. DragDrop should stage the data but not store it until a mouseup event.
+ */
 
 namespace ViewModelExtended
 {

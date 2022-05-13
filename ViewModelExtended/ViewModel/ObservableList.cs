@@ -81,44 +81,105 @@ namespace ViewModelExtended.ViewModel
 			}
 		}
 
+		//public void Reorder (IListItem source, IListItem target)
+		//{
+		//	if (source == target) {
+		//		return;
+		//	}
+
+		//	int oldIdx = m_Observables.IndexOf((T)source);
+		//	int newIdx = m_Observables.IndexOf((T)target);
+
+		//	IListItem? lhs = (oldIdx < newIdx) ? source.Previous : target.Previous;
+		//	IListItem? rhs = (oldIdx < newIdx) ? target.Next : source.Next;
+
+		//	if (oldIdx < newIdx) {
+
+		//		if (lhs != null) {
+		//			lhs.Next = target;
+		//		}
+		//		if (rhs != null) {
+		//			rhs.Previous = source;
+		//		}
+		//		target.Previous = lhs;
+		//		target.Next = source;
+		//		source.Previous = target;
+		//		source.Next = rhs;
+		//	}
+		//	else {
+		//		if (lhs != null) {
+		//			lhs.Next = source;
+		//		}
+		//		if (rhs != null) {
+		//			rhs.Previous = target;
+		//		}
+		//		source.Previous = lhs;
+		//		source.Next = target;
+		//		target.Previous = source;
+		//		target.Next = rhs;
+		//	}
+
+		//	// perform move within the container
+		//	// if both items exist, move model w/ oldIdx to newIdx
+		//	if (oldIdx != -1 && newIdx != -1) {
+		//		m_Observables.Move(oldIdx, newIdx);
+		//	}
+		//}
+
 		public void Reorder (IListItem source, IListItem target)
 		{
-			if (source == target) {
-				return;
-			}
+			if (source == target) return;
 
 			int oldIdx = m_Observables.IndexOf((T)source);
 			int newIdx = m_Observables.IndexOf((T)target);
 
-			IListItem? lhs = (oldIdx < newIdx) ? source.Previous : target.Previous;
-			IListItem? rhs = (oldIdx < newIdx) ? target.Next : source.Next;
+			IListItem? sourcePrevious = source.Previous;
+			IListItem? sourceNext = source.Next;
 
-			if (oldIdx < newIdx) {
+			IListItem? targetPrevious = target.Previous;
+			IListItem? targetNext = target.Next;
 
-				if (lhs != null) {
-					lhs.Next = target;
+			int sourceIndex = Index(source);
+			int targetIndex = Index(target);
+
+			int diff = targetIndex - sourceIndex;
+			bool isAdjacent = Math.Abs(diff) == 1;
+			if (isAdjacent == true) {
+				if (diff > 0) { // forward
+					if (sourcePrevious != null) sourcePrevious.Next = target;
+					source.Previous = target;
+					target.Previous = sourcePrevious;
+					target.Next = source;
+					source.Next = targetNext;
+					if (targetNext != null) targetNext.Previous = source;
 				}
-				if (rhs != null) {
-					rhs.Previous = source;
+				else { // reverse
+					if (sourceNext != null) sourceNext.Previous = target;
+					target.Next = sourceNext;
+					target.Previous = source;
+					source.Next = target;
+					source.Previous = targetPrevious;
+					if (targetPrevious != null) targetPrevious.Next = source;
 				}
-				target.Previous = lhs;
-				target.Next = source;
-				source.Previous = target;
-				source.Next = rhs;
 			}
 			else {
-				if (lhs != null) {
-					lhs.Next = source;
+				if (diff > 0) { // forward
+					if (sourcePrevious != null) sourcePrevious.Next = sourceNext;
+					if (sourceNext != null) sourceNext.Previous = sourcePrevious;
+					target.Next = source;
+					source.Previous = target;
+					source.Next = targetNext;
+					if (targetNext != null) targetNext.Previous = source;
 				}
-				if (rhs != null) {
-					rhs.Previous = target;
+				else { // reverse
+					if (sourceNext != null) sourceNext.Previous = sourcePrevious;
+					if (sourcePrevious != null) sourcePrevious.Next = sourceNext;
+					target.Previous = source;
+					source.Next = target;
+					source.Previous = targetPrevious;
+					if (targetPrevious != null) targetPrevious.Next = source;
 				}
-				source.Previous = lhs;
-				source.Next = target;
-				target.Previous = source;
-				target.Next = rhs;
 			}
-
 			// perform move within the container
 			// if both items exist, move model w/ oldIdx to newIdx
 			if (oldIdx != -1 && newIdx != -1) {

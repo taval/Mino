@@ -24,6 +24,9 @@ namespace ViewModelExtended.Command
 			// get event args
 			MouseEventArgs e = (MouseEventArgs)parameter;
 
+			if (e.Handled) return;
+			e.Handled = true;
+
 			// if button not pressed, invalid event source, or close button is under mouse, bail out
 			Button? closeButton = UIHelper.FindChild<Button>(((FrameworkElement)e.Source).Parent, "RemoveItemButton");
 

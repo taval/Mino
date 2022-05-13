@@ -64,6 +64,8 @@ namespace ViewModelExtended
 			target.ReorderCommand = new NoteReorderCommand(target);
 			//target.RefreshCommand = new NoteRefreshCommand(target);
 			//target.PreselectCommand = new NotePreselectCommand(target);
+			target.DropCommand = new NoteDropCommand(target);
+			target.CancelDropCommand = new NoteCancelDropCommand(target);
 		}
 
 		public void MakePrime (PrimeViewModel target)

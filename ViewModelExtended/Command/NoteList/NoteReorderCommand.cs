@@ -24,6 +24,8 @@ namespace ViewModelExtended.Command
 		{
 			// get event args
 			DragEventArgs e = (DragEventArgs)parameter;
+			if (e.Handled) return;
+			e.Handled = true;
 
 			// prevent close button from performing operation
 			Button? closeButton = UIHelper.FindChild<Button>(((FrameworkElement)e.Source).Parent, "RemoveItemButton");
@@ -35,7 +37,7 @@ namespace ViewModelExtended.Command
 			// get the data from DragDrop operation
 			Tuple<string, object> data = (Tuple<string, object>)e.Data.GetData(DataFormats.Serializable);
 
-			// if the item comes from the same ListView, bail out
+			// if the item comes from different ListView, bail out
 			string itemListName = data.Item1;
 			if (!itemListName.Equals("ListView_NoteListView")) return;
 

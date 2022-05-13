@@ -41,6 +41,14 @@ namespace ViewModelExtended.ViewModel
 
 
 
+		#region Dirty List (used by Reorder/ReorderCommit)
+
+		private Dictionary<string, IListItem?> m_OriginalState;
+		private Queue<Tuple<NoteListObjectViewModel, NoteListObjectViewModel>> m_DirtyNotes;
+
+		#endregion
+
+
 		#region Commands
 
 		public ICommand ReorderCommand {
@@ -49,6 +57,20 @@ namespace ViewModelExtended.ViewModel
 		}
 
 		private ICommand? m_ReorderCommand;
+
+		public ICommand DropCommand {
+			get { return m_DropCommand ?? throw new MissingCommandException(); }
+			set { if (m_DropCommand == null) m_DropCommand = value; }
+		}
+
+		private ICommand? m_DropCommand;
+
+		public ICommand CancelDropCommand {
+			get { return m_CancelDropCommand ?? throw new MissingCommandException(); }
+			set { if (m_CancelDropCommand == null) m_CancelDropCommand = value; }
+		}
+
+		private ICommand? m_CancelDropCommand;
 
 		public ICommand PickupCommand {
 			get { return m_PickupCommand ?? throw new MissingCommandException(); }
@@ -65,6 +87,9 @@ namespace ViewModelExtended.ViewModel
 
 		public NoteListViewModel (IViewModelResource resource)
 		{
+			m_OriginalState = new Dictionary<string, IListItem?>();
+
+			m_DirtyNotes = new Queue<Tuple<NoteListObjectViewModel, NoteListObjectViewModel>>();
 			Resource = resource;
 			Resource.CommandBuilder.MakeNoteList(this);
 			m_Highlighted = null;
@@ -104,12 +129,47 @@ namespace ViewModelExtended.ViewModel
 
 		public void Reorder (NoteListObjectViewModel source, NoteListObjectViewModel target)
 		{
+			if (!m_OriginalState.ContainsKey("sourcePrevious")) m_OriginalState["sourcePrevious"] = source.Previous;
+			if (!m_OriginalState.ContainsKey("source")) m_OriginalState["source"] = source;
+			if (!m_OriginalState.ContainsKey("sourceNext")) m_OriginalState["sourceNext"] = source.Next;
+			if (!m_OriginalState.ContainsKey("targetPrevious")) m_OriginalState["targetPrevious"] = target.Previous;
+			if (!m_OriginalState.ContainsKey("target")) m_OriginalState["target"] = target;
+			if (!m_OriginalState.ContainsKey("targetNext")) m_OriginalState["targetNext"] = target.Next;
+
 			List.Reorder(source, target);
 
+			m_DirtyNotes.Enqueue(new Tuple<NoteListObjectViewModel, NoteListObjectViewModel>(source, target));
+		}
+
+		public void ReorderCommit ()
+		{
+			if (!m_DirtyNotes.Any()) return;
+
 			using (IDbContext dbContext = Resource.CreateDbContext()) {
-				Resource.DbListHelper.UpdateAfterReorder(dbContext, source, target);
+				while (m_DirtyNotes.Any()) {
+					Tuple<NoteListObjectViewModel, NoteListObjectViewModel> notePair = m_DirtyNotes.Dequeue();
+					Resource.DbListHelper.UpdateAfterReorder(dbContext, notePair.Item1, notePair.Item2);
+				}
 				dbContext.Save();
 			}
+			m_DirtyNotes.Clear();
+			m_OriginalState.Clear();
+		}
+
+		public void CancelReorder ()
+		{
+			if (!m_OriginalState.ContainsKey("source") || !m_OriginalState.ContainsKey("target")) return;
+
+			IListItem? source = m_OriginalState["source"];
+			IListItem? target = m_OriginalState["target"];
+			if (source == null || target == null) return;
+			source.Previous = m_OriginalState["sourcePrevious"];
+			source.Next = m_OriginalState["sourceNext"];
+			target.Previous = m_OriginalState["targetPrevious"];
+			target.Next = m_OriginalState["targetNext"];
+			Reorder((NoteListObjectViewModel)source, (NoteListObjectViewModel)target);
+			m_DirtyNotes.Clear();
+			m_OriginalState.Clear();
 		}
 
 		public void Remove (NoteListObjectViewModel input)
