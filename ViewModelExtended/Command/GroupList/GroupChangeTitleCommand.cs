@@ -23,12 +23,18 @@ namespace ViewModelExtended.Command
 			// check key type events for Enter key
 			if (parameter is KeyEventArgs) {
 				KeyEventArgs e = (KeyEventArgs)parameter;
-				if (e.Key != Key.Return) return;
-				if (!(e.Source is TextBox)) return;
+				if (e == null || e.Handled || e.Key != Key.Return || !(e.Source is TextBox)) return;
+
 				e.Handled = true;
+
+				// unfocus the text box
 				TextBox textBox = (TextBox)e.Source;
+
 				textBox.Focus();
+
+				// return the focus from the text box to the selected item
 				ListViewItem? item = UIHelper.FindParent<ListViewItem>(textBox);
+
 				if (item == null) return;
 				item.Focus();
 			}

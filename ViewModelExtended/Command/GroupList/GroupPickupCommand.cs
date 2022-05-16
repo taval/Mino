@@ -23,7 +23,12 @@ namespace ViewModelExtended.Command
 		{
 			// get event args
 			MouseEventArgs e = (MouseEventArgs)parameter;
-			if ((e == null) || (e.LeftButton != MouseButtonState.Pressed) || !(e.Source is FrameworkElement)) return;
+			if (e == null ||
+				e.Handled ||
+				e.LeftButton != MouseButtonState.Pressed ||
+				!(e.Source is FrameworkElement)) return;
+
+			e.Handled = true;
 
 			// if source was text box, bail
 			if (e.OriginalSource is TextBox) return;

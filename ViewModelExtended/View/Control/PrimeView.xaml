@@ -74,7 +74,8 @@
 
 		</Grid>
 		<!-- footer -->
-		<StatusBar MinHeight="32" VerticalAlignment="Bottom">This is a Status Bar</StatusBar>
-	</StackPanel>
+        <local:StatusBarView
+            DataContext="{ Binding Resource.NoteListViewModel, diag:PresentationTraceSources.TraceLevel=High }" />
+    </StackPanel>
 	
 </UserControl>

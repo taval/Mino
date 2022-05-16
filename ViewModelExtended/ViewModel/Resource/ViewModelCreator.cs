@@ -243,10 +243,6 @@ namespace ViewModelExtended.ViewModel
 			return new GroupObjectViewModel(model);
 		}
 
-		// TODO: create factory methods for Create[Temp]GroupObjectViewModel with NoteListObjectViewModel input
-
-
-
 		#endregion
 
 

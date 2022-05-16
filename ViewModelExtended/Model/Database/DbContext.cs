@@ -5,6 +5,8 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 
+// TODO: some combination of deleting GroupObject and/or NoteListObject, in sequence possibly, w/ or w/o text edit, causes execution on non-existent records and throwing an exception
+
 // TODO/NOTE: EntityXItemRemove only works if the item is found again using the id; passing the object gives a duplicate tracking error which so far can't simply be resolved by detaching the temp entities from db upon creation. The problem is probably not here but some object from send/receive that is setting a temporary id somehow
 
 namespace ViewModelExtended.Model

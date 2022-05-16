@@ -26,7 +26,9 @@ namespace ViewModelExtended.Command
 			// prevent close button from performing operation
 			Button? closeButton = UIHelper.FindChild<Button>(((FrameworkElement)e.Source).Parent, "RemoveItemButton");
 
-			if (!(e.Source is FrameworkElement) || closeButton?.IsMouseOver == true) return;
+			if (e == null || e.Handled || !(e.Source is FrameworkElement) || closeButton?.IsMouseOver == true) return;
+
+			e.Handled = true;
 
 			// get the data from DragDrop operation
 			Tuple<string, object> data =
@@ -34,13 +36,11 @@ namespace ViewModelExtended.Command
 
 			// if the item comes from the same ListView, bail out
 			string itemName = data.Item1;
-			
 
-			if (itemName.Equals("ListView_GroupContentsView")) return;
+			if (itemName.Equals("ListView_GroupContentsView")) return; // TODO: should not have to bind this command to any particular instance of a listview - see NoteList reorder command
 
 			// get the actual data to be sent
 			if (data.Item2 == null || !(data.Item2 is NoteListObjectViewModel)) return;
-
 
 			NoteListObjectViewModel dataContext = (NoteListObjectViewModel)data.Item2;
 

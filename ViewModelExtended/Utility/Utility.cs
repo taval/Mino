@@ -27,5 +27,11 @@ namespace ViewModelExtended
         {
             return ((DateTimeOffset)DateTime.Now).ToUnixTimeSeconds();
         }
+
+        public static DateTime UnixToDateTime (long unixTime)
+        {
+            var localDateTimeOffset = DateTimeOffset.FromUnixTimeSeconds(unixTime).DateTime.ToLocalTime();
+            return localDateTimeOffset;
+        }
     }
 }

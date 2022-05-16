@@ -28,11 +28,12 @@ namespace ViewModelExtended.Command
 			Button? closeButton = UIHelper.FindChild<Button>(((FrameworkElement)e.Source).Parent, "RemoveItemButton");
 
 			if (e == null ||
+				e.Handled ||
 				e.LeftButton != MouseButtonState.Pressed ||
 				!(e.Source is FrameworkElement) ||
-				closeButton?.IsMouseOver == true) {
-				return;
-			}
+				closeButton?.IsMouseOver == true) return;
+
+			e.Handled = true;
 
 			// get event source
 			FrameworkElement source = (FrameworkElement)e.Source;

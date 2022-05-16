@@ -19,7 +19,6 @@ namespace ViewModelExtended.Command
 		public override void Execute (object parameter)
 		{
 			m_PrimeViewModel.AddNoteToGroup();
-
 		}
 	}
 }

@@ -21,6 +21,10 @@ namespace ViewModelExtended.Command
 		public override void Execute (object parameter)
 		{
 			DragEventArgs e = (DragEventArgs)parameter;
+			if (e == null || e.Handled || !(e.Source is FrameworkElement)) return;
+
+			e.Handled = true;
+
 			FrameworkElement listView = (FrameworkElement)e.Source;
 
 			HitTestResult result = VisualTreeHelper.HitTest(listView, e.GetPosition(listView));
@@ -29,7 +33,6 @@ namespace ViewModelExtended.Command
 			if (result == null) {
 				m_PrimeViewModel.HoldGroupNote();
 			}
-			
 		}
 	}
 }

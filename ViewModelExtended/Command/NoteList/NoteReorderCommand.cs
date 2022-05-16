@@ -24,12 +24,12 @@ namespace ViewModelExtended.Command
 		{
 			// get event args
 			DragEventArgs e = (DragEventArgs)parameter;
-			if (e.Handled) return;
-			e.Handled = true;
 
 			// prevent close button from performing operation
 			Button? closeButton = UIHelper.FindChild<Button>(((FrameworkElement)e.Source).Parent, "RemoveItemButton");
-			if (!(e.Source is FrameworkElement) || closeButton?.IsMouseOver == true) return;
+			if (e == null || e.Handled || !(e.Source is FrameworkElement) || closeButton?.IsMouseOver == true) return;
+
+			e.Handled = true;
 
 			// get the event source element
 			FrameworkElement element = (FrameworkElement)e.Source;
@@ -39,7 +39,16 @@ namespace ViewModelExtended.Command
 
 			// if the item comes from different ListView, bail out
 			string itemListName = data.Item1;
-			if (!itemListName.Equals("ListView_NoteListView")) return;
+
+			// get listview
+			ListViewItem? item = element.TemplatedParent as ListViewItem;
+			if (item == null) return;
+			ListView listView = (ListView)ItemsControl.ItemsControlFromItemContainer(item);
+
+			if (!itemListName.Equals(listView.Name)) return; // TODO: copy this version of the name comparison to the other reorder commands to separate them from a particular view instance
+
+			// do scroll
+			//ScrollListView(e, listView); // TODO: uncomment and test when dragleave is stable, then incorporate into the other listviews
 
 			// get target
 			NoteListObjectViewModel? target = element.DataContext as NoteListObjectViewModel;
@@ -52,9 +61,47 @@ namespace ViewModelExtended.Command
 
 			// reorder
 			m_ListViewModel.Reorder(source, target);
+		}
 
-			// refresh list data
-			//m_ListViewModel.RefreshListView();
+		private void ScrollListView (DragEventArgs e, ListView listView)
+		{
+			ScrollViewer? scrollViewer = UIHelper.GetChildOfType<ScrollViewer>(listView);
+			
+			if (scrollViewer != null) {
+				double tolerance = 60;
+				double verticalPos = e.GetPosition(listView).Y;
+				double offset = 1;
+
+				if (verticalPos < tolerance) { // if top of visible list, scroll up
+					scrollViewer.ScrollToVerticalOffset(scrollViewer.VerticalOffset - offset);
+				}
+				else if (verticalPos > listView.ActualHeight - tolerance) { // if bottom of visible list, scroll down
+					scrollViewer.ScrollToVerticalOffset(scrollViewer.VerticalOffset + offset);
+				}
+			}
 		}
 	}
 }
+
+//FrameworkElement container = sender as FrameworkElement;
+
+//if (container == null) { return; }
+
+//ScrollViewer scrollViewer = GetFirstVisualChild<ScrollViewer>(container);
+
+//if (scrollViewer == null) { return; }
+
+//double tolerance = 60;
+//double verticalPos = e.GetPosition(container).Y;
+//double offset = 20;
+
+//if (verticalPos < tolerance) // Top of visible list? 
+//{
+//	//Scroll up
+//	scrollViewer.ScrollToVerticalOffset(scrollViewer.VerticalOffset - offset);
+//}
+//else if (verticalPos > container.ActualHeight - tolerance) //Bottom of visible list? 
+//{
+//	//Scroll down
+//	scrollViewer.ScrollToVerticalOffset(scrollViewer.VerticalOffset + offset);
+//}

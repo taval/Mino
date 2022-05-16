@@ -24,18 +24,16 @@ namespace ViewModelExtended.Command
 			// get event args
 			MouseEventArgs e = (MouseEventArgs)parameter;
 
-			if (e.Handled) return;
-			e.Handled = true;
-
 			// if button not pressed, invalid event source, or close button is under mouse, bail out
 			Button? closeButton = UIHelper.FindChild<Button>(((FrameworkElement)e.Source).Parent, "RemoveItemButton");
 
 			if (e == null ||
+				e.Handled ||
 				e.LeftButton != MouseButtonState.Pressed ||
 				!(e.Source is FrameworkElement) ||
-				closeButton?.IsMouseOver == true) {
-				return;
-			}
+				closeButton?.IsMouseOver == true) return;
+
+			e.Handled = true;
 
 			// get event source
 			FrameworkElement source = (FrameworkElement)e.Source;
@@ -56,7 +54,7 @@ namespace ViewModelExtended.Command
 				new DataObject(
 					DataFormats.Serializable,
 					new Tuple<string, object>(listName, dataContext)),
-				DragDropEffects.Copy);
+				DragDropEffects.Copy | DragDropEffects.Scroll);
 		}
 	}
 }

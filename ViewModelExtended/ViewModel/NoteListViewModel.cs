@@ -29,13 +29,19 @@ namespace ViewModelExtended.ViewModel
 
 		#region Cross-View Data
 
-		private NoteListObjectViewModel? m_Highlighted;
 		public NoteListObjectViewModel? Highlighted {
 			get { return m_Highlighted; }
-			set {
-				Set(ref m_Highlighted, value);
-			}
+			set { Set(ref m_Highlighted, value); }
 		}
+
+		private NoteListObjectViewModel? m_Highlighted;
+
+		public int RecordCount {
+			get { return m_RecordCount; }
+			private set { Set(ref m_RecordCount, value); }
+		}
+
+		private int m_RecordCount;
 
 		#endregion
 
@@ -43,7 +49,8 @@ namespace ViewModelExtended.ViewModel
 
 		#region Dirty List (used by Reorder/ReorderCommit)
 
-		private Dictionary<string, IListItem?> m_OriginalState;
+		private int? m_OriginalIndex;
+		private NoteListObjectViewModel? m_OriginalSource;
 		private Queue<Tuple<NoteListObjectViewModel, NoteListObjectViewModel>> m_DirtyNotes;
 
 		#endregion
@@ -87,7 +94,8 @@ namespace ViewModelExtended.ViewModel
 
 		public NoteListViewModel (IViewModelResource resource)
 		{
-			m_OriginalState = new Dictionary<string, IListItem?>();
+			m_OriginalIndex = null;
+			m_OriginalSource = null;
 
 			m_DirtyNotes = new Queue<Tuple<NoteListObjectViewModel, NoteListObjectViewModel>>();
 			Resource = resource;
@@ -99,6 +107,8 @@ namespace ViewModelExtended.ViewModel
 				IQueryable<NoteListObjectViewModel> unsortedObjects = Resource.DbQueryHelper.GetAllNoteListObjects(dbContext);
 				Resource.DbQueryHelper.GetSortedListObjects(unsortedObjects.ToList(), List);
 			}
+
+			RecordCount = List.Items.Count();
 		}
 
 		#endregion
@@ -110,6 +120,7 @@ namespace ViewModelExtended.ViewModel
 		public void Add (NoteListObjectViewModel input)
 		{
 			List.Add(input);
+			RecordCount = List.Items.Count();
 
 			using (IDbContext dbContext = Resource.CreateDbContext()) {
 				Resource.DbListHelper.UpdateAfterAdd(dbContext, input);
@@ -120,6 +131,7 @@ namespace ViewModelExtended.ViewModel
 		public void Insert (NoteListObjectViewModel? target, NoteListObjectViewModel input)
 		{
 			List.Insert(target, input);
+			RecordCount = List.Items.Count();
 
 			using (IDbContext dbContext = Resource.CreateDbContext()) {
 				Resource.DbListHelper.UpdateAfterInsert(dbContext, target, input);
@@ -129,12 +141,8 @@ namespace ViewModelExtended.ViewModel
 
 		public void Reorder (NoteListObjectViewModel source, NoteListObjectViewModel target)
 		{
-			if (!m_OriginalState.ContainsKey("sourcePrevious")) m_OriginalState["sourcePrevious"] = source.Previous;
-			if (!m_OriginalState.ContainsKey("source")) m_OriginalState["source"] = source;
-			if (!m_OriginalState.ContainsKey("sourceNext")) m_OriginalState["sourceNext"] = source.Next;
-			if (!m_OriginalState.ContainsKey("targetPrevious")) m_OriginalState["targetPrevious"] = target.Previous;
-			if (!m_OriginalState.ContainsKey("target")) m_OriginalState["target"] = target;
-			if (!m_OriginalState.ContainsKey("targetNext")) m_OriginalState["targetNext"] = target.Next;
+			if (m_OriginalIndex == null) m_OriginalIndex = Index(source);
+			if (m_OriginalSource == null) m_OriginalSource = source;
 
 			List.Reorder(source, target);
 
@@ -153,28 +161,27 @@ namespace ViewModelExtended.ViewModel
 				dbContext.Save();
 			}
 			m_DirtyNotes.Clear();
-			m_OriginalState.Clear();
+			m_OriginalSource = null;
+			m_OriginalIndex = null;
 		}
 
 		public void CancelReorder ()
 		{
-			if (!m_OriginalState.ContainsKey("source") || !m_OriginalState.ContainsKey("target")) return;
+			if (m_OriginalSource == null || m_OriginalIndex == null) return;
 
-			IListItem? source = m_OriginalState["source"];
-			IListItem? target = m_OriginalState["target"];
-			if (source == null || target == null) return;
-			source.Previous = m_OriginalState["sourcePrevious"];
-			source.Next = m_OriginalState["sourceNext"];
-			target.Previous = m_OriginalState["targetPrevious"];
-			target.Next = m_OriginalState["targetNext"];
-			Reorder((NoteListObjectViewModel)source, (NoteListObjectViewModel)target);
+			IEnumerable<NoteListObjectViewModel> match = Items.Where((note) => Index(note) == m_OriginalIndex);
+			if (!match.Any()) return;
+			NoteListObjectViewModel target = match.Single();
+			Reorder(m_OriginalSource, target);
 			m_DirtyNotes.Clear();
-			m_OriginalState.Clear();
+			m_OriginalSource = null;
+			m_OriginalIndex = null;
 		}
 
 		public void Remove (NoteListObjectViewModel input)
 		{
 			List.Remove(input);
+			RecordCount = List.Items.Count();
 
 			using (IDbContext dbContext = Resource.CreateDbContext()) {
 				Resource.DbListHelper.UpdateAfterRemove(dbContext, input);
@@ -192,6 +199,7 @@ namespace ViewModelExtended.ViewModel
 		{
 			RemoveAllEventHandlers();
 			List.Clear();
+			RecordCount = List.Items.Count();
 		}
 
 		#endregion

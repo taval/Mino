@@ -105,6 +105,10 @@ namespace ViewModelExtended.ViewModel
 
 		private string m_Text;
 
+		public DateTime DateCreated {
+			get { return Utility.UnixToDateTime(Timestamp.UserCreated); }
+		}
+
 		public NoteListObjectViewModel (NoteListObject model)
 		{
 			m_Model = model;

@@ -5,9 +5,12 @@ using System.Text;
 using System.Windows.Input;
 using ViewModelExtended.Model;
 
-// TODO: zero groups should gray out the Contents tab. An existing group should colorize it.
+// TODO: zero groups should gray out the Contents tab. An existing group should ungray/activate it.
 
 // TODO: double-clicking the group's title should only select an item upon the first double-click. Subsequent double-clicks should cause it to edit the text.
+// UPDATE: implemented single/double click choice behavior - review and determine if this is sufficient
+
+// TODO: each group is assigned a color. each associated NoteListObjectViewModel should receive a color if it is associated with a group. when removed from group, it goes back to colorless.
 
 namespace ViewModelExtended.ViewModel
 {

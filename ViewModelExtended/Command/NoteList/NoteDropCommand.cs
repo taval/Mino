@@ -4,7 +4,6 @@ using System.Text;
 using System.Windows;
 using ViewModelExtended.ViewModel;
 
-// TODO: if cursor is outside of listview on drop, rollback (keep original state in addition to queue of changes) - see class NoteCancelDropCommand
 // TODO: write over duplicates in modified queue instead of accumulating many duplicates
 
 namespace ViewModelExtended.Command
@@ -23,7 +22,8 @@ namespace ViewModelExtended.Command
 			// get event args
 			DragEventArgs e = (DragEventArgs)parameter;
 
-			if (e.Handled || !(e.Source is FrameworkElement)) return;
+			if (e == null || e.Handled || !(e.Source is FrameworkElement)) return;
+
 			e.Handled = true;
 
 			// get the event source element
