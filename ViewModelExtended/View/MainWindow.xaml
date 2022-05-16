@@ -6,11 +6,21 @@
 	xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
 	xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
 	xmlns:local="clr-namespace:ViewModelExtended"
+    xmlns:i="http://schemas.microsoft.com/xaml/behaviors"
 	mc:Ignorable="d"
 	Title="Mino" Height="450" Width="800">
 
 	<StackPanel>
-		<!-- Menu -->
+        <i:Interaction.Triggers>
+            <i:EventTrigger
+                EventName="Closing"
+                SourceObject="{ Binding RelativeSource={ RelativeSource AncestorType={ x:Type Window } } }">
+                <i:InvokeCommandAction Command="{ Binding
+					Path=DataContext.CloseCommand,
+					RelativeSource={ RelativeSource AncestorType={ x:Type local:MainWindow } } }" />
+            </i:EventTrigger>
+        </i:Interaction.Triggers>
+        <!-- Menu -->
 		<Menu>
 			<MenuItem Header="_File">
 				<MenuItem Header="_Exit" Command="{ Binding CloseCommand }" />

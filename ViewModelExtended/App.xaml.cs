@@ -37,8 +37,8 @@ namespace ViewModelExtended
 
 			#region Load Test Data
 
-			AddNoteListObjectTestData(resource);
-			AddGroupListObjectTestData(resource);
+			//AddNoteListObjectTestData(resource);
+			//AddGroupListObjectTestData(resource);
 
 			#endregion
 

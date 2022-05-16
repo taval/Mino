@@ -27,7 +27,6 @@
 	<!-- NOTE: in contrast with other bindings outside interaction triggers, 'Path' property must be explicit within one -->
 
 	<Grid
-        Background="Transparent"
 		Height="{ Binding Parent.ActualHeight, Mode=OneWay, RelativeSource={ RelativeSource Self } }"
 		Width="{ Binding Parent.ActualWidth, Mode=OneWay, RelativeSource={ RelativeSource Self } }">
 
@@ -41,7 +40,7 @@
 
 		<!-- the Add Note button -->
 
-        <Grid Height="32" Margin="0 16 0 8" Background="Transparent">
+		<Grid Height="32" Margin="0 16 0 8" Background="Transparent">
 			<Grid.ColumnDefinitions>
 				<ColumnDefinition Width="*" />
 				<ColumnDefinition Width="*" />
@@ -52,17 +51,14 @@
 			</Grid.RowDefinitions>
 
 			<TextBlock
-                Background="Transparent"
 				FontWeight="Bold"
 				FontSize="12"
 				Text="Notes" />
 			<TextBlock
-                Background="Transparent"
 				Grid.Row="1"
 				FontSize="9"
 				Text="{ Binding Highlighted.Title }" />
 			<Button
-                Background="Transparent"
 				Grid.Column="1"
 				Grid.RowSpan="2"
 				Template="{ StaticResource buttonTemplate }"
@@ -89,7 +85,7 @@
 				</Style>
 			</ListView.ItemContainerStyle>
 
-			<i:Interaction.Triggers>
+			<!--<i:Interaction.Triggers>
 				<i:EventTrigger
 					EventName="Drop"
 					SourceObject="{ Binding RelativeSource={ RelativeSource AncestorType={ x:Type ListView } } }">
@@ -109,7 +105,7 @@
 							Path=DataContext.CancelDropCommand,
 							RelativeSource={ RelativeSource AncestorType={ x:Type local:NoteListView } } }" />
 				</i:EventTrigger>
-			</i:Interaction.Triggers>
+			</i:Interaction.Triggers>-->
 
 			<ListView.ItemTemplate>
 				<DataTemplate>
@@ -133,10 +129,10 @@
 								(local:ListAction.RemoveCommand),
 								RelativeSource={ RelativeSource AncestorType={ x:Type local:NoteListView } } }" />
 
-                        <StackPanel Grid.Column="1" Background="Transparent">
-                            <TextBlock Background="Transparent" Text="{ Binding ItemId, StringFormat='Id: {0}', UpdateSourceTrigger=PropertyChanged }" />
-                            <TextBlock Background="Transparent" FontWeight="Bold" Text="{ Binding Title }" />
-                            <TextBlock Background="Transparent" Text="{ Binding Text }" />
+						<StackPanel Grid.Column="1" Background="Transparent">
+							<TextBlock Text="{ Binding ItemId, StringFormat='Id: {0}', UpdateSourceTrigger=PropertyChanged }" />
+							<TextBlock FontWeight="Bold" Text="{ Binding Title }" />
+							<TextBlock Text="{ Binding Text }" />
 						</StackPanel>
 
 						<i:Interaction.Triggers>

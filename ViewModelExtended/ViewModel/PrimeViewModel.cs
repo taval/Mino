@@ -275,6 +275,16 @@ namespace ViewModelExtended.ViewModel
 			}
 		}
 
+		/// <summary>
+		/// do housekeeping (save changes, clear resources, etc.)
+		/// </summary>
+		public void Shutdown ()
+		{
+			Resource.NoteListViewModel.SaveListOrder();
+			//Resource.GroupListViewModel.SaveListOrder();
+			//Resource.GroupContentsViewModel.SaveListOrder();
+		}
+
 		#endregion
 	}
 }

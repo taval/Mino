@@ -25,16 +25,12 @@ namespace ViewModelExtended
 			target.NoteReceiveCommand = new NoteReceiveCommand(target);
 
 			target.ReorderCommand = new GroupNoteReorderCommand(target);
-			//target.RemoveCommand = new GroupNoteRemoveCommand(target); // TODO: don't think this is used anymore, also, does this one need RefreshCommand?
-			//target.PreselectCommand = new GroupNotePreselectCommand(target);
 			target.PickupCommand = new GroupNotePickupCommand(target);
 		}
 
 		public void MakeGroupList (GroupListViewModel target)
 		{
 			target.ReorderCommand = new GroupReorderCommand(target);
-			//target.RefreshCommand = new GroupRefreshCommand(target);
-			//target.PreselectCommand = new GroupPreselectCommand(target);
 			target.PickupCommand = new GroupPickupCommand(target);
 
 			target.ChangeTitleCommand = new GroupChangeTitleCommand(target);
@@ -60,12 +56,7 @@ namespace ViewModelExtended
 		public void MakeNoteList (NoteListViewModel target)
 		{
 			target.PickupCommand = new NotePickupCommand(target);
-
 			target.ReorderCommand = new NoteReorderCommand(target);
-			//target.RefreshCommand = new NoteRefreshCommand(target);
-			//target.PreselectCommand = new NotePreselectCommand(target);
-			target.DropCommand = new NoteDropCommand(target);
-			target.CancelDropCommand = new NoteCancelDropCommand(target);
 		}
 
 		public void MakePrime (PrimeViewModel target)

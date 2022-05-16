@@ -49,9 +49,10 @@ namespace ViewModelExtended.ViewModel
 
 		#region Dirty List (used by Reorder/ReorderCommit)
 
-		private int? m_OriginalIndex;
-		private NoteListObjectViewModel? m_OriginalSource;
-		private Queue<Tuple<NoteListObjectViewModel, NoteListObjectViewModel>> m_DirtyNotes;
+		/// <summary>
+		/// save the dirty state for storing at shutdown, autosave intervals, etc.
+		/// </summary>
+		private Queue<Tuple<NoteListObjectViewModel, NoteListObjectViewModel>> m_DirtyListItems;
 
 		#endregion
 
@@ -64,20 +65,6 @@ namespace ViewModelExtended.ViewModel
 		}
 
 		private ICommand? m_ReorderCommand;
-
-		public ICommand DropCommand {
-			get { return m_DropCommand ?? throw new MissingCommandException(); }
-			set { if (m_DropCommand == null) m_DropCommand = value; }
-		}
-
-		private ICommand? m_DropCommand;
-
-		public ICommand CancelDropCommand {
-			get { return m_CancelDropCommand ?? throw new MissingCommandException(); }
-			set { if (m_CancelDropCommand == null) m_CancelDropCommand = value; }
-		}
-
-		private ICommand? m_CancelDropCommand;
 
 		public ICommand PickupCommand {
 			get { return m_PickupCommand ?? throw new MissingCommandException(); }
@@ -94,10 +81,7 @@ namespace ViewModelExtended.ViewModel
 
 		public NoteListViewModel (IViewModelResource resource)
 		{
-			m_OriginalIndex = null;
-			m_OriginalSource = null;
-
-			m_DirtyNotes = new Queue<Tuple<NoteListObjectViewModel, NoteListObjectViewModel>>();
+			m_DirtyListItems = new Queue<Tuple<NoteListObjectViewModel, NoteListObjectViewModel>>();
 			Resource = resource;
 			Resource.CommandBuilder.MakeNoteList(this);
 			m_Highlighted = null;
@@ -141,41 +125,23 @@ namespace ViewModelExtended.ViewModel
 
 		public void Reorder (NoteListObjectViewModel source, NoteListObjectViewModel target)
 		{
-			if (m_OriginalIndex == null) m_OriginalIndex = Index(source);
-			if (m_OriginalSource == null) m_OriginalSource = source;
-
 			List.Reorder(source, target);
 
-			m_DirtyNotes.Enqueue(new Tuple<NoteListObjectViewModel, NoteListObjectViewModel>(source, target));
+			m_DirtyListItems.Enqueue(new Tuple<NoteListObjectViewModel, NoteListObjectViewModel>(source, target));
 		}
 
-		public void ReorderCommit ()
+		public void SaveListOrder ()
 		{
-			if (!m_DirtyNotes.Any()) return;
+			if (!m_DirtyListItems.Any()) return;
 
 			using (IDbContext dbContext = Resource.CreateDbContext()) {
-				while (m_DirtyNotes.Any()) {
-					Tuple<NoteListObjectViewModel, NoteListObjectViewModel> notePair = m_DirtyNotes.Dequeue();
+				while (m_DirtyListItems.Any()) {
+					Tuple<NoteListObjectViewModel, NoteListObjectViewModel> notePair = m_DirtyListItems.Dequeue();
 					Resource.DbListHelper.UpdateAfterReorder(dbContext, notePair.Item1, notePair.Item2);
 				}
 				dbContext.Save();
 			}
-			m_DirtyNotes.Clear();
-			m_OriginalSource = null;
-			m_OriginalIndex = null;
-		}
-
-		public void CancelReorder ()
-		{
-			if (m_OriginalSource == null || m_OriginalIndex == null) return;
-
-			IEnumerable<NoteListObjectViewModel> match = Items.Where((note) => Index(note) == m_OriginalIndex);
-			if (!match.Any()) return;
-			NoteListObjectViewModel target = match.Single();
-			Reorder(m_OriginalSource, target);
-			m_DirtyNotes.Clear();
-			m_OriginalSource = null;
-			m_OriginalIndex = null;
+			m_DirtyListItems.Clear();
 		}
 
 		public void Remove (NoteListObjectViewModel input)

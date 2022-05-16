@@ -7,7 +7,7 @@ using System.Windows;
 using System.Windows.Input;
 using ViewModelExtended.Model;
 
-
+// TODO: if selecting a different group then going back to the first one selected, the groupnotes no longer trigger their callbacks
 
 namespace ViewModelExtended.ViewModel
 {
