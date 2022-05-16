@@ -269,6 +269,17 @@ namespace ViewModelExtended.ViewModel
 
 
 
+		#region StatusBar
+
+		public StatusBarViewModel CreateStatusBarViewModel ()
+		{
+			return new StatusBarViewModel(Resource);
+		}
+
+		#endregion
+
+
+
 		#region PrimeViewModel
 
 		public PrimeViewModel CreatePrimeViewModel ()
@@ -299,6 +310,11 @@ namespace ViewModelExtended.ViewModel
 		}
 
 		public void DestroyPrimeViewModel (PrimeViewModel target)
+		{
+			// nothing to do
+		}
+
+		public void DestroyStatusBarViewModel (StatusBarViewModel target)
 		{
 			// nothing to do
 		}

@@ -24,6 +24,9 @@ namespace ViewModelExtended.ViewModel
 		public GroupContentsViewModel GroupContentsViewModel { get; }
 
 		public GroupTabsViewModel GroupTabsViewModel { get; }
+
+		public StatusBarViewModel StatusBarViewModel { get; }
+
 		public PrimeViewModel PrimeViewModel { get; }
 
 		public MainWindowViewModel MainWindowViewModel { get; }

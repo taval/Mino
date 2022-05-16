@@ -6,7 +6,6 @@ using System.Threading.Tasks;
 using System.Windows.Input;
 using ViewModelExtended.Model;
 
-// TODO: use the Selected item for id for the status footer instead of Highlighted
 // TODO: line/column numbers for text cursor posted to status bar
 
 namespace ViewModelExtended.ViewModel

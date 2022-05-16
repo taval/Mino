@@ -23,6 +23,8 @@ namespace ViewModelExtended.ViewModel
 		public GroupTabsViewModel GroupTabsViewModel { get; private set; }
 		public PrimeViewModel PrimeViewModel { get; private set; }
 
+		public StatusBarViewModel StatusBarViewModel { get; private set; }
+
 		public MainWindowViewModel MainWindowViewModel { get; private set; }
 
 		public ViewModelResource ()
@@ -43,6 +45,8 @@ namespace ViewModelExtended.ViewModel
 			DbQueryHelper = new DbQueryHelper(this);
 			ViewModelCreator = new ViewModelCreator(this);
 			CommandBuilder = new CommandBuilder(this);
+
+			StatusBarViewModel = ViewModelCreator.CreateStatusBarViewModel();
 
 			NoteListViewModel = ViewModelCreator.CreateNoteListViewModel();
 			GroupListViewModel = ViewModelCreator.CreateGroupListViewModel();

@@ -25,17 +25,23 @@
                     </Grid>
                 </ItemsPanelTemplate>
             </StatusBar.ItemsPanel>
+
             <StatusBarItem>
-                <TextBlock Text="{ Binding Highlighted.ItemId, StringFormat='Id: {0}', UpdateSourceTrigger=PropertyChanged }" />
+                <TextBlock Text="{ Binding SelectedItemId, StringFormat='Id: {0}', UpdateSourceTrigger=PropertyChanged }" />
             </StatusBarItem>
+
             <Separator Grid.Column="1" />
+
             <StatusBarItem Grid.Column="2">
-                <TextBlock Text="{ Binding Highlighted.DateCreated, StringFormat='{}Created: {0:MM/dd/yyyy}', UpdateSourceTrigger=PropertyChanged }" />
+                <TextBlock Text="{ Binding SelectedDateCreated, StringFormat='{}Created: {0:MM/dd/yyyy}', UpdateSourceTrigger=PropertyChanged }" />
             </StatusBarItem>
+
             <Separator Grid.Column="3" />
+
             <StatusBarItem Grid.Column="4">
-                <TextBlock Text="{ Binding RecordCount, StringFormat='# of records: {0}', UpdateSourceTrigger=PropertyChanged }" />
+                <TextBlock Text="{ Binding ItemCount, StringFormat='# of records: {0}', UpdateSourceTrigger=PropertyChanged }" />
             </StatusBarItem>
+
         </StatusBar>
     </Grid>
 </UserControl>

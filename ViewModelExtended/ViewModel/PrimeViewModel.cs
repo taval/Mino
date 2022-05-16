@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Text;
@@ -91,6 +92,14 @@ namespace ViewModelExtended.ViewModel
 
 
 
+		#region Delegates
+
+		private HashSet<PropertyChangedEventHandler> Delegates { get; set; }
+
+		#endregion
+
+
+
 		#region Resource
 
 		public IViewModelResource Resource { get; private set; }
@@ -106,6 +115,24 @@ namespace ViewModelExtended.ViewModel
 			Resource = resource;
 			m_SelectedNoteViewModel = null;
 			Resource.CommandBuilder.MakePrime(this);
+			Delegates = new HashSet<PropertyChangedEventHandler>();
+
+			SetPropertyChangedEventHandler(Resource.StatusBarViewModel);
+		}
+
+		public void SetPropertyChangedEventHandler (StatusBarViewModel observer)
+		{
+			PropertyChangedEventHandler handler = (sender, e) =>
+			{
+				if (e.PropertyName == "SelectedNoteViewModel") {
+					int dummySelectedItemId = observer.SelectedItemId;
+					DateTime dummySelectedDateCreated = observer.SelectedDateCreated;
+				}
+			};
+
+			PropertyChanged += handler;
+
+			Delegates.Add(handler);
 		}
 
 		#endregion

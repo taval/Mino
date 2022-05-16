@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
 using System.Text;
 using System.Windows.Input;
@@ -36,12 +37,12 @@ namespace ViewModelExtended.ViewModel
 
 		private NoteListObjectViewModel? m_Highlighted;
 
-		public int RecordCount {
-			get { return m_RecordCount; }
-			private set { Set(ref m_RecordCount, value); }
+		public int ItemCount {
+			get { return m_ItemCount; }
+			private set { Set(ref m_ItemCount, value); }
 		}
 
-		private int m_RecordCount;
+		private int m_ItemCount;
 
 		#endregion
 
@@ -55,6 +56,15 @@ namespace ViewModelExtended.ViewModel
 		private Dictionary<IListItem, int> m_DirtyListItems;
 
 		#endregion
+
+
+
+		#region Delegates
+
+		private HashSet<PropertyChangedEventHandler> Delegates { get; set; }
+
+		#endregion
+
 
 
 		#region Commands
@@ -84,6 +94,8 @@ namespace ViewModelExtended.ViewModel
 			m_DirtyListItems = new Dictionary<IListItem, int>();
 			Resource = resource;
 			Resource.CommandBuilder.MakeNoteList(this);
+			Delegates = new HashSet<PropertyChangedEventHandler>();
+			SetPropertyChangedEventHandler(Resource.StatusBarViewModel);
 			m_Highlighted = null;
 			List = Resource.ViewModelCreator.CreateList<NoteListObjectViewModel>();
 
@@ -94,7 +106,21 @@ namespace ViewModelExtended.ViewModel
 				Resource.DbQueryHelper.GetSortedListObjects(unsortedObjects.ToList(), List);
 			}
 
-			RecordCount = List.Items.Count();
+			ItemCount = List.Items.Count();
+		}
+
+		public void SetPropertyChangedEventHandler (StatusBarViewModel observer)
+		{
+			PropertyChangedEventHandler handler = (sender, e) =>
+			{
+				if (e.PropertyName == "ItemCount") {
+					int _ = observer.ItemCount;
+				}
+			};
+
+			PropertyChanged += handler;
+
+			Delegates.Add(handler);
 		}
 
 		#endregion
@@ -106,7 +132,7 @@ namespace ViewModelExtended.ViewModel
 		public void Add (NoteListObjectViewModel input)
 		{
 			List.Add(input);
-			RecordCount = List.Items.Count();
+			ItemCount = List.Items.Count();
 
 			using (IDbContext dbContext = Resource.CreateDbContext()) {
 				//Resource.DbListHelper.UpdateAfterAdd(dbContext, input);
@@ -118,13 +144,14 @@ namespace ViewModelExtended.ViewModel
 		public void Insert (NoteListObjectViewModel? target, NoteListObjectViewModel input)
 		{
 			List.Insert(target, input);
-			RecordCount = List.Items.Count();
+			ItemCount = List.Items.Count();
 
 			using (IDbContext dbContext = Resource.CreateDbContext()) {
 				//Resource.DbListHelper.UpdateAfterInsert(dbContext, target, input);
 				//dbContext.Save();
 				m_DirtyListItems.Add(input, m_DirtyListItems.Count());
-				if (target != null) m_DirtyListItems.Add(target, m_DirtyListItems.Count());
+				if (target != null && !m_DirtyListItems.ContainsKey(target))
+					m_DirtyListItems.Add(target, m_DirtyListItems.Count());
 			}
 		}
 
@@ -168,7 +195,7 @@ namespace ViewModelExtended.ViewModel
 		public void Remove (NoteListObjectViewModel input)
 		{
 			List.Remove(input);
-			RecordCount = List.Items.Count();
+			ItemCount = List.Items.Count();
 
 			using (IDbContext dbContext = Resource.CreateDbContext()) {
 				//Resource.DbListHelper.UpdateAfterRemove(dbContext, input);
@@ -194,7 +221,7 @@ namespace ViewModelExtended.ViewModel
 		{
 			RemoveAllEventHandlers();
 			List.Clear();
-			RecordCount = List.Items.Count();
+			ItemCount = List.Items.Count();
 		}
 
 		#endregion
@@ -219,6 +246,20 @@ namespace ViewModelExtended.ViewModel
 			using (IDbContext dbContext = Resource.CreateDbContext()) {
 				return Resource.ViewModelCreator.CreateNoteListObjectViewModel(dbContext);
 			}
+		}
+
+		#endregion
+
+
+
+		#region Shutdown
+
+		/// <summary>
+		/// do housekeeping (save changes, clear resources, etc.)
+		/// </summary>
+		public void Shutdown ()
+		{
+			Delegates.Clear();
 		}
 
 		#endregion

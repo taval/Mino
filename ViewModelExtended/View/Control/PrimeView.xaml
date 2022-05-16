@@ -18,18 +18,18 @@
 
 	<StackPanel>
 		<!-- Viewing window -->
-		<Grid>
-			<Grid.ColumnDefinitions>
-				<ColumnDefinition Width="1*" />
-				<ColumnDefinition Width="2*" />
-				<ColumnDefinition Width="1*" />
-			</Grid.ColumnDefinitions>
+        <Grid>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="1*" />
+                <ColumnDefinition Width="2*" />
+                <ColumnDefinition Width="1*" />
+            </Grid.ColumnDefinitions>
 
-			<Grid.RowDefinitions>
-				<RowDefinition MinHeight="360" Height="*" />
-			</Grid.RowDefinitions>
+            <Grid.RowDefinitions>
+                <RowDefinition MinHeight="360" Height="*" />
+            </Grid.RowDefinitions>
 
-			<local:NoteListView
+            <local:NoteListView
 				Margin="8 0 4 0"
 				DataContext="{ Binding Resource.NoteListViewModel, diag:PresentationTraceSources.TraceLevel=High }"
 
@@ -48,7 +48,7 @@
 					Path=DataContext.NoteDestroyCommand,
 					diag:PresentationTraceSources.TraceLevel=High }" />
 
-			<local:NoteTextView
+            <local:NoteTextView
 				Margin="4 0 4 0"
 				Grid.Column="1"
 				DataContext="{ Binding Resource.NoteTextViewModel }" />
@@ -57,7 +57,7 @@
 					RelativeSource={ RelativeSource AncestorType={ x:Type local:PrimeView } },
 					Path=DataContext.NoteReceiveCommand,
 					diag:PresentationTraceSources.TraceLevel=High }"-->
-			<local:GroupTabsView
+            <local:GroupTabsView
 				Margin="4 0 8 0"
 				Grid.Column="2"
 				DataContext="{ Binding Resource.GroupTabsViewModel }"
@@ -72,10 +72,12 @@
 					Path=DataContext.GroupNoteDropCommand,
 					diag:PresentationTraceSources.TraceLevel=High }" />
 
-		</Grid>
-		<!-- footer -->
+        </Grid>
+
+        <!-- footer -->
         <local:StatusBarView
-            DataContext="{ Binding Resource.NoteListViewModel, diag:PresentationTraceSources.TraceLevel=High }" />
+            DataContext="{ Binding Resource.StatusBarViewModel }" />
+
     </StackPanel>
 	
 </UserControl>
