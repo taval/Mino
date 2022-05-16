@@ -7,7 +7,7 @@ using System.Windows;
 using System.Windows.Input;
 using ViewModelExtended.Model;
 
-// TODO: if selecting a different group then going back to the first one selected, the groupnotes no longer trigger their callbacks
+
 
 namespace ViewModelExtended.ViewModel
 {
@@ -65,7 +65,7 @@ namespace ViewModelExtended.ViewModel
 				using (IDbContext dbContext = Resource.CreateDbContext()) {
 					if (groop != null) {
 						list = GetListByGroupKey(groop);
-						PopulateGroup(dbContext, list, groop);
+						if (!list.Items.Any()) PopulateGroup(dbContext, list, groop);
 					}
 
 					m_List = list;
@@ -546,17 +546,6 @@ namespace ViewModelExtended.ViewModel
 		/// <param name="groop"></param>
 		private void PopulateGroup (IDbContext dbContext, IObservableList<GroupObjectViewModel> list, Group groop)
 		{
-			//IQueryable<GroupObjectViewModel> unsortedObjects = Resource.DbQueryHelper.GetGroupObjectsInGroup(dbContext, groop);
-			//IList<GroupObjectViewModel> tempList = unsortedObjects.ToList();
-
-			//foreach (GroupObjectViewModel observer in tempList) {
-			//	NoteListObjectViewModel subject = FindNote(observer);
-
-			//	SetPropertyChangedEventHandler(subject, observer);
-			//}
-
-			//Resource.DbQueryHelper.GetSortedListObjects(tempList, list);
-
 			/** a GroupObjectViewModel loaded from db is constructed partially from live data.
 			 * - iterate through the database items for ObjectId used to identify the associated Note data
 			 * - construct the GroupObjectViewModel

@@ -5,7 +5,7 @@ using System.Text;
 using System.Windows.Input;
 using ViewModelExtended.Model;
 
-// TODO: there should be allowed zero notes - zero notes would close or block the NoteTextView
+
 
 namespace ViewModelExtended.ViewModel
 {
@@ -52,7 +52,7 @@ namespace ViewModelExtended.ViewModel
 		/// <summary>
 		/// save the dirty state for storing at shutdown, autosave intervals, etc.
 		/// </summary>
-		private Queue<Tuple<NoteListObjectViewModel, NoteListObjectViewModel>> m_DirtyListItems;
+		private Dictionary<IListItem, int> m_DirtyListItems;
 
 		#endregion
 
@@ -81,14 +81,16 @@ namespace ViewModelExtended.ViewModel
 
 		public NoteListViewModel (IViewModelResource resource)
 		{
-			m_DirtyListItems = new Queue<Tuple<NoteListObjectViewModel, NoteListObjectViewModel>>();
+			m_DirtyListItems = new Dictionary<IListItem, int>();
 			Resource = resource;
 			Resource.CommandBuilder.MakeNoteList(this);
 			m_Highlighted = null;
 			List = Resource.ViewModelCreator.CreateList<NoteListObjectViewModel>();
 
 			using (IDbContext dbContext = Resource.CreateDbContext()) {
-				IQueryable<NoteListObjectViewModel> unsortedObjects = Resource.DbQueryHelper.GetAllNoteListObjects(dbContext);
+				IQueryable<NoteListObjectViewModel> unsortedObjects =
+					Resource.DbQueryHelper.GetAllNoteListObjects(dbContext);
+
 				Resource.DbQueryHelper.GetSortedListObjects(unsortedObjects.ToList(), List);
 			}
 
@@ -107,8 +109,9 @@ namespace ViewModelExtended.ViewModel
 			RecordCount = List.Items.Count();
 
 			using (IDbContext dbContext = Resource.CreateDbContext()) {
-				Resource.DbListHelper.UpdateAfterAdd(dbContext, input);
-				dbContext.Save();
+				//Resource.DbListHelper.UpdateAfterAdd(dbContext, input);
+				//dbContext.Save();
+				m_DirtyListItems.Add(input, m_DirtyListItems.Count());
 			}
 		}
 
@@ -118,8 +121,10 @@ namespace ViewModelExtended.ViewModel
 			RecordCount = List.Items.Count();
 
 			using (IDbContext dbContext = Resource.CreateDbContext()) {
-				Resource.DbListHelper.UpdateAfterInsert(dbContext, target, input);
-				dbContext.Save();
+				//Resource.DbListHelper.UpdateAfterInsert(dbContext, target, input);
+				//dbContext.Save();
+				m_DirtyListItems.Add(input, m_DirtyListItems.Count());
+				if (target != null) m_DirtyListItems.Add(target, m_DirtyListItems.Count());
 			}
 		}
 
@@ -127,7 +132,8 @@ namespace ViewModelExtended.ViewModel
 		{
 			List.Reorder(source, target);
 
-			m_DirtyListItems.Enqueue(new Tuple<NoteListObjectViewModel, NoteListObjectViewModel>(source, target));
+			if (!m_DirtyListItems.ContainsKey(source)) m_DirtyListItems.Add(source, m_DirtyListItems.Count());
+			if (!m_DirtyListItems.ContainsKey(target)) m_DirtyListItems.Add(target, m_DirtyListItems.Count());
 		}
 
 		public void SaveListOrder ()
@@ -135,10 +141,25 @@ namespace ViewModelExtended.ViewModel
 			if (!m_DirtyListItems.Any()) return;
 
 			using (IDbContext dbContext = Resource.CreateDbContext()) {
-				while (m_DirtyListItems.Any()) {
-					Tuple<NoteListObjectViewModel, NoteListObjectViewModel> notePair = m_DirtyListItems.Dequeue();
-					Resource.DbListHelper.UpdateAfterReorder(dbContext, notePair.Item1, notePair.Item2);
+				//while (m_DirtyListItems.Any()) {
+				//attempt 1
+					//Tuple<NoteListObjectViewModel, NoteListObjectViewModel> notePair = m_DirtyListItems.Dequeue();
+					//Resource.DbListHelper.UpdateAfterReorder(dbContext, notePair.Item1, notePair.Item2);
+					// attempt 2
+					//IListItem currentItem = m_DirtyListItems.Dequeue();
+					//Resource.DbListHelper.UpdateNodes(dbContext, currentItem);
+				//}
+				// attempt 3
+				IEnumerable<KeyValuePair<IListItem, int>> items =
+					from item in m_DirtyListItems
+					orderby item.Value ascending
+					select item;
+
+				foreach (KeyValuePair<IListItem, int> item in items) {
+					Resource.DbListHelper.UpdateNodes(dbContext, item.Key);
+					m_DirtyListItems.Remove(item.Key);
 				}
+
 				dbContext.Save();
 			}
 			m_DirtyListItems.Clear();
@@ -150,8 +171,16 @@ namespace ViewModelExtended.ViewModel
 			RecordCount = List.Items.Count();
 
 			using (IDbContext dbContext = Resource.CreateDbContext()) {
-				Resource.DbListHelper.UpdateAfterRemove(dbContext, input);
-				dbContext.Save();
+				//Resource.DbListHelper.UpdateAfterRemove(dbContext, input);
+				//dbContext.Save();
+				if (input.Previous != null && !m_DirtyListItems.ContainsKey(input.Previous))
+					m_DirtyListItems.Add(input.Previous, m_DirtyListItems.Count());
+
+				if (input.Next != null && !m_DirtyListItems.ContainsKey(input.Next))
+					m_DirtyListItems.Add(input.Next, m_DirtyListItems.Count());
+
+				if (m_DirtyListItems.ContainsKey(input)) m_DirtyListItems.Remove(input);
+				
 				Resource.ViewModelCreator.DestroyNoteListObjectViewModel(dbContext, input);
 			}
 		}
