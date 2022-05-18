@@ -274,7 +274,7 @@ namespace ViewModelExtended.ViewModel
 			}
 
 			// destroy the GroupObjects (dependent Notes) in the group
-			Resource.GroupContentsViewModel.ClearList(input.Model.Data);
+			Resource.GroupContentsViewModel.DestroyList(input.Model.Data);
 
 			// destroy the Group
 			Resource.GroupListViewModel.Remove(input);

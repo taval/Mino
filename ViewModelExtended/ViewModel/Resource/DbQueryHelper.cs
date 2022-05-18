@@ -109,26 +109,34 @@ namespace ViewModelExtended.ViewModel
 
 		#region Sort
 
-		//public void GetSortedListObjects<T> (IQueryable<T> source, IObservableList<T> target) where T : IListItem
+		public IEnumerable<KeyValuePair<T, int>> SortDictionary<T> (Dictionary<T, int> listItems) where T : IListItem
+		{
+			return
+				from item in listItems
+				orderby item.Value ascending
+				select item;
+		}
+
 		public void GetSortedListObjects<T> (IList<T> source, IObservableList<T> target) where T : IListItem
 		{
 			target.Clear();
-			//List<T> objectList = source.ToList(); // replaced objectList below w/ original source (now a list)
+
+			IList<T> sourceCopy = source.ToList();
 
 			// first object
-			IEnumerable<T> first = source.Where(obj => obj.Node.PreviousId == null);
+			IEnumerable<T> first = sourceCopy.Where(obj => obj.Node.PreviousId == null);
 
 			if (!first.Any()) return;
 			T firstObject = first.Single();
 
 			target.Add(firstObject);
-			source.Remove(firstObject);
+			sourceCopy.Remove(firstObject);
 
 			T currentObject = firstObject;
 
 			// remaining objects
-			while (source.Count > 0) {
-				IEnumerable<T> next = source.Where(obj => obj.Node.Id == currentObject.Node.NextId);
+			while (sourceCopy.Count > 0) {
+				IEnumerable<T> next = sourceCopy.Where(obj => obj.Node.Id == currentObject.Node.NextId);
 
 				if (!next.Any()) {
 					currentObject.Next = null;
@@ -140,7 +148,7 @@ namespace ViewModelExtended.ViewModel
 				nextObject.Previous = currentObject;
 
 				target.Add(nextObject);
-				source.Remove(nextObject);
+				sourceCopy.Remove(nextObject);
 
 				currentObject = nextObject;
 			}

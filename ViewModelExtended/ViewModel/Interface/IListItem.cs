@@ -19,23 +19,15 @@ namespace ViewModelExtended.ViewModel
 
 		public int DataId { get; }
 
-		//public INode Node { get; } // TODO: deprecate
-
 		/// <summary>
 		/// the IListItem's previous item
 		/// </summary>
 		public IListItem? Previous { get; set; }
 
-		//public int? PreviousId { get; } // TODO: deprecate
-
 		/// <summary>
 		/// the IListItem's next item
 		/// </summary>
 		public IListItem? Next { get; set; }
-
-		//public int? NextId { get; } // TODO: deprecate
-
-		//public IListItem Value { get; } // TODO: deprecate
 	}
 
 	public class ListDataEqualityComparer : IEqualityComparer<IListItem>
@@ -43,7 +35,6 @@ namespace ViewModelExtended.ViewModel
 		public bool Equals (IListItem? lhs, IListItem? rhs)
 		{
 			return lhs?.DataId == rhs?.DataId;
-
 		}
 
 		public int GetHashCode ([DisallowNull] IListItem obj)

@@ -8,7 +8,8 @@ using System.Windows;
 using ViewModelExtended.Model;
 using ViewModelExtended.ViewModel;
 
-
+// TODO: most exceptions should trigger a rollback to the last known good state and shutdown/commit properly
+// TODO: use p_ for private properties, f_ for private fields (maybe m_ for private methods but prob best to keep camel case for that one)
 
 namespace ViewModelExtended
 {

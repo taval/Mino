@@ -15,21 +15,37 @@ namespace ViewModelExtended.ViewModel
 	/// </summary>
 	public class NoteListViewModel : ViewModelBase
 	{
+		#region Container
+
 		/// <summary>
 		/// the base ListViewModel
 		/// </summary>
-		private IObservableList<NoteListObjectViewModel> List { get; set; }
-
 		public IEnumerable<NoteListObjectViewModel> Items {
 			get { return List.Items; }
 		}
 
+		private IObservableList<NoteListObjectViewModel> List { get; set; }
+
+		#endregion
+
+
+
+		#region ViewModelResource
+
+		/// <summary>
+		/// the viewmodel datacontext
+		/// </summary>
 		private IViewModelResource Resource { get; set; }
+
+		#endregion
 
 
 
 		#region Cross-View Data
 
+		/// <summary>
+		/// visually depicts the most recently clicked item
+		/// </summary>
 		public NoteListObjectViewModel? Highlighted {
 			get { return m_Highlighted; }
 			set { Set(ref m_Highlighted, value); }
@@ -37,6 +53,9 @@ namespace ViewModelExtended.ViewModel
 
 		private NoteListObjectViewModel? m_Highlighted;
 
+		/// <summary>
+		/// the number of items in the container
+		/// </summary>
 		public int ItemCount {
 			get { return m_ItemCount; }
 			private set { Set(ref m_ItemCount, value); }
@@ -48,7 +67,7 @@ namespace ViewModelExtended.ViewModel
 
 
 
-		#region Dirty List (used by Reorder/ReorderCommit)
+		#region Dirty List
 
 		/// <summary>
 		/// save the dirty state for storing at shutdown, autosave intervals, etc.
@@ -59,16 +78,11 @@ namespace ViewModelExtended.ViewModel
 
 
 
-		#region Delegates
-
-		private HashSet<PropertyChangedEventHandler> Delegates { get; set; }
-
-		#endregion
-
-
-
 		#region Commands
 
+		/// <summary>
+		/// rearrange two nodes
+		/// </summary>
 		public ICommand ReorderCommand {
 			get { return m_ReorderCommand ?? throw new MissingCommandException(); }
 			set { if (m_ReorderCommand == null) m_ReorderCommand = value; }
@@ -76,6 +90,9 @@ namespace ViewModelExtended.ViewModel
 
 		private ICommand? m_ReorderCommand;
 
+		/// <summary>
+		/// gets data for beginning of drag-drop operation
+		/// </summary>
 		public ICommand PickupCommand {
 			get { return m_PickupCommand ?? throw new MissingCommandException(); }
 			set { if (m_PickupCommand == null) m_PickupCommand = value; }
@@ -91,11 +108,10 @@ namespace ViewModelExtended.ViewModel
 
 		public NoteListViewModel (IViewModelResource resource)
 		{
-			m_DirtyListItems = new Dictionary<IListItem, int>();
 			Resource = resource;
 			Resource.CommandBuilder.MakeNoteList(this);
-			Delegates = new HashSet<PropertyChangedEventHandler>();
 			SetPropertyChangedEventHandler(Resource.StatusBarViewModel);
+			m_DirtyListItems = new Dictionary<IListItem, int>();
 			m_Highlighted = null;
 			List = Resource.ViewModelCreator.CreateList<NoteListObjectViewModel>();
 
@@ -109,7 +125,11 @@ namespace ViewModelExtended.ViewModel
 			ItemCount = List.Items.Count();
 		}
 
-		public void SetPropertyChangedEventHandler (StatusBarViewModel observer)
+		/// <summary>
+		/// create a selection of listeners on this object
+		/// </summary>
+		/// <param name="observer"></param>
+		private void SetPropertyChangedEventHandler (StatusBarViewModel observer)
 		{
 			PropertyChangedEventHandler handler = (sender, e) =>
 			{
@@ -119,42 +139,44 @@ namespace ViewModelExtended.ViewModel
 			};
 
 			PropertyChanged += handler;
-
-			Delegates.Add(handler);
 		}
 
 		#endregion
 
 
 
-		#region Access
+		#region List Access
 
+		/// <summary>
+		/// add item to end of list
+		/// </summary>
+		/// <param name="input"></param>
 		public void Add (NoteListObjectViewModel input)
 		{
 			List.Add(input);
 			ItemCount = List.Items.Count();
-
-			using (IDbContext dbContext = Resource.CreateDbContext()) {
-				//Resource.DbListHelper.UpdateAfterAdd(dbContext, input);
-				//dbContext.Save();
-				m_DirtyListItems.Add(input, m_DirtyListItems.Count());
-			}
+			m_DirtyListItems.Add(input, m_DirtyListItems.Count());
 		}
 
+		/// <summary>
+		/// add item to list in the position given by target object
+		/// </summary>
+		/// <param name="target"></param>
+		/// <param name="input"></param>
 		public void Insert (NoteListObjectViewModel? target, NoteListObjectViewModel input)
 		{
 			List.Insert(target, input);
 			ItemCount = List.Items.Count();
-
-			using (IDbContext dbContext = Resource.CreateDbContext()) {
-				//Resource.DbListHelper.UpdateAfterInsert(dbContext, target, input);
-				//dbContext.Save();
-				m_DirtyListItems.Add(input, m_DirtyListItems.Count());
-				if (target != null && !m_DirtyListItems.ContainsKey(target))
-					m_DirtyListItems.Add(target, m_DirtyListItems.Count());
-			}
+			m_DirtyListItems.Add(input, m_DirtyListItems.Count());
+			if (target != null && !m_DirtyListItems.ContainsKey(target))
+				m_DirtyListItems.Add(target, m_DirtyListItems.Count());
 		}
 
+		/// <summary>
+		/// rearrange two objects in list
+		/// </summary>
+		/// <param name="source"></param>
+		/// <param name="target"></param>
 		public void Reorder (NoteListObjectViewModel source, NoteListObjectViewModel target)
 		{
 			List.Reorder(source, target);
@@ -163,63 +185,44 @@ namespace ViewModelExtended.ViewModel
 			if (!m_DirtyListItems.ContainsKey(target)) m_DirtyListItems.Add(target, m_DirtyListItems.Count());
 		}
 
-		public void SaveListOrder ()
-		{
-			if (!m_DirtyListItems.Any()) return;
-
-			using (IDbContext dbContext = Resource.CreateDbContext()) {
-				//while (m_DirtyListItems.Any()) {
-				//attempt 1
-					//Tuple<NoteListObjectViewModel, NoteListObjectViewModel> notePair = m_DirtyListItems.Dequeue();
-					//Resource.DbListHelper.UpdateAfterReorder(dbContext, notePair.Item1, notePair.Item2);
-					// attempt 2
-					//IListItem currentItem = m_DirtyListItems.Dequeue();
-					//Resource.DbListHelper.UpdateNodes(dbContext, currentItem);
-				//}
-				// attempt 3
-				IEnumerable<KeyValuePair<IListItem, int>> items =
-					from item in m_DirtyListItems
-					orderby item.Value ascending
-					select item;
-
-				foreach (KeyValuePair<IListItem, int> item in items) {
-					Resource.DbListHelper.UpdateNodes(dbContext, item.Key);
-					m_DirtyListItems.Remove(item.Key);
-				}
-
-				dbContext.Save();
-			}
-			m_DirtyListItems.Clear();
-		}
-
+		/// <summary>
+		/// remove object from list
+		/// </summary>
+		/// <param name="input"></param>
 		public void Remove (NoteListObjectViewModel input)
 		{
 			List.Remove(input);
 			ItemCount = List.Items.Count();
 
+			if (input.Previous != null && !m_DirtyListItems.ContainsKey(input.Previous))
+				m_DirtyListItems.Add(input.Previous, m_DirtyListItems.Count());
+
+			if (input.Next != null && !m_DirtyListItems.ContainsKey(input.Next))
+				m_DirtyListItems.Add(input.Next, m_DirtyListItems.Count());
+
+			if (m_DirtyListItems.ContainsKey(input)) m_DirtyListItems.Remove(input);
+
 			using (IDbContext dbContext = Resource.CreateDbContext()) {
-				//Resource.DbListHelper.UpdateAfterRemove(dbContext, input);
-				//dbContext.Save();
-				if (input.Previous != null && !m_DirtyListItems.ContainsKey(input.Previous))
-					m_DirtyListItems.Add(input.Previous, m_DirtyListItems.Count());
-
-				if (input.Next != null && !m_DirtyListItems.ContainsKey(input.Next))
-					m_DirtyListItems.Add(input.Next, m_DirtyListItems.Count());
-
-				if (m_DirtyListItems.ContainsKey(input)) m_DirtyListItems.Remove(input);
-				
 				Resource.ViewModelCreator.DestroyNoteListObjectViewModel(dbContext, input);
 			}
 		}
 
+		/// <summary>
+		/// return position of given list item
+		/// </summary>
+		/// <param name="input"></param>
+		/// <returns></returns>
 		public int Index (NoteListObjectViewModel input)
 		{
 			return List.Index(input);
 		}
 
+		/// <summary>
+		/// empty the list
+		/// </summary>
 		public void Clear ()
 		{
-			RemoveAllEventHandlers();
+			m_DirtyListItems.Clear();
 			List.Clear();
 			ItemCount = List.Items.Count();
 		}
@@ -230,6 +233,11 @@ namespace ViewModelExtended.ViewModel
 
 		#region Query
 
+		/// <summary>
+		/// return an item based on conditions provided via callback
+		/// </summary>
+		/// <param name="predicate"></param>
+		/// <returns></returns>
 		public NoteListObjectViewModel Find (Func<NoteListObjectViewModel, bool> predicate)
 		{
 			return List.Find(predicate);
@@ -241,6 +249,10 @@ namespace ViewModelExtended.ViewModel
 
 		#region Create
 
+		/// <summary>
+		/// create a new free object
+		/// </summary>
+		/// <returns></returns>
 		public NoteListObjectViewModel Create ()
 		{
 			using (IDbContext dbContext = Resource.CreateDbContext()) {
@@ -255,11 +267,31 @@ namespace ViewModelExtended.ViewModel
 		#region Shutdown
 
 		/// <summary>
+		/// persist list node order
+		/// </summary>
+		private void SaveListOrder ()
+		{
+			if (!m_DirtyListItems.Any()) return;
+
+			using (IDbContext dbContext = Resource.CreateDbContext()) {
+				foreach (KeyValuePair<IListItem, int> obj in Resource.DbQueryHelper.SortDictionary(m_DirtyListItems)) {
+					Resource.DbListHelper.UpdateNodes(dbContext, obj.Key);
+					m_DirtyListItems.Remove(obj.Key);
+				}
+
+				dbContext.Save();
+			}
+			m_DirtyListItems.Clear();
+		}
+
+		/// <summary>
 		/// do housekeeping (save changes, clear resources, etc.)
 		/// </summary>
 		public void Shutdown ()
 		{
-			Delegates.Clear();
+			SaveListOrder();
+			Clear();
+			RemoveAllEventHandlers();
 		}
 
 		#endregion

@@ -92,14 +92,6 @@ namespace ViewModelExtended.ViewModel
 
 
 
-		#region Delegates
-
-		private HashSet<PropertyChangedEventHandler> Delegates { get; set; }
-
-		#endregion
-
-
-
 		#region Resource
 
 		public IViewModelResource Resource { get; private set; }
@@ -115,8 +107,6 @@ namespace ViewModelExtended.ViewModel
 			Resource = resource;
 			m_SelectedNoteViewModel = null;
 			Resource.CommandBuilder.MakePrime(this);
-			Delegates = new HashSet<PropertyChangedEventHandler>();
-
 			SetPropertyChangedEventHandler(Resource.StatusBarViewModel);
 		}
 
@@ -131,8 +121,6 @@ namespace ViewModelExtended.ViewModel
 			};
 
 			PropertyChanged += handler;
-
-			Delegates.Add(handler);
 		}
 
 		#endregion
@@ -307,9 +295,10 @@ namespace ViewModelExtended.ViewModel
 		/// </summary>
 		public void Shutdown ()
 		{
-			Resource.NoteListViewModel.SaveListOrder();
-			//Resource.GroupListViewModel.SaveListOrder();
-			//Resource.GroupContentsViewModel.SaveListOrder();
+			RemoveAllEventHandlers();
+			Resource.GroupContentsViewModel.Shutdown();
+			Resource.GroupListViewModel.Shutdown();
+			Resource.NoteListViewModel.Shutdown();
 		}
 
 		#endregion

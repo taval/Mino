@@ -1,16 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
 using System.Text;
 using System.Windows.Input;
 using ViewModelExtended.Model;
 
-// TODO: zero groups should gray out the Contents tab. An existing group should ungray/activate it.
 
-// TODO: double-clicking the group's title should only select an item upon the first double-click. Subsequent double-clicks should cause it to edit the text.
-// UPDATE: implemented single/double click choice behavior - review and determine if this is sufficient
-
-// TODO: each group is assigned a color. each associated NoteListObjectViewModel should receive a color if it is associated with a group. when removed from group, it goes back to colorless.
 
 namespace ViewModelExtended.ViewModel
 {
@@ -19,29 +15,64 @@ namespace ViewModelExtended.ViewModel
 	/// </summary>
 	public class GroupListViewModel : ViewModelBase
 	{
+		#region Container
+
 		/// <summary>
 		/// the base ListViewModel
 		/// </summary>
-		private IObservableList<GroupListObjectViewModel> List { get; set; }
-
 		public IEnumerable<GroupListObjectViewModel> Items {
 			get { return List.Items; }
 		}
 
+		private IObservableList<GroupListObjectViewModel> List { get; set; }
+
+		#endregion
+
+
+
+		#region Resource
+
+		/// <summary>
+		/// the viewmodel datacontext
+		/// </summary>
 		private IViewModelResource Resource { get; set; }
+
+		#endregion
 
 
 
 		#region Cross-View Data
 
+		/// <summary>
+		/// visually depicts the most recently clicked item
+		/// </summary>
 		public GroupListObjectViewModel? Highlighted {
 			get { return m_Highlighted; }
-			set {
-				Set(ref m_Highlighted, value);
-			}
+			set { Set(ref m_Highlighted, value); }
 		}
 
 		private GroupListObjectViewModel? m_Highlighted;
+
+		/// <summary>
+		/// the number of items in the container
+		/// </summary>
+		public int ItemCount {
+			get { return m_ItemCount; }
+			private set { Set(ref m_ItemCount, value); } // TODO: display this on StatusBar
+		}
+
+		private int m_ItemCount;
+
+		#endregion
+
+
+
+		#region Dirty List
+
+		/// <summary>
+		/// save the dirty state for storing at shutdown, autosave intervals, etc.
+		/// </summary>
+		private Dictionary<IListItem, int> m_DirtyListItems;
 
 		#endregion
 
@@ -49,6 +80,9 @@ namespace ViewModelExtended.ViewModel
 
 		#region Commands
 
+		/// <summary>
+		/// rearrange two nodes
+		/// </summary>
 		public ICommand ReorderCommand {
 			get { return m_ReorderCommand ?? throw new MissingCommandException(); }
 			set { if (m_ReorderCommand == null) m_ReorderCommand = value; }
@@ -56,6 +90,9 @@ namespace ViewModelExtended.ViewModel
 
 		private ICommand? m_ReorderCommand;
 
+		/// <summary>
+		/// gets data for beginning of drag-drop operation
+		/// </summary>
 		public ICommand PickupCommand {
 			get { return m_PickupCommand ?? throw new MissingCommandException(); }
 			set { if (m_PickupCommand == null) m_PickupCommand = value; }
@@ -63,6 +100,9 @@ namespace ViewModelExtended.ViewModel
 
 		private ICommand? m_PickupCommand;
 
+		/// <summary>
+		/// change the title
+		/// </summary>
 		public ICommand ChangeTitleCommand {
 			get { return m_ChangeTitleCommand ?? throw new MissingCommandException(); }
 			set { if (m_ChangeTitleCommand == null) m_ChangeTitleCommand = value; }
@@ -70,6 +110,9 @@ namespace ViewModelExtended.ViewModel
 
 		private ICommand? m_ChangeTitleCommand;
 
+		/// <summary>
+		/// change the color
+		/// </summary>
 		public ICommand ChangeColorCommand {
 			get { return m_ChangeColorCommand ?? throw new MissingCommandException(); }
 			set { if (m_ChangeColorCommand == null) m_ChangeColorCommand = value; }
@@ -77,6 +120,9 @@ namespace ViewModelExtended.ViewModel
 
 		private ICommand? m_ChangeColorCommand;
 
+		/// <summary>
+		/// perform operations based on highlighting an item
+		/// </summary>
 		public ICommand HighlightCommand {
 			get { return m_HighlightCommand ?? throw new MissingCommandException(); }
 			set { if (m_HighlightCommand == null) m_HighlightCommand = value; }
@@ -94,72 +140,121 @@ namespace ViewModelExtended.ViewModel
 		{
 			Resource = resource;
 			Resource.CommandBuilder.MakeGroupList(this);
+			SetPropertyChangedEventHandler(Resource.StatusBarViewModel);
+			m_DirtyListItems = new Dictionary<IListItem, int>();
 			m_Highlighted = null;
 			List = Resource.ViewModelCreator.CreateList<GroupListObjectViewModel>();
 
 			using (IDbContext dbContext = Resource.CreateDbContext()) {
-				IQueryable<GroupListObjectViewModel> unsortedObjects = Resource.DbQueryHelper.GetAllGroupListObjects(dbContext);
+				IQueryable<GroupListObjectViewModel> unsortedObjects =
+					Resource.DbQueryHelper.GetAllGroupListObjects(dbContext);
+
 				Resource.DbQueryHelper.GetSortedListObjects(unsortedObjects.ToList(), List);
 			}
+
+			ItemCount = List.Items.Count();
+		}
+
+		/// <summary>
+		/// create a selection of listeners on this object
+		/// </summary>
+		/// <param name="observer"></param>
+		private void SetPropertyChangedEventHandler (StatusBarViewModel observer)
+		{
+			PropertyChangedEventHandler handler = (sender, e) =>
+			{
+				if (e.PropertyName == "ItemCount") {
+					int _ = observer.ItemCount;
+				}
+			};
+
+			PropertyChanged += handler;
 		}
 
 		#endregion
 
 
 
-		#region Access
+		#region List Access
 
+		/// <summary>
+		/// add item to end of list
+		/// </summary>
+		/// <param name="input"></param>
 		public void Add (GroupListObjectViewModel input)
 		{
 			List.Add(input);
-
-			// make changes to database
-			using (IDbContext dbContext = Resource.CreateDbContext()) {
-				Resource.DbListHelper.UpdateAfterAdd(dbContext, input);
-				dbContext.Save();
-			}
+			ItemCount = List.Items.Count();
+			m_DirtyListItems.Add(input, m_DirtyListItems.Count());
 		}
 
+		/// <summary>
+		/// add item to list in the position given by target object
+		/// </summary>
+		/// <param name="target"></param>
+		/// <param name="input"></param>
 		public void Insert (GroupListObjectViewModel? target, GroupListObjectViewModel input)
 		{
 			List.Insert(target, input);
-
-			using (IDbContext dbContext = Resource.CreateDbContext()) {
-				Resource.DbListHelper.UpdateAfterInsert(dbContext, target, input);
-				dbContext.Save();
-			}
+			ItemCount = List.Items.Count();
+			m_DirtyListItems.Add(input, m_DirtyListItems.Count());
+			if (target != null && !m_DirtyListItems.ContainsKey(target))
+				m_DirtyListItems.Add(target, m_DirtyListItems.Count());
 		}
 
+		/// <summary>
+		/// rearrange two objects in list
+		/// </summary>
+		/// <param name="source"></param>
+		/// <param name="target"></param>
 		public void Reorder (GroupListObjectViewModel source, GroupListObjectViewModel target)
 		{
 			List.Reorder(source, target);
 
-			using (IDbContext dbContext = Resource.CreateDbContext()) {
-				Resource.DbListHelper.UpdateAfterReorder(dbContext, source, target);
-				dbContext.Save();
-			}
+			if (!m_DirtyListItems.ContainsKey(source)) m_DirtyListItems.Add(source, m_DirtyListItems.Count());
+			if (!m_DirtyListItems.ContainsKey(target)) m_DirtyListItems.Add(target, m_DirtyListItems.Count());
 		}
 
+		/// <summary>
+		/// remove object from list
+		/// </summary>
+		/// <param name="input"></param>
 		public void Remove (GroupListObjectViewModel input)
 		{
 			List.Remove(input);
+			ItemCount = List.Items.Count();
+
+			if (input.Previous != null && !m_DirtyListItems.ContainsKey(input.Previous))
+				m_DirtyListItems.Add(input.Previous, m_DirtyListItems.Count());
+
+			if (input.Next != null && !m_DirtyListItems.ContainsKey(input.Next))
+				m_DirtyListItems.Add(input.Next, m_DirtyListItems.Count());
+
+			if (m_DirtyListItems.ContainsKey(input)) m_DirtyListItems.Remove(input);
 
 			using (IDbContext dbContext = Resource.CreateDbContext()) {
-				Resource.DbListHelper.UpdateAfterRemove(dbContext, input);
-				dbContext.Save();
 				Resource.ViewModelCreator.DestroyGroupListObjectViewModel(dbContext, input);
 			}
 		}
 
+		/// <summary>
+		/// return position of given list item
+		/// </summary>
+		/// <param name="input"></param>
+		/// <returns></returns>
 		public int Index (GroupListObjectViewModel input)
 		{
 			return List.Index(input);
 		}
 
+		/// <summary>
+		/// empty the list
+		/// </summary>
 		public void Clear ()
 		{
-			RemoveAllEventHandlers();
+			m_DirtyListItems.Clear();
 			List.Clear();
+			ItemCount = List.Items.Count();
 		}
 
 		#endregion
@@ -168,6 +263,11 @@ namespace ViewModelExtended.ViewModel
 
 		#region Query
 
+		/// <summary>
+		/// return an item based on conditions provided via callback
+		/// </summary>
+		/// <param name="predicate"></param>
+		/// <returns></returns>
 		public GroupListObjectViewModel Find (Func<GroupListObjectViewModel, bool> predicate)
 		{
 			return List.Find(predicate);
@@ -179,6 +279,10 @@ namespace ViewModelExtended.ViewModel
 
 		#region Create
 
+		/// <summary>
+		/// create a new free object
+		/// </summary>
+		/// <returns></returns>
 		public GroupListObjectViewModel Create ()
 		{
 			using (IDbContext dbContext = Resource.CreateDbContext()) {
@@ -213,5 +317,46 @@ namespace ViewModelExtended.ViewModel
 		}
 
 		#endregion
+
+
+
+		#region Shutdown
+
+		/// <summary>
+		/// persist list node order
+		/// </summary>
+		private void SaveListOrder ()
+		{
+			if (!m_DirtyListItems.Any()) return;
+
+			using (IDbContext dbContext = Resource.CreateDbContext()) {
+				foreach (KeyValuePair<IListItem, int> obj in Resource.DbQueryHelper.SortDictionary(m_DirtyListItems)) {
+					Resource.DbListHelper.UpdateNodes(dbContext, obj.Key);
+					m_DirtyListItems.Remove(obj.Key);
+				}
+
+				dbContext.Save();
+			}
+			m_DirtyListItems.Clear();
+		}
+
+		/// <summary>
+		/// do housekeeping (save changes, clear resources, etc.)
+		/// </summary>
+		public void Shutdown ()
+		{
+			SaveListOrder();
+			Clear();
+			RemoveAllEventHandlers();
+		}
+
+		#endregion
 	}
 }
+
+// TODO: zero groups should gray out the Contents tab. An existing group should ungray/activate it.
+
+// TODO: double-clicking the group's title should only select an item upon the first double-click. Subsequent double-clicks should cause it to edit the text.
+// UPDATE: implemented single/double click choice behavior - review and determine if this is sufficient
+
+// TODO: each group is assigned a color. each associated NoteListObjectViewModel should receive a color if it is associated with a group. when removed from group, it goes back to colorless.
