@@ -26,6 +26,14 @@ namespace ViewModelExtended.ViewModel
 		public IEnumerable<KeyValuePair<T, int>> SortDictionary<T> (Dictionary<T, int> listItems) where T : IListItem;
 
 		/// <summary>
+		/// do a simple copy into an IObservableList
+		/// </summary>
+		/// <typeparam name="T"></typeparam>
+		/// <param name="source"></param>
+		/// <param name="target"></param>
+		public void GetUnsortedListObjects<T> (IList<T> source, IObservableList<T> target) where T : IListItem;
+
+		/// <summary>
 		/// sort a basic list into an IObservableList
 		/// </summary>
 		/// <typeparam name="T"></typeparam>

@@ -117,6 +117,13 @@ namespace ViewModelExtended.ViewModel
 				select item;
 		}
 
+		public void GetUnsortedListObjects<T> (IList<T> source, IObservableList<T> target) where T : IListItem
+		{
+			target.Clear();
+
+			foreach (T obj in source) target.Add(obj);
+		}
+
 		public void GetSortedListObjects<T> (IList<T> source, IObservableList<T> target) where T : IListItem
 		{
 			target.Clear();

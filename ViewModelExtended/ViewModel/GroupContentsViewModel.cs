@@ -17,38 +17,17 @@ namespace ViewModelExtended.ViewModel
 	{
 		#region Container
 
-		/// <summary>
-		/// the public enumerable interface for a list of GroupObjects - represents the contents of the selected group
-		/// </summary>
+		///// <summary>
+		///// the public enumerable interface for a list of GroupObjects - represents the contents of the selected group
+		///// </summary>
 		public IEnumerable<GroupObjectViewModel> Items {
-			get { return p_List.Items; }
+			get { return Contents.Items; }
 		}
 
-		/// <summary>
-		/// the internal interface to the selected contents list
-		/// </summary>
-		private IObservableList<GroupObjectViewModel> p_List {
-			get {
-				// provide a dummy list if none available
-				if (f_List == null) return p_Resource.ViewModelCreator.CreateList<GroupObjectViewModel>();
-
-				return f_List;
-			}
-			set {
-				f_List = value;
-				ItemCount = f_List.Items.Count();
-			}
-		}
-
-		/// <summary>
-		/// the stored reference to the selected observable contents list
-		/// </summary>
-		private IObservableList<GroupObjectViewModel>? f_List;
-
-		/// <summary>
-		/// A dictionary of GroupContents lists
-		/// </summary>
-		private Dictionary<Group, IObservableList<GroupObjectViewModel>> p_Lists { get; set; }
+		///// <summary>
+		///// the internal interface to the selected contents list
+		///// </summary>
+		private GroupContents Contents { get; set; }
 
 		#endregion
 
@@ -90,7 +69,10 @@ namespace ViewModelExtended.ViewModel
 			set {
 				// if ContentData was set to null, assign the list an empty value
 				if (value == null) {
-					f_List = null;
+					//Contents.GetListByGroupKey(null);
+					Contents.List = Contents.GetListByGroupKey(null);
+					//DirtyLists.GetListByGroupKey(null);
+					DirtyLists.List = DirtyLists.GetListByGroupKey(null);
 					HasGroup = false;
 					return;
 				}
@@ -98,22 +80,26 @@ namespace ViewModelExtended.ViewModel
 				HasGroup = true;
 
 				Group groop = value.Model.Data;
-				Dictionary<IListItem, int>? dirtyList = null;
-				IObservableList<GroupObjectViewModel>? list = null;
 
 				if (groop != null) {
 					// select the dirty list
-					dirtyList = GetDirtyListByGroupKey(groop);
+					//DirtyLists.GetListByGroupKey(groop);
+					DirtyLists.List = DirtyLists.GetListByGroupKey(groop);
 
 					// populate the GroupContents list
-					list = GetListByGroupKey(groop);
+					Contents.List = Contents.GetListByGroupKey(groop);
+
 					using (IDbContext dbContext = p_Resource.CreateDbContext()) {
-						if (!list.Items.Any()) PopulateGroup(dbContext, list, groop);
+						//if (!list.Items.Any()) PopulateGroup(dbContext, list, groop);
+						if (!Contents.List.Items.Any()) {
+							IList<GroupObjectViewModel> tempList = new List<GroupObjectViewModel>();
+
+							PopulateGroup(dbContext, tempList, groop);
+
+							p_Resource.DbQueryHelper.GetSortedListObjects(tempList, Contents.List);
+						}
 					}
 				}
-				f_DirtyList = dirtyList;
-				if (list != null) p_List = list;
-				
 
 				Set(ref f_ContentData, value);
 				NotifyPropertyChanged(nameof(Title));
@@ -235,28 +221,12 @@ namespace ViewModelExtended.ViewModel
 
 
 
-		#region Dirty List
+		#region Dirty Lists
 
 		/// <summary>
 		/// save the dirty state for storing at shutdown, autosave intervals, etc.
 		/// </summary>
-		private Dictionary<Group, Dictionary<IListItem, int>> f_DirtyLists;
-
-		/// <summary>
-		/// the internal interface to the selected dirty list
-		/// </summary>
-		private Dictionary<IListItem, int> p_DirtyList {
-			get {
-				if (f_DirtyList == null) return new Dictionary<IListItem, int>();
-
-				return f_DirtyList;
-			}
-		}
-
-		/// <summary>
-		/// the stored reference to the selected dirty list
-		/// </summary>
-		private Dictionary<IListItem, int>? f_DirtyList;
+		GroupChangeQueue DirtyLists;
 
 		#endregion
 
@@ -302,18 +272,28 @@ namespace ViewModelExtended.ViewModel
 
 		public GroupContentsViewModel (IViewModelResource resource)
 		{
+			// attach commands
 			p_Resource = resource;
 			p_Resource.CommandBuilder.MakeGroup(this);
+
+			// attach handlers
 			SetPropertyChangedEventHandler(p_Resource.StatusBarViewModel);
-			//f_DirtyLists = new Dictionary<IListItem, int>();
-			f_DirtyLists = new Dictionary<Group, Dictionary<IListItem, int>>();
-			p_Lists = new Dictionary<Group, IObservableList<GroupObjectViewModel>>();
+
+			// init contents container
+			Contents = new GroupContents(() => p_Resource.ViewModelCreator.CreateList<GroupObjectViewModel>());
+			ItemCount = Contents.ItemCount;
+
+			// init change 'queue'
+			DirtyLists = new GroupChangeQueue(() => new Dictionary<IListItem, int>());
+
+			// init content metadata (the 'group')
 			f_ContentData = null;
-			f_List = null;
-			p_Delegates = new Dictionary<
-				int, KeyValuePair<NoteListObjectViewModel, PropertyChangedEventHandler>>();
+
+			// init delegate reference
+			p_Delegates = new Dictionary<int, KeyValuePair<NoteListObjectViewModel, PropertyChangedEventHandler>>();
+
+			// init highlighted
 			f_Highlighted = null;
-			ItemCount = p_List.Items.Count();
 		}
 
 		/// <summary>
@@ -344,21 +324,14 @@ namespace ViewModelExtended.ViewModel
 		/// <param name="input"></param>
 		public void Add (GroupObjectViewModel input)
 		{
-			if (f_List == null) return;
-
 			NoteListObjectViewModel match = FindNote(input);
 
 			SetNoteObserver(match, input);
 
-			p_List.Add(input);
+			Contents.Add(input);
+			ItemCount = Contents.ItemCount;
 
-			ItemCount = p_List.Items.Count();
-			p_DirtyList.Add(input, p_DirtyList.Count());
-
-			//using (IDbContext dbContext = p_Resource.CreateDbContext()) {
-			//	p_Resource.DbListHelper.UpdateAfterAdd(dbContext, input);
-			//	dbContext.Save();
-			//}
+			DirtyLists.QueueOnAdd(input);
 		}
 
 		/// <summary>
@@ -368,23 +341,14 @@ namespace ViewModelExtended.ViewModel
 		/// <param name="input"></param>
 		public void Insert (GroupObjectViewModel? target, GroupObjectViewModel input)
 		{
-			if (f_List == null) return;
-
 			NoteListObjectViewModel match = FindNote(input);
 
 			SetNoteObserver(match, input);
 
-			p_List.Insert(target, input);
+			Contents.Insert(target, input);
+			ItemCount = Contents.ItemCount;
 
-			ItemCount = p_List.Items.Count();
-			p_DirtyList.Add(input, p_DirtyList.Count());
-			if (target != null && !p_DirtyList.ContainsKey(target))
-				p_DirtyList.Add(target, p_DirtyList.Count());
-
-			//using (IDbContext dbContext = p_Resource.CreateDbContext()) {
-			//	p_Resource.DbListHelper.UpdateAfterInsert(dbContext, target, input);
-			//	dbContext.Save();
-			//}
+			DirtyLists.QueueOnInsert(target, input);
 		}
 
 		/// <summary>
@@ -394,17 +358,9 @@ namespace ViewModelExtended.ViewModel
 		/// <param name="target"></param>
 		public void Reorder (GroupObjectViewModel source, GroupObjectViewModel target)
 		{
-			if (f_List == null) return;
+			Contents.Reorder(source, target);
 
-			p_List.Reorder(source, target);
-
-			if (!p_DirtyList.ContainsKey(source)) p_DirtyList.Add(source, p_DirtyList.Count());
-			if (!p_DirtyList.ContainsKey(target)) p_DirtyList.Add(target, p_DirtyList.Count());
-
-			//using (IDbContext dbContext = p_Resource.CreateDbContext()) {
-			//	p_Resource.DbListHelper.UpdateAfterReorder(dbContext, source, target);
-			//	dbContext.Save();
-			//}
+			DirtyLists.QueueOnReorder(source, target);
 		}
 
 
@@ -414,37 +370,26 @@ namespace ViewModelExtended.ViewModel
 		/// <param name="input"></param>
 		public void Remove (GroupObjectViewModel input)
 		{
-			if (f_List == null) return;
-
 			UnsetNoteObserver(input);
 
-			if (input.Previous != null && !p_DirtyList.ContainsKey(input.Previous))
-				p_DirtyList.Add(input.Previous, p_DirtyList.Count());
+			DirtyLists.QueueOnRemove(input);
 
-			if (input.Next != null && !p_DirtyList.ContainsKey(input.Next))
-				p_DirtyList.Add(input.Next, p_DirtyList.Count());
-
-			if (p_DirtyList.ContainsKey(input)) p_DirtyList.Remove(input);
-
-			p_List.Remove(input);
-			ItemCount = p_List.Items.Count();
+			Contents.Remove(input);
+			ItemCount = Contents.ItemCount;
 
 			using (IDbContext dbContext = p_Resource.CreateDbContext()) {
 				p_Resource.ViewModelCreator.DestroyGroupObjectViewModel(dbContext, input);
 			}
-
-			//using (IDbContext dbContext = p_Resource.CreateDbContext()) {
-			//	p_Resource.DbListHelper.UpdateAfterRemove(dbContext, input);
-			//	dbContext.Save();
-			//	p_Resource.ViewModelCreator.DestroyGroupObjectViewModel(dbContext, input);
-			//}
 		}
 
+		/// <summary>
+		/// return the position of the given input
+		/// </summary>
+		/// <param name="input"></param>
+		/// <returns></returns>
 		public int Index (GroupObjectViewModel input)
 		{
-			if (f_List == null) return -1;
-
-			return p_List.Index(input);
+			return Contents.Index(input);
 		}
 
 		#endregion
@@ -455,7 +400,7 @@ namespace ViewModelExtended.ViewModel
 
 		public GroupObjectViewModel Find (Func<GroupObjectViewModel, bool> predicate)
 		{
-			return p_List.Find(predicate);
+			return Contents.List.Find(predicate);
 		}
 
 		public NoteListObjectViewModel FindNote (GroupObjectViewModel input)
@@ -481,7 +426,7 @@ namespace ViewModelExtended.ViewModel
 				GroupObjectViewModel output =
 					p_Resource.ViewModelCreator.CreateTempGroupObjectViewModel(dbContext, groop, data);
 
-				p_List.Add(output);
+				Contents.Add(output);
 
 				return output;
 			}
@@ -519,21 +464,12 @@ namespace ViewModelExtended.ViewModel
 				else if (e.PropertyName == "Text") {
 					string _ = observer.Text;
 				}
-				//MessageBox.Show(
-				//	$"GroupObject: { observer.ItemId }\n" +
-				//	$"\tTitle: { observer.Title }\n" +
-				//	$"\tText: { observer.Text }\n" +
-				//	$"Note: { subject.ItemId }\n" +
-				//	$"\tTitle: { subject.Title }\n" +
-				//	$"\tText: { subject.Text }");
 			};
 
 			subject.PropertyChanged += handler;
 
 			p_Delegates.Add(
 				observerId, new KeyValuePair<NoteListObjectViewModel, PropertyChangedEventHandler>(subject, handler));
-
-			//MessageBox.Show("delegate was added to NoteListViewModel");
 		}
 
 		public void UnsetNoteObserver (GroupObjectViewModel observer)
@@ -561,13 +497,13 @@ namespace ViewModelExtended.ViewModel
 		/// <param name="groop"></param>
 		public void DestroyList (Group groop)
 		{
-			if (!p_Lists.ContainsKey(groop)) return;
+			if (!Contents.Lists.ContainsKey(groop)) return;
 
-			IObservableList<GroupObjectViewModel> groupObjs = p_Lists[groop];
+			IObservableList<GroupObjectViewModel> groupObjs = Contents.Lists[groop];
 
 			foreach (GroupObjectViewModel obj in groupObjs.Items) Remove(obj);
 
-			p_Lists.Remove(groop);
+			Contents.Lists.Remove(groop);
 		}
 
 		/// <summary>
@@ -575,10 +511,8 @@ namespace ViewModelExtended.ViewModel
 		/// </summary>
 		private void ClearList (IObservableList<GroupObjectViewModel> list)
 		{
-
 			foreach (GroupObjectViewModel obj in list.Items) {
 				UnsetNoteObserver(obj);
-				//list.Remove(obj);
 			}
 			list.Clear();
 		}
@@ -588,11 +522,11 @@ namespace ViewModelExtended.ViewModel
 		/// </summary>
 		public void Clear ()
 		{
-			foreach (KeyValuePair<Group, IObservableList<GroupObjectViewModel>> list in p_Lists) {
-				if (f_DirtyLists.ContainsKey(list.Key)) f_DirtyLists[list.Key].Clear();
+			foreach (KeyValuePair<Group, IObservableList<GroupObjectViewModel>> list in Contents.Lists) {
+				if (DirtyLists.Lists.ContainsKey(list.Key)) DirtyLists.Lists[list.Key].Clear();
 				ClearList(list.Value);
 			}
-			ItemCount = p_List.Items.Count();
+			ItemCount = Contents.ItemCount;
 		}
 
 		#endregion
@@ -601,40 +535,14 @@ namespace ViewModelExtended.ViewModel
 
 		#region Methods: GroupContents
 
-		///// <summary>
-		///// accepts an object from NoteList and converts it into a temporary GroupListObject
-		///// </summary>
-		///// <param name="input"></param>
-		//public void ReceiveGroupNote (NoteListObjectViewModel input)
-		//{
-		//	using (IDbContext dbContext = p_Resource.CreateDbContext()) {
-		//		// if no group is selected, bail out
-		//		if (ContentData == null) return;
-
-		//		// if Note already exists in Group, bail out
-		//		if (Items.Contains(input, new GroupNoteObjectEqualityComparer())) return;
-
-		//		// create a temporary GroupObject with the given NoteListObject
-		//		GroupObjectViewModel groupNote =
-		//			p_Resource.ViewModelCreator.CreateTempGroupObjectViewModel(
-		//				dbContext, ContentData.Model.Data, input.Model.Data);
-
-		//		p_TempGroupObjectViewModel = groupNote;
-
-		//		p_List.Add(groupNote);
-		//	}
-		//}
-
 		/// <summary>
 		/// cancels the incoming GroupObject
 		/// </summary>
 		public void HoldGroupNote ()
 		{
-			if (f_List == null) return;
-
 			using (IDbContext dbContext = p_Resource.CreateDbContext()) {
 				if (p_TempGroupObjectViewModel != null) {
-					p_List.Remove(p_TempGroupObjectViewModel);
+					Contents.Remove(p_TempGroupObjectViewModel);
 					p_TempGroupObjectViewModel = null;
 					Incoming = null;
 				}
@@ -650,7 +558,7 @@ namespace ViewModelExtended.ViewModel
 			if (ContentData == null || Incoming == null || p_TempGroupObjectViewModel == null) return;
 
 			// remove the temp from list
-			p_List.Remove(p_TempGroupObjectViewModel);
+			Contents.Remove(p_TempGroupObjectViewModel);
 
 			Group groop = ContentData.Model.Data;
 			Note note = p_TempGroupObjectViewModel.Model.Data;
@@ -669,7 +577,40 @@ namespace ViewModelExtended.ViewModel
 		/// <param name="dbContext"></param>
 		/// <param name="list"></param>
 		/// <param name="groop"></param>
-		private void PopulateGroup (IDbContext dbContext, IObservableList<GroupObjectViewModel> list, Group groop)
+		//private void PopulateGroup (IDbContext dbContext, IObservableList<GroupObjectViewModel> list, Group groop)
+		//{
+		//	/** a GroupObjectViewModel loaded from db is constructed partially from live data.
+		//	 * - iterate through the database items for ObjectId used to identify the associated Note data
+		//	 * - construct the GroupObjectViewModel
+		//	 * - set GroupObjectViewModel's event handler on NoteListObjectViewModel
+		//	 * - add it to list
+		//	 */
+		//	IQueryable<Tuple<GroupItem, ObjectRoot>> unsortedObjects =
+		//		p_Resource.DbQueryHelper.GetGroupItemsInGroup(dbContext, groop);
+		//	IList<Tuple<GroupItem, ObjectRoot>> groupItemsInGroup = unsortedObjects.ToList();
+		//	IList<GroupObjectViewModel> tempList = new List<GroupObjectViewModel>();
+
+		//	foreach (Tuple<GroupItem, ObjectRoot> item in groupItemsInGroup) {
+		//		IEnumerable<NoteListObjectViewModel> noteMatch =
+		//			p_Resource.NoteListViewModel.Items.Where((noteVM) => noteVM.DataId == item.Item1.ObjectId);
+
+		//		if (!noteMatch.Any()) {
+		//			throw new Exception("no NoteListObjectViewModel matching the GroupObjectViewModel could be found");
+		//		}
+
+		//		NoteListObjectViewModel subject = noteMatch.Single();
+
+		//		GroupObjectViewModel observer = p_Resource.ViewModelCreator.CreateGroupObjectViewModel(
+		//			dbContext.CreateGroupObject(item.Item1, item.Item2,groop, subject.Model.Data));
+
+		//		SetNoteObserver(subject, observer);
+
+		//		tempList.Add(observer);
+		//	}
+
+		//	p_Resource.DbQueryHelper.GetSortedListObjects(tempList, list);
+		//}
+		private void PopulateGroup (IDbContext dbContext, IList<GroupObjectViewModel> list, Group groop)
 		{
 			/** a GroupObjectViewModel loaded from db is constructed partially from live data.
 			 * - iterate through the database items for ObjectId used to identify the associated Note data
@@ -680,7 +621,7 @@ namespace ViewModelExtended.ViewModel
 			IQueryable<Tuple<GroupItem, ObjectRoot>> unsortedObjects =
 				p_Resource.DbQueryHelper.GetGroupItemsInGroup(dbContext, groop);
 			IList<Tuple<GroupItem, ObjectRoot>> groupItemsInGroup = unsortedObjects.ToList();
-			IList<GroupObjectViewModel> tempList = new List<GroupObjectViewModel>();
+			//IList<GroupObjectViewModel> tempList = new List<GroupObjectViewModel>();
 
 			foreach (Tuple<GroupItem, ObjectRoot> item in groupItemsInGroup) {
 				IEnumerable<NoteListObjectViewModel> noteMatch =
@@ -693,15 +634,14 @@ namespace ViewModelExtended.ViewModel
 				NoteListObjectViewModel subject = noteMatch.Single();
 
 				GroupObjectViewModel observer = p_Resource.ViewModelCreator.CreateGroupObjectViewModel(
-					dbContext.CreateGroupObject(item.Item1, item.Item2,groop, subject.Model.Data));
+					dbContext.CreateGroupObject(item.Item1, item.Item2, groop, subject.Model.Data));
 
 				SetNoteObserver(subject, observer);
 
-				tempList.Add(observer);
+				list.Add(observer);
 			}
 
-			p_Resource.DbQueryHelper.GetSortedListObjects(tempList, list);
-
+			//p_Resource.DbQueryHelper.GetSortedListObjects(list, list);
 		}
 
 		#endregion
@@ -710,48 +650,7 @@ namespace ViewModelExtended.ViewModel
 
 		#region Methods: Lists
 
-		/// <summary>
-		/// gets the list by using Group as key
-		/// </summary>
-		/// <param name="groop"></param>
-		/// <returns>the GroupObject list associated with the given Group key</returns>
-		private Dictionary<IListItem, int> GetDirtyListByGroupKey (Group groop)
-		{
-			IEnumerable<KeyValuePair<Group, Dictionary<IListItem, int>>> selectedList =
-				f_DirtyLists.Where((kv) => kv.Key == groop);
 
-			if (selectedList.Any()) {
-				return selectedList.Single().Value;
-			}
-			else {
-				Dictionary<IListItem, int> list = new Dictionary<IListItem, int>();
-
-				f_DirtyLists.Add(groop, list);
-				return list;
-			}
-		}
-
-		/// <summary>
-		/// gets the list by using Group as key
-		/// </summary>
-		/// <param name="groop"></param>
-		/// <returns>the GroupObject list associated with the given Group key</returns>
-		private IObservableList<GroupObjectViewModel> GetListByGroupKey (Group groop)
-		{
-			IEnumerable<KeyValuePair<Group, IObservableList<GroupObjectViewModel>>> selectedList =
-				p_Lists.Where((kv) => kv.Key == groop);
-
-			if (selectedList.Any()) {
-				return selectedList.Single().Value;
-			}
-			else {
-				IObservableList<GroupObjectViewModel> list =
-					p_Resource.ViewModelCreator.CreateList<GroupObjectViewModel>();
-
-				p_Lists.Add(groop, list);
-				return list;
-			}
-		}
 
 		/// <summary>
 		/// removes all dependent GroupObjects (notes) associated with a given NoteListObject
@@ -770,32 +669,22 @@ namespace ViewModelExtended.ViewModel
 					IObservableList<GroupObjectViewModel>? list = null;
 					Dictionary<IListItem, int>? dirtyList = null;
 
-					// check if temp list is same as displayed list to prevent populating same list twice
 					// select the list of the particular group or the display group
 					// select the dirtyList of the particular group or the display group
-					bool isActiveGroup = obj.Model.Group.Id == ContentData?.Model.Data.Id;
+					list = Contents.GetListByGroupKey(obj.Model.Group);
+					dirtyList = DirtyLists.GetListByGroupKey(obj.Model.Group);
 
-					if (isActiveGroup) {
-						list = p_List;
-						dirtyList = p_DirtyList;
-					}
-					else {
-						list = GetListByGroupKey(obj.Model.Group);
-						dirtyList = GetDirtyListByGroupKey(obj.Model.Group);
-					}
+					
+					// populate the viewmodel list of that group
+					//if (!list.Items.Any()) PopulateGroup(dbContext, list, obj.Model.Group);
+					if (!list.Items.Any()) {
+						IList<GroupObjectViewModel> tempList = new List<GroupObjectViewModel>();
 
-					if (list == null) {
-						throw new NullReferenceException("temporary Group contents list could not be set");
-					}
+						PopulateGroup(dbContext, tempList, obj.Model.Group);
 
-					if (dirtyList == null) {
-						throw new NullReferenceException("contents dirty list could not be set");
+						p_Resource.DbQueryHelper.GetSortedListObjects(tempList, Contents.List);
 					}
-
-					if (!isActiveGroup) {
-						// populate the viewmodel list of that group
-						PopulateGroup(dbContext, list, obj.Model.Group);
-					}
+					
 
 					// select bound group object matching the unbound group object in the original query
 					IEnumerable<GroupObjectViewModel> match =
@@ -809,26 +698,16 @@ namespace ViewModelExtended.ViewModel
 						UnsetNoteObserver(item);
 
 						// remove from dirty list
-						if (item.Previous != null && !dirtyList.ContainsKey(item.Previous))
-							dirtyList.Add(item.Previous, dirtyList.Count());
-
-						if (item.Next != null && !dirtyList.ContainsKey(item.Next))
-							dirtyList.Add(item.Next, dirtyList.Count());
-
-						if (dirtyList.ContainsKey(item)) dirtyList.Remove(item);
+						DirtyLists.QueueOnRemove(item);
 
 						// remove from list
 						list.Remove(item);
-
-						if (list == p_List) ItemCount = p_List.Items.Count();
-						//p_Resource.DbListHelper.UpdateAfterRemove(dbContext, item);
-						//dbContext.Save();
+						if (list == Contents.List) ItemCount = Contents.ItemCount;
 
 						// destroy the database record
 						p_Resource.ViewModelCreator.DestroyGroupObjectViewModel(dbContext, item);
 					}
 				}
-
 			}
 		}
 
@@ -840,7 +719,9 @@ namespace ViewModelExtended.ViewModel
 
 		private void SaveListOrder ()
 		{
-			foreach (KeyValuePair<Group, Dictionary<IListItem, int>> dirtyList in f_DirtyLists) {
+			//if (!DirtyLists.IsDirty) return;
+
+			foreach (KeyValuePair<Group, Dictionary<IListItem, int>> dirtyList in DirtyLists.Lists) {
 				Group key = dirtyList.Key;
 				Dictionary<IListItem, int> list = dirtyList.Value;
 
@@ -856,7 +737,7 @@ namespace ViewModelExtended.ViewModel
 				}
 				list.Clear();
 			}
-			f_DirtyLists.Clear();
+			DirtyLists.Clear();
 		}
 
 		/// <summary>
@@ -872,5 +753,9 @@ namespace ViewModelExtended.ViewModel
 		#endregion
 	}
 }
+
+// TODO: a write is occurring on delete that somehow stores node data -- since node data has not been added to the dbcontext, it just saves a bunch of nulls and screws everything up - the DestroyViewModel methods are the culprit
+
+// UPDATE 2: instant db update via propertychanged handler has same problem with skipping updates as calling update on list functions. node queue is still necessary for large lists. try removing the UpdateNodes call from the Destroy method
 
 // TODO/NOTE: group must be in sync with its contents list and any input to its access points must match an object existing within the currently selected group or bad things will happen. This is not a problem as long as valid existing inputs are made or the newly created inputs are destined for the selected group. There are currently no checks as to whether or not the input exists outside the currently selected list and an object nonexistent within the list should throw an exception

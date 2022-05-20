@@ -252,11 +252,6 @@ namespace ViewModelExtended.Model
 
 		public void DeleteGroupListItem (GroupListItem target)
 		{
-			//IQueryable<GroupItem> groupItems = GetGroupItemsInGroup(Groups.Find(target.ObjectId));
-
-			//foreach (GroupItem item in groupItems) {
-			//	DeleteGroupItem(item);
-			//}
 			DeleteNode(Nodes.Find(target.NodeId));
 			DeleteTimestamp(Timestamps.Find(target.TimestampId));
 			DeleteGroup(Groups.Find(target.ObjectId));

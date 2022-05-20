@@ -72,7 +72,7 @@ namespace ViewModelExtended.ViewModel
 		/// <summary>
 		/// save the dirty state for storing at shutdown, autosave intervals, etc.
 		/// </summary>
-		private Dictionary<IListItem, int> m_DirtyListItems;
+		private IChangeQueue<NoteListObjectViewModel> DirtyList { get; set; }
 
 		#endregion
 
@@ -108,11 +108,20 @@ namespace ViewModelExtended.ViewModel
 
 		public NoteListViewModel (IViewModelResource resource)
 		{
+			// attach commands
 			Resource = resource;
 			Resource.CommandBuilder.MakeNoteList(this);
+
+			// attach handlers
 			SetPropertyChangedEventHandler(Resource.StatusBarViewModel);
-			m_DirtyListItems = new Dictionary<IListItem, int>();
+
+			// init change 'queue'
+			DirtyList = new ChangeQueue<NoteListObjectViewModel>(new Dictionary<IListItem, int>());
+
+			// init highlighted
 			m_Highlighted = null;
+
+			// populate list
 			List = Resource.ViewModelCreator.CreateList<NoteListObjectViewModel>();
 
 			using (IDbContext dbContext = Resource.CreateDbContext()) {
@@ -155,7 +164,8 @@ namespace ViewModelExtended.ViewModel
 		{
 			List.Add(input);
 			ItemCount = List.Items.Count();
-			m_DirtyListItems.Add(input, m_DirtyListItems.Count());
+
+			DirtyList.QueueOnAdd(input);
 		}
 
 		/// <summary>
@@ -167,9 +177,8 @@ namespace ViewModelExtended.ViewModel
 		{
 			List.Insert(target, input);
 			ItemCount = List.Items.Count();
-			m_DirtyListItems.Add(input, m_DirtyListItems.Count());
-			if (target != null && !m_DirtyListItems.ContainsKey(target))
-				m_DirtyListItems.Add(target, m_DirtyListItems.Count());
+
+			DirtyList.QueueOnInsert(target, input);
 		}
 
 		/// <summary>
@@ -181,8 +190,7 @@ namespace ViewModelExtended.ViewModel
 		{
 			List.Reorder(source, target);
 
-			if (!m_DirtyListItems.ContainsKey(source)) m_DirtyListItems.Add(source, m_DirtyListItems.Count());
-			if (!m_DirtyListItems.ContainsKey(target)) m_DirtyListItems.Add(target, m_DirtyListItems.Count());
+			DirtyList.QueueOnReorder(source, target);
 		}
 
 		/// <summary>
@@ -191,16 +199,10 @@ namespace ViewModelExtended.ViewModel
 		/// <param name="input"></param>
 		public void Remove (NoteListObjectViewModel input)
 		{
+			DirtyList.QueueOnRemove(input);
+
 			List.Remove(input);
 			ItemCount = List.Items.Count();
-
-			if (input.Previous != null && !m_DirtyListItems.ContainsKey(input.Previous))
-				m_DirtyListItems.Add(input.Previous, m_DirtyListItems.Count());
-
-			if (input.Next != null && !m_DirtyListItems.ContainsKey(input.Next))
-				m_DirtyListItems.Add(input.Next, m_DirtyListItems.Count());
-
-			if (m_DirtyListItems.ContainsKey(input)) m_DirtyListItems.Remove(input);
 
 			using (IDbContext dbContext = Resource.CreateDbContext()) {
 				Resource.ViewModelCreator.DestroyNoteListObjectViewModel(dbContext, input);
@@ -222,7 +224,7 @@ namespace ViewModelExtended.ViewModel
 		/// </summary>
 		public void Clear ()
 		{
-			m_DirtyListItems.Clear();
+			DirtyList.Clear();
 			List.Clear();
 			ItemCount = List.Items.Count();
 		}
@@ -271,17 +273,17 @@ namespace ViewModelExtended.ViewModel
 		/// </summary>
 		private void SaveListOrder ()
 		{
-			if (!m_DirtyListItems.Any()) return;
+			if (!DirtyList.List.Any()) return;
 
 			using (IDbContext dbContext = Resource.CreateDbContext()) {
-				foreach (KeyValuePair<IListItem, int> obj in Resource.DbQueryHelper.SortDictionary(m_DirtyListItems)) {
+				foreach (KeyValuePair<IListItem, int> obj in Resource.DbQueryHelper.SortDictionary(DirtyList.List)) {
 					Resource.DbListHelper.UpdateNodes(dbContext, obj.Key);
-					m_DirtyListItems.Remove(obj.Key);
+					DirtyList.List.Remove(obj.Key);
 				}
 
 				dbContext.Save();
 			}
-			m_DirtyListItems.Clear();
+			DirtyList.Clear();
 		}
 
 		/// <summary>
