@@ -39,7 +39,22 @@ namespace ViewModelExtended.ViewModel
 
 		public int GetHashCode ([DisallowNull] IListItem obj)
 		{
-			return obj.GetHashCode();
+			//return obj.GetHashCode();
+			return obj.DataId.GetHashCode() * 17;
+		}
+	}
+
+	public class ListItemEqualityComparer : IEqualityComparer<IListItem>
+	{
+		public bool Equals (IListItem? lhs, IListItem? rhs)
+		{
+			return lhs?.ItemId == rhs?.ItemId;
+		}
+
+		public int GetHashCode ([DisallowNull] IListItem obj)
+		{
+			//return obj.GetHashCode();
+			return obj.ItemId.GetHashCode() * 17;
 		}
 	}
 }

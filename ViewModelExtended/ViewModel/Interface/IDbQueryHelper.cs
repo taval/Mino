@@ -19,13 +19,6 @@ namespace ViewModelExtended.ViewModel
 		public IQueryable<GroupObjectViewModel> GetGroupObjectsByNote (IDbContext dbContext, Note note);
 
 		/// <summary>
-		/// sort a dictionary with an integer value
-		/// </summary>
-		/// <param name="listItems"></param>
-		/// <returns></returns>
-		public IEnumerable<KeyValuePair<T, int>> SortDictionary<T> (Dictionary<T, int> listItems) where T : IListItem;
-
-		/// <summary>
 		/// do a simple copy into an IObservableList
 		/// </summary>
 		/// <typeparam name="T"></typeparam>

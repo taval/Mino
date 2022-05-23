@@ -6,36 +6,34 @@ using System.Text;
 
 namespace ViewModelExtended.ViewModel
 {
-	internal interface IChangeQueue<T> where T : IListItem
+	internal interface IChangeQueue<T> : IEnumerable<KeyValuePair<IListItem, int>> where T : IListItem
 	{
-		#region Container
+		#region Dirty
 
 		/// <summary>
-		/// the interface to the selected dirty list
+		/// true if changes have been made
 		/// </summary>
-		public Dictionary<IListItem, int> List { get; }
+		public bool IsDirty { get; }
 
 		#endregion
-
-
 
 		#region List Access
 
 		/// <summary>
-		/// add an object to the end of the list
+		/// changes for when adding an object to the end of the list
 		/// </summary>
 		/// <param name="input"></param>
 		public void QueueOnAdd (T input);
 
 		/// <summary>
-		/// insert an object into the list at the target's position
+		/// changes for when inserting an object into the list at the target's position
 		/// </summary>
 		/// <param name="target"></param>
 		/// <param name="input"></param>
 		public void QueueOnInsert (IListItem? target, T input);
 
 		/// <summary>
-		/// rearrange two objects in the list
+		/// changes for when rearranging two objects in the list
 		/// </summary>
 		/// <param name="source"></param>
 		/// <param name="target"></param>
@@ -43,17 +41,27 @@ namespace ViewModelExtended.ViewModel
 
 
 		/// <summary>
-		/// remove the object from the list
+		/// changes for when removing the object from the list
 		/// </summary>
 		/// <param name="input"></param>
 		public void QueueOnRemove (IListItem input);
 
-		public bool IsDirty { get; }
+		/// <summary>
+		/// remove change from queue
+		/// </summary>
+		/// <param name="target"></param>
+		public void Remove (IListItem target);
 
 		/// <summary>
 		/// empty all lists non-destructively
 		/// </summary>
 		public void Clear ();
+
+		/// <summary>
+		/// true if any objects exist in the dictionary
+		/// </summary>
+		/// <returns></returns>
+		bool Any ();
 
 		#endregion
 	}

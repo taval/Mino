@@ -1,19 +1,22 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using ViewModelExtended.Model;
 
+
+
 namespace ViewModelExtended.ViewModel
 {
-	internal class GroupChangeQueue : IChangeQueue<GroupObjectViewModel>
+	internal class GroupChangeQueue : IEnumerable<KeyValuePair<IListItem, int>>
 	{
 		#region Lists Container
 
 		/// <summary>
 		/// save the dirty state for storing at shutdown, autosave intervals, etc.
 		/// </summary>
-		public Dictionary<Group, Dictionary<IListItem, int>> Lists { get; private set; }
+		public Dictionary<Group, ListItemDictionary> Dictionaries { get; private set; }
 
 		#endregion
 
@@ -21,45 +24,35 @@ namespace ViewModelExtended.ViewModel
 
 		#region Current List
 
-		/// <summary>
-		/// the interface to the selected dirty list
-		/// </summary>
-		//public Dictionary<IListItem, int> List {
-		//	get {
-		//		if (f_List == null) return f_DefaultList;
-
-		//		return f_List;
-		//	}
-		//	set {
-		//		f_List = value;
-		//	}
-		//}
-		public Dictionary<IListItem, int> List {
+		public ListItemDictionary Items {
 			get {
-				// provide a dummy list if none available
-				if (f_List == null) return f_DefaultList;
+				if (f_Items == null) return f_DefaultDictionary;
 
-				return f_List;
+				return f_Items;
 			}
 			set {
-				f_List = value;
+				f_Items = value;
 			}
 		}
 
-		/// <summary>
-		/// the default list to return
-		/// </summary>
-		private Dictionary<IListItem, int> f_DefaultList;
+		
 
 		/// <summary>
-		/// the list creation mechanism
+		/// the default dictionary to return
 		/// </summary>
-		private readonly Func<Dictionary<IListItem, int>> f_ListCreator;
+		private ListItemDictionary f_DefaultDictionary;
 
 		/// <summary>
-		/// the stored reference to the selected dirty list
+		/// the dictionary creation mechanism
 		/// </summary>
-		private Dictionary<IListItem, int>? f_List;
+		//private readonly Func<Dictionary<IListItem, int>> f_DictionaryCreator;
+		private IViewModelResource f_Resource;
+
+		/// <summary>
+		/// the stored reference to the selected dirty dictionary
+		/// </summary>
+		//private Dictionary<IListItem, int>? f_Items;
+		private ListItemDictionary? f_Items;
 
 		#endregion
 
@@ -67,12 +60,16 @@ namespace ViewModelExtended.ViewModel
 
 		#region Constructor
 
-		public GroupChangeQueue (Func<Dictionary<IListItem, int>> listCreator)
+		//public GroupChangeQueue (Func<Dictionary<IListItem, int>> dictionaryCreator)
+		public GroupChangeQueue (IViewModelResource resource)
 		{
-			f_ListCreator = listCreator;
-			f_DefaultList = f_ListCreator.Invoke();
-			Lists = new Dictionary<Group, Dictionary<IListItem, int>>();
-			f_List = null;
+			//f_DictionaryCreator = dictionaryCreator;
+			f_Resource = resource;
+			//f_DefaultDictionary = new ListItemDictionary(f_DictionaryCreator.Invoke());
+			//f_DefaultDictionary = new ListItemDictionary(resource.ViewModelCreator.CreateDictionary());
+			f_DefaultDictionary = new ListItemDictionary(resource);
+			Dictionaries = new Dictionary<Group, ListItemDictionary>(new GroupEqualityComparer());
+			f_Items = null;
 		}
 
 		#endregion
@@ -83,67 +80,86 @@ namespace ViewModelExtended.ViewModel
 		#region List Access
 
 		/// <summary>
-		/// add an object to the end of the CURRENTLY VISIBLE list
+		/// add an object to the end of the dictionary
 		/// </summary>
 		/// <param name="input"></param>
 		public void QueueOnAdd (GroupObjectViewModel input)
 		{
-			if (f_List == null) return;
+			Group groop = input.Model.Group;
 
-			List.Add(input, List.Count());
+			if (Dictionaries.ContainsKey(groop)) {
+				ListItemDictionary dictionary = Dictionaries[groop];
+
+				dictionary.Add(input);
+			}
 		}
 
 		/// <summary>
-		/// insert an object into the CURRENTLY VISIBLE list at the target's position
+		/// insert an object into the dictionary at the target's position
 		/// </summary>
 		/// <param name="target"></param>
 		/// <param name="input"></param>
-		public void QueueOnInsert (IListItem? target, GroupObjectViewModel input)
+		public void QueueOnInsert (GroupObjectViewModel? target, GroupObjectViewModel input)
 		{
-			if (f_List == null) return;
+			Group groop = input.Model.Group;
 
-			List.Add(input, List.Count());
-			if (target != null && !List.ContainsKey(target))
-				List.Add(target, List.Count());
+			if (Dictionaries.ContainsKey(groop)) {
+				ListItemDictionary dictionary = Dictionaries[groop];
+
+				dictionary.Add(input);
+				if (target != null && !dictionary.ContainsKey(target))
+					dictionary.Add(target);
+			}
 		}
 
 		/// <summary>
-		/// rearrange two objects in the CURRENTLY VISIBLE list
+		/// rearrange two objects in the dictionary selected by group
 		/// </summary>
 		/// <param name="source"></param>
 		/// <param name="target"></param>
-		public void QueueOnReorder (IListItem source, IListItem target)
+		/// <param name="groop"></param>
+		public void QueueOnReorder (GroupObjectViewModel source, GroupObjectViewModel target)
 		{
-			if (f_List == null) return;
+			Group groop = source.Model.Group;
 
-			if (!List.ContainsKey(source)) List.Add(source, List.Count());
-			if (!List.ContainsKey(target)) List.Add(target, List.Count());
+			if (source.Model.Group != target.Model.Group) return;
+
+			if (Dictionaries.ContainsKey(groop)) {
+				ListItemDictionary dictionary = Dictionaries[groop];
+
+				if (!dictionary.ContainsKey(source)) dictionary.Add(source);
+				if (!dictionary.ContainsKey(target)) dictionary.Add(target);
+			}
 		}
 
-
 		/// <summary>
-		/// remove the object from the CURRENTLY VISIBLE list
+		/// remove the object from the dictionary
 		/// </summary>
 		/// <param name="input"></param>
-		public void QueueOnRemove (IListItem input)
+		/// <param name="groop"></param>
+		public void QueueOnRemove (GroupObjectViewModel input)
 		{
-			if (f_List == null) return;
+			Group groop = input.Model.Group;
 
-			if (input.Previous != null && !List.ContainsKey(input.Previous))
-				List.Add(input.Previous, List.Count());
+			if (Dictionaries.ContainsKey(groop)) {
+				ListItemDictionary dictionary = Dictionaries[groop];
 
-			if (input.Next != null && !List.ContainsKey(input.Next))
-				List.Add(input.Next, List.Count());
+				if (input.Previous != null && !dictionary.ContainsKey(input.Previous))
+					dictionary.Add(input.Previous);
 
-			if (List.ContainsKey(input)) List.Remove(input);
+				if (input.Next != null && !dictionary.ContainsKey(input.Next))
+					dictionary.Add(input.Next);
+
+				if (dictionary.ContainsKey(input)) dictionary.Remove(input);
+			}
 		}
 
 		public bool IsDirty {
 			get {
-				foreach (KeyValuePair<Group, Dictionary<IListItem, int>> list in Lists) {
-					if (list.Value.Count > 0) return false;
+				foreach (KeyValuePair<Group, ListItemDictionary> dictionary in Dictionaries) {
+					if (dictionary.Value.Any()) return true;
 				}
-				return true;
+				return false;
 			}
 		}
 
@@ -152,39 +168,48 @@ namespace ViewModelExtended.ViewModel
 		/// </summary>
 		public void Clear ()
 		{
-			foreach (KeyValuePair<Group, Dictionary<IListItem, int>> list in Lists) {
-				list.Value.Clear();
+			foreach (KeyValuePair<Group, ListItemDictionary> dictionary in Dictionaries) {
+				dictionary.Value.Clear();
 			}
 		}
 
 		/// <summary>
-		/// gets the list by using Group as key
+		/// gets the dictionary by using Group as key
 		/// </summary>
 		/// <param name="groop"></param>
-		/// <returns>the GroupObject list associated with the given Group key</returns>
-		public Dictionary<IListItem, int> GetListByGroupKey (Group? groop)
+		/// <returns>the GroupObject dictionary associated with the given Group key</returns>
+		//public Dictionary<IListItem, int> GetListByGroupKey (Group? groop)
+		public ListItemDictionary GetListByGroupKey (Group? groop)
 		{
 			if (groop == null) {
-				f_List = null;
-				return List;
+				return f_DefaultDictionary;
 			}
 
-			IEnumerable<KeyValuePair<Group, Dictionary<IListItem, int>>> selectedList =
-				Lists.Where((kv) => kv.Key.Id == groop.Id);
-
-			if (selectedList.Any()) {
-				//List = selectedList.Single().Value;
-				return selectedList.Single().Value;
+			if (Dictionaries.ContainsKey(groop)) {
+				return Dictionaries[groop];
 			}
 			else {
-				Dictionary<IListItem, int> list = f_ListCreator.Invoke();
+				//ListItemDictionary output = new ListItemDictionary(f_DictionaryCreator.Invoke());
+				//ListItemDictionary output = new ListItemDictionary(f_Resource.ViewModelCreator.CreateDictionary());
+				ListItemDictionary output = new ListItemDictionary(f_Resource);
+				Dictionaries.Add(groop, output);
 
-				Lists.Add(groop, list);
-				//List = list;
-				return list;
+				return output;
 			}
+		}
 
-			//return List;
+		/// <summary>
+		/// iterate over the sorted selected dictionary
+		/// </summary>
+		/// <returns></returns>
+		public IEnumerator<KeyValuePair<IListItem, int>> GetEnumerator ()
+		{
+			return Items.GetEnumerator();
+		}
+
+		IEnumerator IEnumerable.GetEnumerator ()
+		{
+			return GetEnumerator();
 		}
 
 		#endregion
@@ -192,3 +217,4 @@ namespace ViewModelExtended.ViewModel
 }
 
 // TODO: make nearly identical to GroupContents class
+

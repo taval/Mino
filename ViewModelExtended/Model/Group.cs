@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Drawing;
 
 
@@ -35,6 +36,20 @@ namespace ViewModelExtended.Model
 			//Id = 0;
 			m_Color = "#000";
 			Title = String.Empty;
+		}
+	}
+
+	public class GroupEqualityComparer : IEqualityComparer<Group>
+	{
+		public bool Equals (Group? lhs, Group? rhs)
+		{
+			return lhs?.Id == rhs?.Id;
+		}
+
+		public int GetHashCode ([DisallowNull] Group obj)
+		{
+			//return obj.GetHashCode();
+			return obj.Id.GetHashCode() * 17;
 		}
 	}
 }

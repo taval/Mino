@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -11,7 +12,7 @@ namespace ViewModelExtended.ViewModel
 	/// <summary>
 	/// container of contents lists which presents a single list at a time
 	/// </summary>
-	internal class GroupContents
+	internal class GroupContents : IEnumerable<GroupObjectViewModel>
 	{
 		#region Lists Container
 
@@ -29,18 +30,6 @@ namespace ViewModelExtended.ViewModel
 		/// <summary>
 		/// the interface to the selected contents list
 		/// </summary>
-		//public IObservableList<GroupObjectViewModel> List {
-		//	get {
-		//		// provide a dummy list if none available
-		//		if (f_List == null) return f_DefaultList;
-
-		//		return f_List;
-		//	}
-		//	set {
-		//		f_List = value;
-		//		ItemCount = (f_List != null) ? f_List.Items.Count() : 0;
-		//	}
-		//}
 		public IObservableList<GroupObjectViewModel> List {
 			get {
 				// provide a dummy list if none available
@@ -79,7 +68,7 @@ namespace ViewModelExtended.ViewModel
 		/// the number of items in the container
 		/// </summary>
 		public int ItemCount {
-			get { return List.Items.Count(); }
+			get { return Items.Count(); }
 		}
 
 		#endregion
@@ -92,7 +81,7 @@ namespace ViewModelExtended.ViewModel
 		{
 			f_ListCreator = listCreator;
 			f_DefaultList = f_ListCreator.Invoke();
-			Lists = new Dictionary<Group, IObservableList<GroupObjectViewModel>>();
+			Lists = new Dictionary<Group, IObservableList<GroupObjectViewModel>>(new GroupEqualityComparer());
 			f_List = null;
 		}
 
@@ -100,54 +89,62 @@ namespace ViewModelExtended.ViewModel
 
 
 
-
 		#region List Access
 
 		/// <summary>
-		/// add an object to the end of the CURRENTLY VISIBLE list
+		/// add an object to the end of the list
 		/// </summary>
 		/// <param name="input"></param>
 		public void Add (GroupObjectViewModel input)
 		{
-			if (f_List == null) return;
+			Group groop = input.Model.Group;
 
-			List.Add(input);
+			if (Lists.ContainsKey(groop)) {
+				Lists[groop].Add(input);
+			}
 		}
 
 		/// <summary>
-		/// insert an object into the CURRENTLY VISIBLE list at the target's position
+		/// insert an object into the list at the target's position
 		/// </summary>
 		/// <param name="target"></param>
 		/// <param name="input"></param>
 		public void Insert (GroupObjectViewModel? target, GroupObjectViewModel input)
 		{
-			if (f_List == null) return;
+			Group groop = input.Model.Group;
 
-			List.Insert(target, input);
+			if (Lists.ContainsKey(groop)) {
+				Lists[groop].Insert(target, input);
+			}
 		}
 
 		/// <summary>
-		/// rearrange two objects in the CURRENTLY VISIBLE list
+		/// rearrange two objects in the list
 		/// </summary>
 		/// <param name="source"></param>
 		/// <param name="target"></param>
 		public void Reorder (GroupObjectViewModel source, GroupObjectViewModel target)
 		{
-			if (f_List == null) return;
+			Group groop = source.Model.Group;
 
-			List.Reorder(source, target);
+			if (source.Model.Group != target.Model.Group) return;
+
+			if (Lists.ContainsKey(groop)) {
+				Lists[groop].Reorder(source, target);
+			}
 		}
 
-
 		/// <summary>
-		/// remove the object from the CURRENTLY VISIBLE list
+		/// remove the object from the list
 		/// </summary>
 		/// <param name="input"></param>
 		public void Remove (GroupObjectViewModel input)
 		{
-			if (f_List == null) return;
+			Group groop = input.Model.Group;
 
-			List.Remove(input);
+			if (Lists.ContainsKey(groop)) {
+				Lists[groop].Remove(input);
+			}
 		}
 
 		/// <summary>
@@ -160,6 +157,11 @@ namespace ViewModelExtended.ViewModel
 			if (f_List == null) return -1;
 
 			return List.Index(input);
+		}
+
+		public GroupObjectViewModel Find (Func<GroupObjectViewModel, bool> predicate)
+		{
+			return List.Find(predicate);
 		}
 
 		/// <summary>
@@ -180,27 +182,29 @@ namespace ViewModelExtended.ViewModel
 		public IObservableList<GroupObjectViewModel> GetListByGroupKey (Group? groop)
 		{
 			if (groop == null) {
-				//f_List = null;
-				//return List;
 				return f_DefaultList;
 			}
 
-			IEnumerable<KeyValuePair<Group, IObservableList<GroupObjectViewModel>>> selectedList =
-				Lists.Where((kv) => kv.Key.Id == groop.Id);
-
-			if (selectedList.Any()) {
-				//List = selectedList.Single().Value;
-				return selectedList.Single().Value;
+			if (Lists.ContainsKey(groop)) {
+				return Lists[groop];
 			}
 			else {
 				IObservableList<GroupObjectViewModel> list = f_ListCreator.Invoke();
 
 				Lists.Add(groop, list);
-				//List = list;
+
 				return list;
 			}
+		}
 
-			//return List;
+		public IEnumerator<GroupObjectViewModel> GetEnumerator ()
+		{
+			return Items.GetEnumerator();
+		}
+
+		IEnumerator IEnumerable.GetEnumerator ()
+		{
+			return GetEnumerator();
 		}
 
 		#endregion

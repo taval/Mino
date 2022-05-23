@@ -47,21 +47,21 @@ namespace ViewModelExtended.ViewModel
 		/// visually depicts the most recently clicked item
 		/// </summary>
 		public GroupListObjectViewModel? Highlighted {
-			get { return m_Highlighted; }
-			set { Set(ref m_Highlighted, value); }
+			get { return f_Highlighted; }
+			set { Set(ref f_Highlighted, value); }
 		}
 
-		private GroupListObjectViewModel? m_Highlighted;
+		private GroupListObjectViewModel? f_Highlighted;
 
 		/// <summary>
 		/// the number of items in the container
 		/// </summary>
 		public int ItemCount {
-			get { return m_ItemCount; }
-			private set { Set(ref m_ItemCount, value); } // TODO: display this on StatusBar
+			get { return f_ItemCount; }
+			private set { Set(ref f_ItemCount, value); } // TODO: display this on StatusBar
 		}
 
-		private int m_ItemCount;
+		private int f_ItemCount;
 
 		#endregion
 
@@ -72,7 +72,7 @@ namespace ViewModelExtended.ViewModel
 		/// <summary>
 		/// save the dirty state for storing at shutdown, autosave intervals, etc.
 		/// </summary>
-		private IChangeQueue<GroupListObjectViewModel> DirtyList { get; set; }
+		private IChangeQueue<GroupListObjectViewModel> f_Changes;
 
 		#endregion
 
@@ -84,51 +84,51 @@ namespace ViewModelExtended.ViewModel
 		/// rearrange two nodes
 		/// </summary>
 		public ICommand ReorderCommand {
-			get { return m_ReorderCommand ?? throw new MissingCommandException(); }
-			set { if (m_ReorderCommand == null) m_ReorderCommand = value; }
+			get { return f_ReorderCommand ?? throw new MissingCommandException(); }
+			set { if (f_ReorderCommand == null) f_ReorderCommand = value; }
 		}
 
-		private ICommand? m_ReorderCommand;
+		private ICommand? f_ReorderCommand;
 
 		/// <summary>
 		/// gets data for beginning of drag-drop operation
 		/// </summary>
 		public ICommand PickupCommand {
-			get { return m_PickupCommand ?? throw new MissingCommandException(); }
-			set { if (m_PickupCommand == null) m_PickupCommand = value; }
+			get { return f_PickupCommand ?? throw new MissingCommandException(); }
+			set { if (f_PickupCommand == null) f_PickupCommand = value; }
 		}
 
-		private ICommand? m_PickupCommand;
+		private ICommand? f_PickupCommand;
 
 		/// <summary>
 		/// change the title
 		/// </summary>
 		public ICommand ChangeTitleCommand {
-			get { return m_ChangeTitleCommand ?? throw new MissingCommandException(); }
-			set { if (m_ChangeTitleCommand == null) m_ChangeTitleCommand = value; }
+			get { return f_ChangeTitleCommand ?? throw new MissingCommandException(); }
+			set { if (f_ChangeTitleCommand == null) f_ChangeTitleCommand = value; }
 		}
 
-		private ICommand? m_ChangeTitleCommand;
+		private ICommand? f_ChangeTitleCommand;
 
 		/// <summary>
 		/// change the color
 		/// </summary>
 		public ICommand ChangeColorCommand {
-			get { return m_ChangeColorCommand ?? throw new MissingCommandException(); }
-			set { if (m_ChangeColorCommand == null) m_ChangeColorCommand = value; }
+			get { return f_ChangeColorCommand ?? throw new MissingCommandException(); }
+			set { if (f_ChangeColorCommand == null) f_ChangeColorCommand = value; }
 		}
 
-		private ICommand? m_ChangeColorCommand;
+		private ICommand? f_ChangeColorCommand;
 
 		/// <summary>
 		/// perform operations based on highlighting an item
 		/// </summary>
 		public ICommand HighlightCommand {
-			get { return m_HighlightCommand ?? throw new MissingCommandException(); }
-			set { if (m_HighlightCommand == null) m_HighlightCommand = value; }
+			get { return f_HighlightCommand ?? throw new MissingCommandException(); }
+			set { if (f_HighlightCommand == null) f_HighlightCommand = value; }
 		}
 
-		private ICommand? m_HighlightCommand;
+		private ICommand? f_HighlightCommand;
 
 		#endregion
 
@@ -146,8 +146,9 @@ namespace ViewModelExtended.ViewModel
 			SetPropertyChangedEventHandler(Resource.StatusBarViewModel);
 
 			// init change 'queue'
-			DirtyList = new ChangeQueue<GroupListObjectViewModel>(new Dictionary<IListItem, int>());
-			m_Highlighted = null;
+			//Changes = new ChangeQueue<GroupListObjectViewModel>(new Dictionary<IListItem, int>(new ListItemEqualityComparer()));
+			f_Changes = new ChangeQueue<GroupListObjectViewModel>(resource);
+			f_Highlighted = null;
 
 			// populate list
 			List = Resource.ViewModelCreator.CreateList<GroupListObjectViewModel>();
@@ -193,7 +194,7 @@ namespace ViewModelExtended.ViewModel
 			List.Add(input);
 			ItemCount = List.Items.Count();
 
-			DirtyList.QueueOnAdd(input);
+			f_Changes.QueueOnAdd(input);
 		}
 
 		/// <summary>
@@ -206,7 +207,7 @@ namespace ViewModelExtended.ViewModel
 			List.Insert(target, input);
 			ItemCount = List.Items.Count();
 
-			DirtyList.QueueOnInsert(target, input);
+			f_Changes.QueueOnInsert(target, input);
 		}
 
 		/// <summary>
@@ -218,7 +219,7 @@ namespace ViewModelExtended.ViewModel
 		{
 			List.Reorder(source, target);
 
-			DirtyList.QueueOnReorder(source, target);
+			f_Changes.QueueOnReorder(source, target);
 		}
 
 		/// <summary>
@@ -227,7 +228,7 @@ namespace ViewModelExtended.ViewModel
 		/// <param name="input"></param>
 		public void Remove (GroupListObjectViewModel input)
 		{
-			DirtyList.QueueOnRemove(input);
+			f_Changes.QueueOnRemove(input);
 
 			List.Remove(input);
 			ItemCount = List.Items.Count();
@@ -252,7 +253,7 @@ namespace ViewModelExtended.ViewModel
 		/// </summary>
 		public void Clear ()
 		{
-			DirtyList.Clear();
+			f_Changes.Clear();
 			List.Clear();
 			ItemCount = List.Items.Count();
 		}
@@ -298,20 +299,20 @@ namespace ViewModelExtended.ViewModel
 
 		public void UpdateTitle ()
 		{
-			if (m_Highlighted == null) return;
+			if (f_Highlighted == null) return;
 
 			using (IDbContext dbContext = Resource.CreateDbContext()) {
-				dbContext.UpdateGroup(m_Highlighted.Model.Data, m_Highlighted.Title, null);
+				dbContext.UpdateGroup(f_Highlighted.Model.Data, f_Highlighted.Title, null);
 				dbContext.Save();
 			}
 		}
 
 		public void UpdateColor ()
 		{
-			if (m_Highlighted == null) return;
+			if (f_Highlighted == null) return;
 
 			using (IDbContext dbContext = Resource.CreateDbContext()) {
-				dbContext.UpdateGroup(m_Highlighted.Model.Data, m_Highlighted.Color, null);
+				dbContext.UpdateGroup(f_Highlighted.Model.Data, f_Highlighted.Color, null);
 				dbContext.Save();
 			}
 		}
@@ -327,17 +328,18 @@ namespace ViewModelExtended.ViewModel
 		/// </summary>
 		private void SaveListOrder ()
 		{
-			if (!DirtyList.List.Any()) return;
+			if (!f_Changes.IsDirty) return;
 
 			using (IDbContext dbContext = Resource.CreateDbContext()) {
-				foreach (KeyValuePair<IListItem, int> obj in Resource.DbQueryHelper.SortDictionary(DirtyList.List)) {
+				//foreach (KeyValuePair<IListItem, int> obj in Resource.DbQueryHelper.SortDictionary(Changes.Items)) {
+				foreach (KeyValuePair<IListItem, int> obj in f_Changes) {
 					Resource.DbListHelper.UpdateNodes(dbContext, obj.Key);
-					DirtyList.List.Remove(obj.Key);
+					f_Changes.Remove(obj.Key);
 				}
 
 				dbContext.Save();
 			}
-			DirtyList.Clear();
+			f_Changes.Clear();
 		}
 
 		/// <summary>

@@ -109,14 +109,6 @@ namespace ViewModelExtended.ViewModel
 
 		#region Sort
 
-		public IEnumerable<KeyValuePair<T, int>> SortDictionary<T> (Dictionary<T, int> listItems) where T : IListItem
-		{
-			return
-				from item in listItems
-				orderby item.Value ascending
-				select item;
-		}
-
 		public void GetUnsortedListObjects<T> (IList<T> source, IObservableList<T> target) where T : IListItem
 		{
 			target.Clear();

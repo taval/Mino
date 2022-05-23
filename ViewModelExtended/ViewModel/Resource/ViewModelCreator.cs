@@ -39,6 +39,17 @@ namespace ViewModelExtended.ViewModel
 
 
 
+		#region Dictionary
+
+		public Dictionary<IListItem, int> CreateDictionary ()
+		{
+			return new Dictionary<IListItem, int>(new ListItemEqualityComparer());
+		}
+
+		#endregion
+
+
+
 		#region NoteList
 
 		public NoteListViewModel CreateNoteListViewModel ()

@@ -6,7 +6,7 @@ using System.Text;
 using System.Windows.Input;
 using ViewModelExtended.Model;
 
-
+// TODO: make GetSortedListObjects a part of IObservableList
 
 namespace ViewModelExtended.ViewModel
 {
@@ -72,7 +72,7 @@ namespace ViewModelExtended.ViewModel
 					//Contents.GetListByGroupKey(null);
 					Contents.List = Contents.GetListByGroupKey(null);
 					//DirtyLists.GetListByGroupKey(null);
-					DirtyLists.List = DirtyLists.GetListByGroupKey(null);
+					Changes.Items = Changes.GetListByGroupKey(null);
 					HasGroup = false;
 					return;
 				}
@@ -84,14 +84,14 @@ namespace ViewModelExtended.ViewModel
 				if (groop != null) {
 					// select the dirty list
 					//DirtyLists.GetListByGroupKey(groop);
-					DirtyLists.List = DirtyLists.GetListByGroupKey(groop);
+					Changes.Items = Changes.GetListByGroupKey(groop);
 
 					// populate the GroupContents list
 					Contents.List = Contents.GetListByGroupKey(groop);
 
 					using (IDbContext dbContext = p_Resource.CreateDbContext()) {
 						//if (!list.Items.Any()) PopulateGroup(dbContext, list, groop);
-						if (!Contents.List.Items.Any()) {
+						if (!Contents.Any()) {
 							IList<GroupObjectViewModel> tempList = new List<GroupObjectViewModel>();
 
 							PopulateGroup(dbContext, tempList, groop);
@@ -226,7 +226,7 @@ namespace ViewModelExtended.ViewModel
 		/// <summary>
 		/// save the dirty state for storing at shutdown, autosave intervals, etc.
 		/// </summary>
-		GroupChangeQueue DirtyLists;
+		private GroupChangeQueue Changes { get; set; }
 
 		#endregion
 
@@ -284,7 +284,8 @@ namespace ViewModelExtended.ViewModel
 			ItemCount = Contents.ItemCount;
 
 			// init change 'queue'
-			DirtyLists = new GroupChangeQueue(() => new Dictionary<IListItem, int>());
+			//Changes = new GroupChangeQueue(() => new Dictionary<IListItem, int>(new ListItemEqualityComparer()));
+			Changes = new GroupChangeQueue(p_Resource);
 
 			// init content metadata (the 'group')
 			f_ContentData = null;
@@ -331,7 +332,7 @@ namespace ViewModelExtended.ViewModel
 			Contents.Add(input);
 			ItemCount = Contents.ItemCount;
 
-			DirtyLists.QueueOnAdd(input);
+			Changes.QueueOnAdd(input);
 		}
 
 		/// <summary>
@@ -348,7 +349,7 @@ namespace ViewModelExtended.ViewModel
 			Contents.Insert(target, input);
 			ItemCount = Contents.ItemCount;
 
-			DirtyLists.QueueOnInsert(target, input);
+			Changes.QueueOnInsert(target, input);
 		}
 
 		/// <summary>
@@ -360,7 +361,7 @@ namespace ViewModelExtended.ViewModel
 		{
 			Contents.Reorder(source, target);
 
-			DirtyLists.QueueOnReorder(source, target);
+			Changes.QueueOnReorder(source, target);
 		}
 
 
@@ -372,7 +373,7 @@ namespace ViewModelExtended.ViewModel
 		{
 			UnsetNoteObserver(input);
 
-			DirtyLists.QueueOnRemove(input);
+			Changes.QueueOnRemove(input);
 
 			Contents.Remove(input);
 			ItemCount = Contents.ItemCount;
@@ -400,7 +401,7 @@ namespace ViewModelExtended.ViewModel
 
 		public GroupObjectViewModel Find (Func<GroupObjectViewModel, bool> predicate)
 		{
-			return Contents.List.Find(predicate);
+			return Contents.Find(predicate);
 		}
 
 		public NoteListObjectViewModel FindNote (GroupObjectViewModel input)
@@ -523,7 +524,7 @@ namespace ViewModelExtended.ViewModel
 		public void Clear ()
 		{
 			foreach (KeyValuePair<Group, IObservableList<GroupObjectViewModel>> list in Contents.Lists) {
-				if (DirtyLists.Lists.ContainsKey(list.Key)) DirtyLists.Lists[list.Key].Clear();
+				if (Changes.Dictionaries.ContainsKey(list.Key)) Changes.Dictionaries[list.Key].Clear();
 				ClearList(list.Value);
 			}
 			ItemCount = Contents.ItemCount;
@@ -650,8 +651,6 @@ namespace ViewModelExtended.ViewModel
 
 		#region Methods: Lists
 
-
-
 		/// <summary>
 		/// removes all dependent GroupObjects (notes) associated with a given NoteListObject
 		/// </summary>
@@ -667,12 +666,12 @@ namespace ViewModelExtended.ViewModel
 				// for each group represented in original query (can just iterate over the query since one group exists per group object)
 				foreach (GroupObjectViewModel obj in groupObjectsByNote) {
 					IObservableList<GroupObjectViewModel>? list = null;
-					Dictionary<IListItem, int>? dirtyList = null;
+					//ListItemDictionary? changesInGroup = null;
 
 					// select the list of the particular group or the display group
 					// select the dirtyList of the particular group or the display group
 					list = Contents.GetListByGroupKey(obj.Model.Group);
-					dirtyList = DirtyLists.GetListByGroupKey(obj.Model.Group);
+					//changesInGroup = Changes.GetListByGroupKey(obj.Model.Group);
 
 					
 					// populate the viewmodel list of that group
@@ -682,10 +681,10 @@ namespace ViewModelExtended.ViewModel
 
 						PopulateGroup(dbContext, tempList, obj.Model.Group);
 
-						p_Resource.DbQueryHelper.GetSortedListObjects(tempList, Contents.List);
+						//p_Resource.DbQueryHelper.GetSortedListObjects(tempList, Contents.List);
+						p_Resource.DbQueryHelper.GetSortedListObjects(tempList, list);
 					}
 					
-
 					// select bound group object matching the unbound group object in the original query
 					IEnumerable<GroupObjectViewModel> match =
 						list.Items.Where((n) => n.DataId == note.Id);
@@ -697,8 +696,9 @@ namespace ViewModelExtended.ViewModel
 						// remove event handlers
 						UnsetNoteObserver(item);
 
-						// remove from dirty list
-						DirtyLists.QueueOnRemove(item);
+						// remove from dirty list - the appropriate group's dictionary is found via item's Group
+						//DirtyLists.QueueOnRemove(item);
+						Changes.QueueOnRemove(item);
 
 						// remove from list
 						list.Remove(item);
@@ -719,25 +719,29 @@ namespace ViewModelExtended.ViewModel
 
 		private void SaveListOrder ()
 		{
-			//if (!DirtyLists.IsDirty) return;
+			if (!Changes.IsDirty) return;
 
-			foreach (KeyValuePair<Group, Dictionary<IListItem, int>> dirtyList in DirtyLists.Lists) {
-				Group key = dirtyList.Key;
-				Dictionary<IListItem, int> list = dirtyList.Value;
+			foreach (KeyValuePair<Group, ListItemDictionary> kvChangesInGroup in Changes.Dictionaries) {
+				Group key = kvChangesInGroup.Key;
+				ListItemDictionary changesInGroup = kvChangesInGroup.Value;
 
-				if (!list.Any()) continue;
+				if (!changesInGroup.Any()) continue;
+
+				//IEnumerable<KeyValuePair<IListItem, int>> sortedDictionary =
+				//	p_Resource.DbQueryHelper.SortDictionary(changesInGroup);
 
 				using (IDbContext dbContext = p_Resource.CreateDbContext()) {
-					foreach (KeyValuePair<IListItem, int> obj in p_Resource.DbQueryHelper.SortDictionary(list)) {
+					//foreach (KeyValuePair<IListItem, int> obj in sortedDictionary) {
+					foreach (KeyValuePair<IListItem, int> obj in changesInGroup) {
 						p_Resource.DbListHelper.UpdateNodes(dbContext, obj.Key);
-						list.Remove(obj.Key);
+						changesInGroup.Remove(obj.Key);
 					}
 
 					dbContext.Save();
 				}
-				list.Clear();
+				changesInGroup.Clear();
 			}
-			DirtyLists.Clear();
+			Changes.Clear();
 		}
 
 		/// <summary>
@@ -753,9 +757,5 @@ namespace ViewModelExtended.ViewModel
 		#endregion
 	}
 }
-
-// TODO: a write is occurring on delete that somehow stores node data -- since node data has not been added to the dbcontext, it just saves a bunch of nulls and screws everything up - the DestroyViewModel methods are the culprit
-
-// UPDATE 2: instant db update via propertychanged handler has same problem with skipping updates as calling update on list functions. node queue is still necessary for large lists. try removing the UpdateNodes call from the Destroy method
 
 // TODO/NOTE: group must be in sync with its contents list and any input to its access points must match an object existing within the currently selected group or bad things will happen. This is not a problem as long as valid existing inputs are made or the newly created inputs are destined for the selected group. There are currently no checks as to whether or not the input exists outside the currently selected list and an object nonexistent within the list should throw an exception

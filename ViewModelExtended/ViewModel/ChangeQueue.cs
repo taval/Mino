@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -12,10 +13,19 @@ namespace ViewModelExtended.ViewModel
 	{
 		#region Container
 
-		/// <summary>
-		/// the interface to the selected dirty list
-		/// </summary>
-		public Dictionary<IListItem, int> List { get; private set; }
+		private ListItemDictionary f_Items;
+
+		#endregion
+
+
+
+		#region Dirty
+
+		public bool IsDirty {
+			get {
+				return Any();
+			}
+		}
 
 		#endregion
 
@@ -23,9 +33,14 @@ namespace ViewModelExtended.ViewModel
 
 		#region Constructor
 
-		public ChangeQueue (Dictionary<IListItem, int> list)
+		public ChangeQueue (IViewModelResource resource)
 		{
-			List = list;
+			f_Items = new ListItemDictionary(resource);
+		}
+
+		public ChangeQueue (IViewModelResource resource, Dictionary<IListItem, int> list)
+		{
+			f_Items = new ListItemDictionary(resource, list);
 		}
 
 		#endregion
@@ -33,64 +48,66 @@ namespace ViewModelExtended.ViewModel
 
 
 
-		#region List Access
+		#region IChangeQueue - List Access
 
-		/// <summary>
-		/// add an object to the end of the list
-		/// </summary>
-		/// <param name="input"></param>
 		public void QueueOnAdd (T input)
 		{
-			List.Add(input, List.Count());
+			f_Items.Add(input);
 		}
 
-		/// <summary>
-		/// insert an object into the list at the target's position
-		/// </summary>
-		/// <param name="target"></param>
-		/// <param name="input"></param>
 		public void QueueOnInsert (IListItem? target, T input)
 		{
-			List.Add(input, List.Count());
-			if (target != null && !List.ContainsKey(target))
-				List.Add(target, List.Count());
+			f_Items.Add(input);
+			if (target != null && !f_Items.ContainsKey(target))
+				f_Items.Add(target);
 		}
 
-		/// <summary>
-		/// rearrange two objects in the list
-		/// </summary>
-		/// <param name="source"></param>
-		/// <param name="target"></param>
 		public void QueueOnReorder (IListItem source, IListItem target)
 		{
-			if (!List.ContainsKey(source)) List.Add(source, List.Count());
-			if (!List.ContainsKey(target)) List.Add(target, List.Count());
+			if (!f_Items.ContainsKey(source)) f_Items.Add(source);
+			if (!f_Items.ContainsKey(target)) f_Items.Add(target);
 		}
 
-
-		/// <summary>
-		/// remove the object from the list
-		/// </summary>
-		/// <param name="input"></param>
 		public void QueueOnRemove (IListItem input)
 		{
-			if (input.Previous != null && !List.ContainsKey(input.Previous))
-				List.Add(input.Previous, List.Count());
+			if (input.Previous != null && !f_Items.ContainsKey(input.Previous))
+				f_Items.Add(input.Previous);
 
-			if (input.Next != null && !List.ContainsKey(input.Next))
-				List.Add(input.Next, List.Count());
+			if (input.Next != null && !f_Items.ContainsKey(input.Next))
+				f_Items.Add(input.Next);
 
-			if (List.ContainsKey(input)) List.Remove(input);
+			if (f_Items.ContainsKey(input)) f_Items.Remove(input);
 		}
 
-		public bool IsDirty { get { return List.Count > 0; } }
+		public void Remove (IListItem input)
+		{
+			f_Items.Remove(input);
+		}
 
-		/// <summary>
-		/// empty all lists non-destructively
-		/// </summary>
+		public bool Any ()
+		{
+			return f_Items.Any();
+		}
+
 		public void Clear ()
 		{
-			List.Clear();
+			f_Items.Clear();
+		}
+
+		#endregion
+
+
+
+		#region IEnumerable
+
+		public IEnumerator<KeyValuePair<IListItem, int>> GetEnumerator ()
+		{
+			return f_Items.GetEnumerator();
+		}
+
+		IEnumerator IEnumerable.GetEnumerator ()
+		{
+			return GetEnumerator();
 		}
 
 		#endregion
