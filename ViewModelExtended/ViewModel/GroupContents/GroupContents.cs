@@ -197,6 +197,19 @@ namespace ViewModelExtended.ViewModel
 			}
 		}
 
+		/// <summary>
+		/// if any items exist, return true, else return false
+		/// </summary>
+		/// <returns></returns>
+		public bool Any ()
+		{
+			foreach (KeyValuePair<Group, IObservableList<GroupObjectViewModel>> item in Lists) {
+				if (item.Value.Any()) return true;
+			}
+
+			return false;
+		}
+
 		public IEnumerator<GroupObjectViewModel> GetEnumerator ()
 		{
 			return Items.GetEnumerator();

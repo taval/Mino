@@ -8,7 +8,7 @@ using System.Text;
 
 namespace ViewModelExtended.ViewModel
 {
-	public class ObservableList<T> : IObservableList<T> where T : IListItem
+	internal class ObservableList<T> : IObservableList<T> where T : IListItem
 	{
 		#region Collection
 
@@ -20,26 +20,52 @@ namespace ViewModelExtended.ViewModel
 
 		#endregion
 
+
+
 		#region Constructor
 
 		public ObservableList () { } // TODO: make a constructor for observablelist w/ data
 
 		#endregion
 
+
+
 		#region Methods
+
+		public void AddSortedRange (IEnumerable<T> source)
+		{
+			if (Any()) {
+				source.First().Previous = m_Observables.Last();
+				m_Observables.Last().Next = source.First();
+			}
+
+			foreach (T item in source) {
+				if (!m_Observables.Contains(item)) m_Observables.Add(item);
+			}
+		}
+
+		public void AddRange (IEnumerable<T> source)
+		{
+			if (Any()) {
+				source.First().Previous = m_Observables.Last();
+				m_Observables.Last().Next = source.First();
+			}
+
+			foreach (T item in source) {
+				Add(item);
+			}
+		}
 
 		public void Add (T input)
 		{
-			if (Items.Contains(input)) {
+			if (m_Observables.Contains(input)) {
 				return;
 			}
 
 			IListItem? previous = null;
-			int objCount = m_Observables.Count();
 
-			// connect nodes
-			if (objCount > 0) {
-				previous = Items.Last();
+			if (Any()) {
+				previous = m_Observables.Last();
 				previous.Next = input;
 			}
 
@@ -50,14 +76,12 @@ namespace ViewModelExtended.ViewModel
 
 		public void Insert (IListItem? target, T input)
 		{
-			if (Items.Contains(input)) {
+			if (m_Observables.Contains(input)) {
 				return;
 			}
 
-			int objCount = m_Observables.Count();
-
-			if (target == null && objCount > 0) {
-				target = Items.First();
+			if (target == null && Any()) {
+				target = m_Observables.First();
 			}
 
 			if (target != null) {
@@ -72,59 +96,13 @@ namespace ViewModelExtended.ViewModel
 			input.Next = target;
 
 			// insert node into list (> 0: at target obj's index; <= 0: first index; no list items: add the first obj)
-			if (objCount > 0) {
-				//m_Observables.Insert((target != null && target.Idx >= 0) ? target.Idx : 0, input);
+			if (Any()) {
 				m_Observables.Insert((target != null && Index(target) >= 0) ? Index(target) : 0, input);
 			}
 			else {
 				m_Observables.Add(input);
 			}
 		}
-
-		//public void Reorder (IListItem source, IListItem target)
-		//{
-		//	if (source == target) {
-		//		return;
-		//	}
-
-		//	int oldIdx = m_Observables.IndexOf((T)source);
-		//	int newIdx = m_Observables.IndexOf((T)target);
-
-		//	IListItem? lhs = (oldIdx < newIdx) ? source.Previous : target.Previous;
-		//	IListItem? rhs = (oldIdx < newIdx) ? target.Next : source.Next;
-
-		//	if (oldIdx < newIdx) {
-
-		//		if (lhs != null) {
-		//			lhs.Next = target;
-		//		}
-		//		if (rhs != null) {
-		//			rhs.Previous = source;
-		//		}
-		//		target.Previous = lhs;
-		//		target.Next = source;
-		//		source.Previous = target;
-		//		source.Next = rhs;
-		//	}
-		//	else {
-		//		if (lhs != null) {
-		//			lhs.Next = source;
-		//		}
-		//		if (rhs != null) {
-		//			rhs.Previous = target;
-		//		}
-		//		source.Previous = lhs;
-		//		source.Next = target;
-		//		target.Previous = source;
-		//		target.Next = rhs;
-		//	}
-
-		//	// perform move within the container
-		//	// if both items exist, move model w/ oldIdx to newIdx
-		//	if (oldIdx != -1 && newIdx != -1) {
-		//		m_Observables.Move(oldIdx, newIdx);
-		//	}
-		//}
 
 		public void Reorder (IListItem source, IListItem target)
 		{
@@ -220,40 +198,11 @@ namespace ViewModelExtended.ViewModel
 			return match.First();
 		}
 
-		//public void LinkAll ()
-		//{
-		//	// create the relationship between Notes in a linked list
-		//	// assumes note begin/end nodes will correctly contain null upon immediate construction
-		//	// this maybe useful later for something. check the model's implementation against this
-
-		//	int id = 1;
-		//	IListItem? prev = null;
-		//	IListItem? current = null;
-		//	IListItem? next = null;
-
-		//	foreach (IListItem note in Items) {
-		//		note.Id = id++; // TODO: id is set by model
-
-		//		if (prev == null) {
-		//			prev = note;
-		//			continue;
-		//		}
-		//		if (prev != null && current == null) {
-		//			current = note;
-		//			continue;
-		//		}
-		//		if (prev != null && current != null) {
-		//			next = note;
-		//			prev.Next = current;
-		//			current.Previous = prev;
-		//			current.Next = next;
-		//			next.Previous = current;
-		//			prev = current;
-		//			current = next;
-		//		}
-		//	}
-		//}
+		public bool Any ()
+		{
+			return m_Observables.Any();
+		}
 
 		#endregion
-	} // end class
-} // end namespace
+	}
+}

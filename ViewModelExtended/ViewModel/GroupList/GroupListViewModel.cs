@@ -138,6 +138,8 @@ namespace ViewModelExtended.ViewModel
 
 		public GroupListViewModel (IViewModelResource resource)
 		{
+			IComponentCreator componentCreator = new ComponentCreator();
+
 			// attach commands
 			Resource = resource;
 			Resource.CommandBuilder.MakeGroupList(this);
@@ -147,17 +149,24 @@ namespace ViewModelExtended.ViewModel
 
 			// init change 'queue'
 			//Changes = new ChangeQueue<GroupListObjectViewModel>(new Dictionary<IListItem, int>(new ListItemEqualityComparer()));
-			f_Changes = new ChangeQueue<GroupListObjectViewModel>(resource);
+			//f_Changes = new ChangeQueue<GroupListObjectViewModel>(resource);
+			f_Changes = componentCreator.CreateChangeQueue<GroupListObjectViewModel>();
 			f_Highlighted = null;
 
 			// populate list
-			List = Resource.ViewModelCreator.CreateList<GroupListObjectViewModel>();
+			//List = Resource.ViewModelCreator.CreateList<GroupListObjectViewModel>();
+			List = componentCreator.CreateObservableList<GroupListObjectViewModel>();
 
 			using (IDbContext dbContext = Resource.CreateDbContext()) {
 				IQueryable<GroupListObjectViewModel> unsortedObjects =
 					Resource.DbQueryHelper.GetAllGroupListObjects(dbContext);
 
-				Resource.DbQueryHelper.GetSortedListObjects(unsortedObjects.ToList(), List);
+				//Resource.DbQueryHelper.GetSortedListObjects(unsortedObjects.ToList(), List);
+				IEnumerable<GroupListObjectViewModel> sortedObjects =
+					Resource.DbListHelper.SortListObjects(unsortedObjects.ToList());
+
+				List.Clear();
+				List.AddSortedRange(sortedObjects);
 			}
 
 			ItemCount = List.Items.Count();

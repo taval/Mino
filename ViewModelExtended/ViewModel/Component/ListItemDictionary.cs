@@ -6,9 +6,6 @@ using System.Linq;
 
 
 
-// TODO: marked for internal use only, similarly to GroupContents and the ChangeQueue variants.
-//		 does not interface with any view or external code.
-
 namespace ViewModelExtended.ViewModel
 {
 	/// <summary>
@@ -18,9 +15,8 @@ namespace ViewModelExtended.ViewModel
 	/// in contrast with the IListItem-aware IObservableList, this is intended as a dependent collection.
 	/// Data should not be stored here, only referenced.
 	/// </summary>
-	public class ListItemDictionary : IEnumerable<KeyValuePair<IListItem, int>>
+	internal class ListItemDictionary : IListItemDictionary
 	{
-		//public Dictionary<IListItem, int> Items { get; private set; }
 		private Dictionary<IListItem, int> f_Items;
 
 		private IdGenerator f_IdGenerator;
@@ -31,23 +27,19 @@ namespace ViewModelExtended.ViewModel
 			}
 		}
 
-		private IViewModelResource f_Resource;
-
-		public ListItemDictionary (IViewModelResource resource)
+		public ListItemDictionary ()
 		{
 			f_IdGenerator = new IdGenerator();
-			f_Resource = resource;
-			f_Items = resource.ViewModelCreator.CreateDictionary();
+			f_Items = new Dictionary<IListItem, int>(new ListItemEqualityComparer());
 		}
 
-		public ListItemDictionary (IViewModelResource resource, Dictionary<IListItem, int> dictionary)
+		public ListItemDictionary (Dictionary<IListItem, int> dictionary)
 		{
 			f_IdGenerator = new IdGenerator();
-			f_Resource = resource;
 			f_Items = dictionary;
 		}
 
-		private IEnumerable<KeyValuePair<IListItem, int>> Sort ()
+		private IEnumerable<KeyValuePair<IListItem, int>> GetSorted ()
 		{
 			return
 				from item in f_Items
@@ -75,9 +67,14 @@ namespace ViewModelExtended.ViewModel
 			f_Items.Clear();
 		}
 
+		public bool Any ()
+		{
+			return f_Items.Any();
+		}
+
 		public IEnumerator<KeyValuePair<IListItem, int>> GetEnumerator ()
 		{
-			IEnumerable<KeyValuePair<IListItem, int>> sortedChanges = Sort();
+			IEnumerable<KeyValuePair<IListItem, int>> sortedChanges = GetSorted();
 
 			return f_Items.GetEnumerator();
 		}

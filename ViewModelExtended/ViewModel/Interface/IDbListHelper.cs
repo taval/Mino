@@ -15,5 +15,13 @@ namespace ViewModelExtended.ViewModel
 		public void UpdateAfterRemove (IDbContext dbContext, IListItem obj);
 		public void UpdateAfterInsert (IDbContext dbContext, IListItem? target, IListItem input);
 		public void UpdateAfterReorder (IDbContext dbContext, IListItem source, IListItem target);
+
+		/// <summary>
+		/// output a new sorted list based on the source
+		/// </summary>
+		/// <typeparam name="T"></typeparam>
+		/// <param name="source"></param>
+		/// <returns></returns>
+		public IEnumerable<T> SortListObjects<T> (IList<T> source) where T : IListItem;
 	}
 }

@@ -107,52 +107,52 @@ namespace ViewModelExtended.ViewModel
 
 
 
-		#region Sort
+		//#region Sort
 
-		public void GetUnsortedListObjects<T> (IList<T> source, IObservableList<T> target) where T : IListItem
-		{
-			target.Clear();
+		//public void GetUnsortedListObjects<T> (IList<T> source, IObservableList<T> target) where T : IListItem
+		//{
+		//	target.Clear();
 
-			foreach (T obj in source) target.Add(obj);
-		}
+		//	foreach (T obj in source) target.Add(obj);
+		//}
 
-		public void GetSortedListObjects<T> (IList<T> source, IObservableList<T> target) where T : IListItem
-		{
-			target.Clear();
+		//public void GetSortedListObjects<T> (IList<T> source, IObservableList<T> target) where T : IListItem
+		//{
+		//	target.Clear();
 
-			IList<T> sourceCopy = source.ToList();
+		//	IList<T> sourceCopy = source.ToList();
 
-			// first object
-			IEnumerable<T> first = sourceCopy.Where(obj => obj.Node.PreviousId == null);
+		//	// first object
+		//	IEnumerable<T> first = sourceCopy.Where(obj => obj.Node.PreviousId == null);
 
-			if (!first.Any()) return;
-			T firstObject = first.Single();
+		//	if (!first.Any()) return;
+		//	T firstObject = first.Single();
 
-			target.Add(firstObject);
-			sourceCopy.Remove(firstObject);
+		//	target.Add(firstObject);
+		//	sourceCopy.Remove(firstObject);
 
-			T currentObject = firstObject;
+		//	T currentObject = firstObject;
 
-			// remaining objects
-			while (sourceCopy.Count > 0) {
-				IEnumerable<T> next = sourceCopy.Where(obj => obj.Node.Id == currentObject.Node.NextId);
+		//	// remaining objects
+		//	while (sourceCopy.Count > 0) {
+		//		IEnumerable<T> next = sourceCopy.Where(obj => obj.Node.Id == currentObject.Node.NextId);
 
-				if (!next.Any()) {
-					currentObject.Next = null;
-					return;
-				}
-				T nextObject = next.Single();
-				currentObject.Next = nextObject;
+		//		if (!next.Any()) {
+		//			currentObject.Next = null;
+		//			return;
+		//		}
+		//		T nextObject = next.Single();
+		//		currentObject.Next = nextObject;
 
-				nextObject.Previous = currentObject;
+		//		nextObject.Previous = currentObject;
 
-				target.Add(nextObject);
-				sourceCopy.Remove(nextObject);
+		//		target.Add(nextObject);
+		//		sourceCopy.Remove(nextObject);
 
-				currentObject = nextObject;
-			}
-		}
+		//		currentObject = nextObject;
+		//	}
+		//}
 
-		#endregion
+		//#endregion
 	}
 }

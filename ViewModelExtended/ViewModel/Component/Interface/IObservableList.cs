@@ -6,12 +6,28 @@ using System.Text;
 
 namespace ViewModelExtended.ViewModel
 {
-	public interface IObservableList<T> where T : IListItem
+	internal interface IObservableList<T> where T : IListItem
 	{
 		/// <summary>
 		/// the enumerable list of items
 		/// </summary>
 		public IEnumerable<T> Items { get; }
+
+		/// <summary>
+		/// joins a range of list items with node data already set
+		/// incoming node data is left as-is
+		/// existing tail is joined with incoming node data
+		/// </summary>
+		/// <param name="source"></param>
+		public void AddSortedRange (IEnumerable<T> source);
+
+		/// <summary>
+		/// joins a set of list items at end of existing list with unset node data
+		/// ignores and overwrites incoming node data
+		/// existing tail is joined with incoming node data
+		/// </summary>
+		/// <param name="source"></param>
+		public void AddRange (IEnumerable<T> source);
 
 		/// <summary>
 		/// add a new input to the end of the collection
@@ -52,5 +68,7 @@ namespace ViewModelExtended.ViewModel
 		public void Clear ();
 
 		public T Find (Func<T, bool> predicate);
+
+		public bool Any ();
 	}
 }

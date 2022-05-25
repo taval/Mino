@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 using ViewModelExtended.Model;
 
@@ -82,5 +83,48 @@ namespace ViewModelExtended.ViewModel
 				}
 			}
 		}
+
+		#region Sort
+
+		public IEnumerable<T> SortListObjects<T> (IList<T> source) where T : IListItem
+		{
+			IList<T> output = new List<T>();
+
+			IList<T> sourceCopy = source.ToList();
+
+			// first object
+			IEnumerable<T> first = sourceCopy.Where(obj => obj.Node.PreviousId == null);
+
+			if (!first.Any()) return output;
+			T firstObject = first.Single();
+
+			output.Add(firstObject);
+			sourceCopy.Remove(firstObject);
+
+			T currentObject = firstObject;
+
+			// remaining objects
+			while (sourceCopy.Count > 0) {
+				IEnumerable<T> next = sourceCopy.Where(obj => obj.Node.Id == currentObject.Node.NextId);
+
+				if (!next.Any()) {
+					currentObject.Next = null;
+					return output;
+				}
+				T nextObject = next.Single();
+				currentObject.Next = nextObject;
+
+				nextObject.Previous = currentObject;
+
+				output.Add(nextObject);
+				sourceCopy.Remove(nextObject);
+
+				currentObject = nextObject;
+			}
+
+			return output;
+		}
+
+		#endregion
 	}
 }

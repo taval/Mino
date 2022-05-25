@@ -3,20 +3,12 @@ using System.Collections.Generic;
 using System.Text;
 using ViewModelExtended.Model;
 
-/** TODO: add create methods for:
- * ChangeQueue
- * GroupChangeQueue
- * GroupContents
- * these are implementation details so do not go here but in their own separate factory class
- */
+
 
 namespace ViewModelExtended.ViewModel
 {
 	public interface IViewModelCreator
 	{
-		public IObservableList<T> CreateList<T> () where T : IListItem;
-		public Dictionary<IListItem, int> CreateDictionary (); // TODO: deprecate
-
 		// ListObjects have two input methods: new data and existing data
 
 		#region NoteList
@@ -77,9 +69,6 @@ namespace ViewModelExtended.ViewModel
 		public GroupObjectViewModel CreateGroupObjectViewModel (GroupObject data);
 		public GroupObjectViewModel CreateGroupObjectViewModel (
 			GroupObject data, IDbContext dbContext, Action<GroupObjectViewModel> action);
-
-		// copy
-		//public GroupObjectViewModel CreateGroupObjectViewModel (IDbContext dbContext, GroupObjectViewModel input);
 
 		// temp
 		public GroupObjectViewModel CreateTempGroupObjectViewModel (IDbContext dbContext, Group groop, Note note);

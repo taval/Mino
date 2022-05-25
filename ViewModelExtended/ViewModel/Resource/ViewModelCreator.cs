@@ -28,28 +28,6 @@ namespace ViewModelExtended.ViewModel
 
 
 
-		#region List
-
-		public IObservableList<T> CreateList<T> () where T : IListItem
-		{
-			return new ObservableList<T>();
-		}
-
-		#endregion
-
-
-
-		#region Dictionary
-
-		public Dictionary<IListItem, int> CreateDictionary ()
-		{
-			return new Dictionary<IListItem, int>(new ListItemEqualityComparer());
-		}
-
-		#endregion
-
-
-
 		#region NoteList
 
 		public NoteListViewModel CreateNoteListViewModel ()

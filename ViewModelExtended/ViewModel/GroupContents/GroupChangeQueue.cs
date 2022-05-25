@@ -16,7 +16,29 @@ namespace ViewModelExtended.ViewModel
 		/// <summary>
 		/// save the dirty state for storing at shutdown, autosave intervals, etc.
 		/// </summary>
-		public Dictionary<Group, ListItemDictionary> Dictionaries { get; private set; }
+		public Dictionary<Group, IListItemDictionary> Dictionaries { get; private set; }
+
+		#endregion
+
+
+
+		#region Default Dictionary
+
+		/// <summary>
+		/// the default dictionary to return
+		/// </summary>
+		private IListItemDictionary f_DefaultDictionary;
+
+		#endregion
+
+
+
+		#region Resource
+
+		/// <summary>
+		/// the dictionary creation mechanism
+		/// </summary>
+		private readonly Func<IListItemDictionary> f_DictionaryCreator;
 
 		#endregion
 
@@ -24,7 +46,7 @@ namespace ViewModelExtended.ViewModel
 
 		#region Current List
 
-		public ListItemDictionary Items {
+		public IListItemDictionary Items {
 			get {
 				if (f_Items == null) return f_DefaultDictionary;
 
@@ -35,24 +57,20 @@ namespace ViewModelExtended.ViewModel
 			}
 		}
 
-		
-
-		/// <summary>
-		/// the default dictionary to return
-		/// </summary>
-		private ListItemDictionary f_DefaultDictionary;
-
-		/// <summary>
-		/// the dictionary creation mechanism
-		/// </summary>
-		//private readonly Func<Dictionary<IListItem, int>> f_DictionaryCreator;
-		private IViewModelResource f_Resource;
-
 		/// <summary>
 		/// the stored reference to the selected dirty dictionary
 		/// </summary>
-		//private Dictionary<IListItem, int>? f_Items;
-		private ListItemDictionary? f_Items;
+		private IListItemDictionary? f_Items;
+
+		#endregion
+
+
+
+		#region Dirty
+
+		public bool IsDirty {
+			get { return Any(); }
+		}
 
 		#endregion
 
@@ -60,15 +78,11 @@ namespace ViewModelExtended.ViewModel
 
 		#region Constructor
 
-		//public GroupChangeQueue (Func<Dictionary<IListItem, int>> dictionaryCreator)
-		public GroupChangeQueue (IViewModelResource resource)
+		public GroupChangeQueue (Func<IListItemDictionary> dictionaryCreator)
 		{
-			//f_DictionaryCreator = dictionaryCreator;
-			f_Resource = resource;
-			//f_DefaultDictionary = new ListItemDictionary(f_DictionaryCreator.Invoke());
-			//f_DefaultDictionary = new ListItemDictionary(resource.ViewModelCreator.CreateDictionary());
-			f_DefaultDictionary = new ListItemDictionary(resource);
-			Dictionaries = new Dictionary<Group, ListItemDictionary>(new GroupEqualityComparer());
+			f_DictionaryCreator = dictionaryCreator;
+			f_DefaultDictionary = dictionaryCreator.Invoke();
+			Dictionaries = new Dictionary<Group, IListItemDictionary>(new GroupEqualityComparer());
 			f_Items = null;
 		}
 
@@ -88,7 +102,7 @@ namespace ViewModelExtended.ViewModel
 			Group groop = input.Model.Group;
 
 			if (Dictionaries.ContainsKey(groop)) {
-				ListItemDictionary dictionary = Dictionaries[groop];
+				IListItemDictionary dictionary = Dictionaries[groop];
 
 				dictionary.Add(input);
 			}
@@ -104,7 +118,7 @@ namespace ViewModelExtended.ViewModel
 			Group groop = input.Model.Group;
 
 			if (Dictionaries.ContainsKey(groop)) {
-				ListItemDictionary dictionary = Dictionaries[groop];
+				IListItemDictionary dictionary = Dictionaries[groop];
 
 				dictionary.Add(input);
 				if (target != null && !dictionary.ContainsKey(target))
@@ -117,7 +131,6 @@ namespace ViewModelExtended.ViewModel
 		/// </summary>
 		/// <param name="source"></param>
 		/// <param name="target"></param>
-		/// <param name="groop"></param>
 		public void QueueOnReorder (GroupObjectViewModel source, GroupObjectViewModel target)
 		{
 			Group groop = source.Model.Group;
@@ -125,7 +138,7 @@ namespace ViewModelExtended.ViewModel
 			if (source.Model.Group != target.Model.Group) return;
 
 			if (Dictionaries.ContainsKey(groop)) {
-				ListItemDictionary dictionary = Dictionaries[groop];
+				IListItemDictionary dictionary = Dictionaries[groop];
 
 				if (!dictionary.ContainsKey(source)) dictionary.Add(source);
 				if (!dictionary.ContainsKey(target)) dictionary.Add(target);
@@ -136,13 +149,12 @@ namespace ViewModelExtended.ViewModel
 		/// remove the object from the dictionary
 		/// </summary>
 		/// <param name="input"></param>
-		/// <param name="groop"></param>
 		public void QueueOnRemove (GroupObjectViewModel input)
 		{
 			Group groop = input.Model.Group;
 
 			if (Dictionaries.ContainsKey(groop)) {
-				ListItemDictionary dictionary = Dictionaries[groop];
+				IListItemDictionary dictionary = Dictionaries[groop];
 
 				if (input.Previous != null && !dictionary.ContainsKey(input.Previous))
 					dictionary.Add(input.Previous);
@@ -154,21 +166,12 @@ namespace ViewModelExtended.ViewModel
 			}
 		}
 
-		public bool IsDirty {
-			get {
-				foreach (KeyValuePair<Group, ListItemDictionary> dictionary in Dictionaries) {
-					if (dictionary.Value.Any()) return true;
-				}
-				return false;
-			}
-		}
-
 		/// <summary>
 		/// empty all lists non-destructively
 		/// </summary>
 		public void Clear ()
 		{
-			foreach (KeyValuePair<Group, ListItemDictionary> dictionary in Dictionaries) {
+			foreach (KeyValuePair<Group, IListItemDictionary> dictionary in Dictionaries) {
 				dictionary.Value.Clear();
 			}
 		}
@@ -178,8 +181,7 @@ namespace ViewModelExtended.ViewModel
 		/// </summary>
 		/// <param name="groop"></param>
 		/// <returns>the GroupObject dictionary associated with the given Group key</returns>
-		//public Dictionary<IListItem, int> GetListByGroupKey (Group? groop)
-		public ListItemDictionary GetListByGroupKey (Group? groop)
+		public IListItemDictionary GetListByGroupKey (Group? groop)
 		{
 			if (groop == null) {
 				return f_DefaultDictionary;
@@ -189,13 +191,24 @@ namespace ViewModelExtended.ViewModel
 				return Dictionaries[groop];
 			}
 			else {
-				//ListItemDictionary output = new ListItemDictionary(f_DictionaryCreator.Invoke());
-				//ListItemDictionary output = new ListItemDictionary(f_Resource.ViewModelCreator.CreateDictionary());
-				ListItemDictionary output = new ListItemDictionary(f_Resource);
+				IListItemDictionary output = f_DictionaryCreator.Invoke();
 				Dictionaries.Add(groop, output);
 
 				return output;
 			}
+		}
+
+		/// <summary>
+		/// if any items exist, return true, else return false
+		/// </summary>
+		/// <returns></returns>
+		public bool Any ()
+		{
+			foreach (KeyValuePair<Group, IListItemDictionary> item in Dictionaries) {
+				if (item.Value.Any()) return true;
+			}
+
+			return false;
 		}
 
 		/// <summary>
@@ -215,6 +228,3 @@ namespace ViewModelExtended.ViewModel
 		#endregion
 	}
 }
-
-// TODO: make nearly identical to GroupContents class
-

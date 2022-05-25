@@ -108,6 +108,8 @@ namespace ViewModelExtended.ViewModel
 
 		public NoteListViewModel (IViewModelResource resource)
 		{
+			IComponentCreator componentCreator = new ComponentCreator();
+
 			// attach commands
 			Resource = resource;
 			Resource.CommandBuilder.MakeNoteList(this);
@@ -119,19 +121,26 @@ namespace ViewModelExtended.ViewModel
 			//DirtyList = new ChangeQueue<NoteListObjectViewModel>(new Dictionary<IListItem, int>());
 			//Changes = new ChangeQueue<NoteListObjectViewModel>(
 			//	new Dictionary<IListItem, int>(new ListItemEqualityComparer()));
-			f_Changes = new ChangeQueue<NoteListObjectViewModel>(resource);
+			//f_Changes = new ChangeQueue<NoteListObjectViewModel>(resource);
+			f_Changes = componentCreator.CreateChangeQueue<NoteListObjectViewModel>();
 
 			// init highlighted
 			f_Highlighted = null;
 
 			// populate list
-			List = Resource.ViewModelCreator.CreateList<NoteListObjectViewModel>();
+			//List = Resource.ViewModelCreator.CreateList<NoteListObjectViewModel>();
+			List = componentCreator.CreateObservableList<NoteListObjectViewModel>();
 
 			using (IDbContext dbContext = Resource.CreateDbContext()) {
 				IQueryable<NoteListObjectViewModel> unsortedObjects =
 					Resource.DbQueryHelper.GetAllNoteListObjects(dbContext);
 
-				Resource.DbQueryHelper.GetSortedListObjects(unsortedObjects.ToList(), List);
+				//Resource.DbQueryHelper.GetSortedListObjects(unsortedObjects.ToList(), List);
+				IEnumerable<NoteListObjectViewModel> sortedObjects =
+					Resource.DbListHelper.SortListObjects(unsortedObjects.ToList());
+
+				List.Clear();
+				List.AddSortedRange(sortedObjects);
 			}
 
 			ItemCount = List.Items.Count();

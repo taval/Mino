@@ -13,7 +13,7 @@ namespace ViewModelExtended.ViewModel
 	{
 		#region Container
 
-		private ListItemDictionary f_Items;
+		private IListItemDictionary f_Items;
 
 		#endregion
 
@@ -22,9 +22,7 @@ namespace ViewModelExtended.ViewModel
 		#region Dirty
 
 		public bool IsDirty {
-			get {
-				return Any();
-			}
+			get { return Any(); }
 		}
 
 		#endregion
@@ -33,14 +31,16 @@ namespace ViewModelExtended.ViewModel
 
 		#region Constructor
 
-		public ChangeQueue (IViewModelResource resource)
+		public ChangeQueue (Func<IListItemDictionary> dictionaryCreator)
 		{
-			f_Items = new ListItemDictionary(resource);
+			f_Items = dictionaryCreator.Invoke();
 		}
 
-		public ChangeQueue (IViewModelResource resource, Dictionary<IListItem, int> list)
+		public ChangeQueue (
+			Func<Dictionary<IListItem, int>, IListItemDictionary> dictionaryCreator,
+			Dictionary<IListItem, int> dictionary)
 		{
-			f_Items = new ListItemDictionary(resource, list);
+			f_Items = dictionaryCreator.Invoke(dictionary);
 		}
 
 		#endregion
