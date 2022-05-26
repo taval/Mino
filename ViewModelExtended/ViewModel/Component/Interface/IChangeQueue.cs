@@ -19,6 +19,8 @@ namespace ViewModelExtended.ViewModel
 
 		#region List Access
 
+		public IReadOnlyDictionary<IListItem, int> Items { get; }
+
 		/// <summary>
 		/// changes for when adding an object to the end of the list
 		/// </summary>

@@ -23,5 +23,13 @@ namespace ViewModelExtended.ViewModel
 		/// <param name="source"></param>
 		/// <returns></returns>
 		public IEnumerable<T> SortListObjects<T> (IList<T> source) where T : IListItem;
+
+		/// <summary>
+		/// output an enumerable of dictionary objects sorted by the value of the key-value pair
+		/// </summary>
+		/// <param name="dictionary"></param>
+		/// <returns></returns>
+		public IEnumerable<KeyValuePair<IListItem, int>> SortDictionaryObjects (
+			IReadOnlyDictionary<IListItem, int> dictionary);
 	}
 }

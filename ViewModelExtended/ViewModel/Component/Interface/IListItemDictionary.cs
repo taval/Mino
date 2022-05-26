@@ -8,6 +8,8 @@ namespace ViewModelExtended.ViewModel
 {
 	internal interface IListItemDictionary : IEnumerable<KeyValuePair<IListItem, int>>
 	{
+		public IReadOnlyDictionary<IListItem, int> Items { get; }
+
 		public int Count { get; }
 
 		public bool ContainsKey (IListItem key);

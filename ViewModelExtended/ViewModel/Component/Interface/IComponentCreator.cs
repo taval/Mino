@@ -2,7 +2,10 @@
 using System.Collections.Generic;
 using System.Text;
 
-
+/** NOTE: When creating objects with method references, a reference to their source must be kept like anything else,
+ *        as long as it is active and not ready for gc.
+ *        To that end, store a reference to IComponentCreator in the viewmodel when using jt to build viewmodel components.
+ */
 
 namespace ViewModelExtended.ViewModel
 {

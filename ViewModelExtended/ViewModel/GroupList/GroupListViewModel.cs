@@ -21,10 +21,10 @@ namespace ViewModelExtended.ViewModel
 		/// the base ListViewModel
 		/// </summary>
 		public IEnumerable<GroupListObjectViewModel> Items {
-			get { return List.Items; }
+			get { return f_List.Items; }
 		}
 
-		private IObservableList<GroupListObjectViewModel> List { get; set; }
+		private IObservableList<GroupListObjectViewModel> f_List;
 
 		#endregion
 
@@ -35,7 +35,12 @@ namespace ViewModelExtended.ViewModel
 		/// <summary>
 		/// the viewmodel datacontext
 		/// </summary>
-		private IViewModelResource Resource { get; set; }
+		private IViewModelResource f_Resource;
+
+		/// <summary>
+		/// viewmodel component creation methods
+		/// </summary>
+		private IComponentCreator f_ComponentCreator;
 
 		#endregion
 
@@ -138,38 +143,40 @@ namespace ViewModelExtended.ViewModel
 
 		public GroupListViewModel (IViewModelResource resource)
 		{
-			IComponentCreator componentCreator = new ComponentCreator();
+			f_ComponentCreator = new ComponentCreator();
 
 			// attach commands
-			Resource = resource;
-			Resource.CommandBuilder.MakeGroupList(this);
+			f_Resource = resource;
+			f_Resource.CommandBuilder.MakeGroupList(this);
 
 			// attach handlers
-			SetPropertyChangedEventHandler(Resource.StatusBarViewModel);
+			SetPropertyChangedEventHandler(f_Resource.StatusBarViewModel);
 
 			// init change 'queue'
-			//Changes = new ChangeQueue<GroupListObjectViewModel>(new Dictionary<IListItem, int>(new ListItemEqualityComparer()));
-			//f_Changes = new ChangeQueue<GroupListObjectViewModel>(resource);
-			f_Changes = componentCreator.CreateChangeQueue<GroupListObjectViewModel>();
+			f_Changes = f_ComponentCreator.CreateChangeQueue<GroupListObjectViewModel>();
 			f_Highlighted = null;
 
-			// populate list
-			//List = Resource.ViewModelCreator.CreateList<GroupListObjectViewModel>();
-			List = componentCreator.CreateObservableList<GroupListObjectViewModel>();
+			/** populate list:
+			 * - set the viewmodel list to a new IObservableList
+			 * - get list objects from database
+			 * - sort the instantiated list
+			 * - add the data to the viewmodel's list
+			 */
+			f_List = f_ComponentCreator.CreateObservableList<GroupListObjectViewModel>();
 
-			using (IDbContext dbContext = Resource.CreateDbContext()) {
+			using (IDbContext dbContext = f_Resource.CreateDbContext()) {
 				IQueryable<GroupListObjectViewModel> unsortedObjects =
-					Resource.DbQueryHelper.GetAllGroupListObjects(dbContext);
+					f_Resource.DbQueryHelper.GetAllGroupListObjects(dbContext);
 
-				//Resource.DbQueryHelper.GetSortedListObjects(unsortedObjects.ToList(), List);
 				IEnumerable<GroupListObjectViewModel> sortedObjects =
-					Resource.DbListHelper.SortListObjects(unsortedObjects.ToList());
+					f_Resource.DbListHelper.SortListObjects(unsortedObjects.ToList());
 
-				List.Clear();
-				List.AddSortedRange(sortedObjects);
+				f_List.Clear();
+				f_List.AddSortedRange(sortedObjects);
 			}
 
-			ItemCount = List.Items.Count();
+			// set the viewmodel list count
+			ItemCount = f_List.Items.Count();
 		}
 
 		/// <summary>
@@ -200,8 +207,8 @@ namespace ViewModelExtended.ViewModel
 		/// <param name="input"></param>
 		public void Add (GroupListObjectViewModel input)
 		{
-			List.Add(input);
-			ItemCount = List.Items.Count();
+			f_List.Add(input);
+			ItemCount = f_List.Items.Count();
 
 			f_Changes.QueueOnAdd(input);
 		}
@@ -213,8 +220,8 @@ namespace ViewModelExtended.ViewModel
 		/// <param name="input"></param>
 		public void Insert (GroupListObjectViewModel? target, GroupListObjectViewModel input)
 		{
-			List.Insert(target, input);
-			ItemCount = List.Items.Count();
+			f_List.Insert(target, input);
+			ItemCount = f_List.Items.Count();
 
 			f_Changes.QueueOnInsert(target, input);
 		}
@@ -226,7 +233,7 @@ namespace ViewModelExtended.ViewModel
 		/// <param name="target"></param>
 		public void Reorder (GroupListObjectViewModel source, GroupListObjectViewModel target)
 		{
-			List.Reorder(source, target);
+			f_List.Reorder(source, target);
 
 			f_Changes.QueueOnReorder(source, target);
 		}
@@ -239,11 +246,11 @@ namespace ViewModelExtended.ViewModel
 		{
 			f_Changes.QueueOnRemove(input);
 
-			List.Remove(input);
-			ItemCount = List.Items.Count();
+			f_List.Remove(input);
+			ItemCount = f_List.Items.Count();
 
-			using (IDbContext dbContext = Resource.CreateDbContext()) {
-				Resource.ViewModelCreator.DestroyGroupListObjectViewModel(dbContext, input);
+			using (IDbContext dbContext = f_Resource.CreateDbContext()) {
+				f_Resource.ViewModelCreator.DestroyGroupListObjectViewModel(dbContext, input);
 			}
 		}
 
@@ -254,7 +261,7 @@ namespace ViewModelExtended.ViewModel
 		/// <returns></returns>
 		public int Index (GroupListObjectViewModel input)
 		{
-			return List.Index(input);
+			return f_List.Index(input);
 		}
 
 		/// <summary>
@@ -263,8 +270,8 @@ namespace ViewModelExtended.ViewModel
 		public void Clear ()
 		{
 			f_Changes.Clear();
-			List.Clear();
-			ItemCount = List.Items.Count();
+			f_List.Clear();
+			ItemCount = f_List.Items.Count();
 		}
 
 		#endregion
@@ -280,7 +287,7 @@ namespace ViewModelExtended.ViewModel
 		/// <returns></returns>
 		public GroupListObjectViewModel Find (Func<GroupListObjectViewModel, bool> predicate)
 		{
-			return List.Find(predicate);
+			return f_List.Find(predicate);
 		}
 
 		#endregion
@@ -295,8 +302,8 @@ namespace ViewModelExtended.ViewModel
 		/// <returns></returns>
 		public GroupListObjectViewModel Create ()
 		{
-			using (IDbContext dbContext = Resource.CreateDbContext()) {
-				return Resource.ViewModelCreator.CreateGroupListObjectViewModel(dbContext);
+			using (IDbContext dbContext = f_Resource.CreateDbContext()) {
+				return f_Resource.ViewModelCreator.CreateGroupListObjectViewModel(dbContext);
 			}
 		}
 
@@ -310,7 +317,7 @@ namespace ViewModelExtended.ViewModel
 		{
 			if (f_Highlighted == null) return;
 
-			using (IDbContext dbContext = Resource.CreateDbContext()) {
+			using (IDbContext dbContext = f_Resource.CreateDbContext()) {
 				dbContext.UpdateGroup(f_Highlighted.Model.Data, f_Highlighted.Title, null);
 				dbContext.Save();
 			}
@@ -320,7 +327,7 @@ namespace ViewModelExtended.ViewModel
 		{
 			if (f_Highlighted == null) return;
 
-			using (IDbContext dbContext = Resource.CreateDbContext()) {
+			using (IDbContext dbContext = f_Resource.CreateDbContext()) {
 				dbContext.UpdateGroup(f_Highlighted.Model.Data, f_Highlighted.Color, null);
 				dbContext.Save();
 			}
@@ -339,10 +346,12 @@ namespace ViewModelExtended.ViewModel
 		{
 			if (!f_Changes.IsDirty) return;
 
-			using (IDbContext dbContext = Resource.CreateDbContext()) {
-				//foreach (KeyValuePair<IListItem, int> obj in Resource.DbQueryHelper.SortDictionary(Changes.Items)) {
-				foreach (KeyValuePair<IListItem, int> obj in f_Changes) {
-					Resource.DbListHelper.UpdateNodes(dbContext, obj.Key);
+			IEnumerable<KeyValuePair<IListItem, int>> sortedChanges =
+				f_Resource.DbListHelper.SortDictionaryObjects(f_Changes.Items);
+
+			using (IDbContext dbContext = f_Resource.CreateDbContext()) {
+				foreach (KeyValuePair<IListItem, int> obj in sortedChanges) {
+					f_Resource.DbListHelper.UpdateNodes(dbContext, obj.Key);
 					f_Changes.Remove(obj.Key);
 				}
 

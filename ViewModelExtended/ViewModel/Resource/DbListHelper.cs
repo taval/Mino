@@ -125,6 +125,15 @@ namespace ViewModelExtended.ViewModel
 			return output;
 		}
 
+		public IEnumerable<KeyValuePair<IListItem, int>> SortDictionaryObjects (
+			IReadOnlyDictionary<IListItem, int> dictionary)
+		{
+			return
+				from item in dictionary
+				orderby item.Value ascending
+				select item;
+		}
+
 		#endregion
 	}
 }

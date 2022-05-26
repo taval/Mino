@@ -17,7 +17,11 @@ namespace ViewModelExtended.ViewModel
 
 		#endregion
 
-
+		public IReadOnlyDictionary<IListItem, int> Items {
+			get {
+				return f_Items.Items;
+			}
+		}
 
 		#region Dirty
 

@@ -17,6 +17,10 @@ namespace ViewModelExtended.ViewModel
 	/// </summary>
 	internal class ListItemDictionary : IListItemDictionary
 	{
+		public IReadOnlyDictionary<IListItem, int> Items {
+			get { return f_Items; }
+		}
+
 		private Dictionary<IListItem, int> f_Items;
 
 		private IdGenerator f_IdGenerator;
@@ -37,14 +41,6 @@ namespace ViewModelExtended.ViewModel
 		{
 			f_IdGenerator = new IdGenerator();
 			f_Items = dictionary;
-		}
-
-		private IEnumerable<KeyValuePair<IListItem, int>> GetSorted ()
-		{
-			return
-				from item in f_Items
-				orderby item.Value ascending
-				select item;
 		}
 
 		public bool ContainsKey (IListItem key)
@@ -74,8 +70,6 @@ namespace ViewModelExtended.ViewModel
 
 		public IEnumerator<KeyValuePair<IListItem, int>> GetEnumerator ()
 		{
-			IEnumerable<KeyValuePair<IListItem, int>> sortedChanges = GetSorted();
-
 			return f_Items.GetEnumerator();
 		}
 

@@ -40,6 +40,16 @@ namespace ViewModelExtended.ViewModel
 		/// </summary>
 		private IViewModelResource f_Resource;
 
+		/// <summary>
+		/// viewmodel component creation methods
+		/// </summary>
+		private IComponentCreator f_ComponentCreator;
+
+		/// <summary>
+		/// GroupContents-specific viewmodel creation methods
+		/// </summary>
+		private IGroupContentsComponentCreator f_GroupContentsComponentCreator;
+
 		#endregion
 
 
@@ -271,9 +281,9 @@ namespace ViewModelExtended.ViewModel
 		public GroupContentsViewModel (IViewModelResource resource)
 		{
 			// resources for object component construction
-			IComponentCreator componentCreator = new ComponentCreator();
-			IGroupContentsComponentCreator groupContentsComponentCreator = new GroupContentsComponentCreator();
 			f_Resource = resource;
+			f_ComponentCreator = new ComponentCreator();
+			f_GroupContentsComponentCreator = new GroupContentsComponentCreator();
 
 			// attach commands
 			f_Resource.CommandBuilder.MakeGroup(this);
@@ -282,20 +292,20 @@ namespace ViewModelExtended.ViewModel
 			SetPropertyChangedEventHandler(f_Resource.StatusBarViewModel);
 
 			// init contents container
-			f_Contents = groupContentsComponentCreator.CreateGroupContents(
-				() => componentCreator.CreateObservableList<GroupObjectViewModel>());
+			f_Contents = f_GroupContentsComponentCreator.CreateGroupContents(
+				() => f_ComponentCreator.CreateObservableList<GroupObjectViewModel>());
 
 			ItemCount = f_Contents.ItemCount;
 
 			// init change 'queue'
-			f_Changes = groupContentsComponentCreator.CreateGroupChangeQueue(
-				() => componentCreator.CreateListItemDictionary());
+			f_Changes = f_GroupContentsComponentCreator.CreateGroupChangeQueue(
+				() => f_ComponentCreator.CreateListItemDictionary());
 
 			// init content metadata (the 'group')
 			f_ContentData = null;
 
 			// init delegate reference
-			f_Delegates = groupContentsComponentCreator.CreateNoteDelegateDictionary();
+			f_Delegates = f_GroupContentsComponentCreator.CreateNoteDelegateDictionary();
 
 			// init highlighted
 			f_Highlighted = null;
@@ -684,21 +694,24 @@ namespace ViewModelExtended.ViewModel
 		{
 			if (!f_Changes.IsDirty) return;
 
-			foreach (KeyValuePair<Group, IListItemDictionary> kvChangesInGroup in f_Changes.Dictionaries) {
-				Group key = kvChangesInGroup.Key;
-				IListItemDictionary changesInGroup = kvChangesInGroup.Value;
+			using (IDbContext dbContext = f_Resource.CreateDbContext()) {
+				foreach (KeyValuePair<Group, IListItemDictionary> kvChangesInGroup in f_Changes.Dictionaries) {
+					Group key = kvChangesInGroup.Key;
+					IListItemDictionary changesInGroup = kvChangesInGroup.Value;
 
-				if (!changesInGroup.Any()) continue;
+					if (!changesInGroup.Any()) continue;
 
-				using (IDbContext dbContext = f_Resource.CreateDbContext()) {
-					foreach (KeyValuePair<IListItem, int> obj in changesInGroup) {
+					IEnumerable<KeyValuePair<IListItem, int>> sortedChanges =
+						f_Resource.DbListHelper.SortDictionaryObjects(changesInGroup.Items);
+
+					foreach (KeyValuePair<IListItem, int> obj in sortedChanges) {
 						f_Resource.DbListHelper.UpdateNodes(dbContext, obj.Key);
 						changesInGroup.Remove(obj.Key);
 					}
 
-					dbContext.Save();
+					changesInGroup.Clear();
 				}
-				changesInGroup.Clear();
+				dbContext.Save();
 			}
 			f_Changes.Clear();
 		}
