@@ -12,11 +12,11 @@ namespace ViewModelExtended.Command
 {
 	public class GroupNotePickupCommand : CommandBase
 	{
-		private readonly GroupContentsViewModel m_ListViewModel;
+		private readonly GroupContentsViewModel f_ListViewModel;
 
 		public GroupNotePickupCommand (GroupContentsViewModel listViewModel)
 		{
-			m_ListViewModel = listViewModel;
+			f_ListViewModel = listViewModel;
 		}
 
 		public override void Execute (object parameter)

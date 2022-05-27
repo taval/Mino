@@ -15,23 +15,23 @@ namespace ViewModelExtended.ViewModel
 		#region Cross-View Data
 
 		public int SelectedTabIndex {
-			get { return m_SelectedTabIndex; }
-			set { Set(ref m_SelectedTabIndex, value); }
+			get { return f_SelectedTabIndex; }
+			set { Set(ref f_SelectedTabIndex, value); }
 		}
 
-		private int m_SelectedTabIndex;
+		private int f_SelectedTabIndex;
 
 		/// <summary>
 		/// the GroupViewModel (data displayed by GroupView)
 		/// NOTE: this is bound for purpose of GroupView population operation
 		/// </summary>
 		public GroupListObjectViewModel? SelectedGroupViewModel {
-			get { return m_SelectedGroupViewModel; }
+			get { return f_SelectedGroupViewModel; }
 			set {
-				Set(ref m_SelectedGroupViewModel, value);
+				Set(ref f_SelectedGroupViewModel, value);
 				NotifyPropertyChanged("GroupTitle");
-				if (m_SelectedGroupViewModel == null) return;
-				m_SelectedGroupViewModel.PropertyChanged += (sender, e) =>
+				if (f_SelectedGroupViewModel == null) return;
+				f_SelectedGroupViewModel.PropertyChanged += (sender, e) =>
 				{
 					if (e.PropertyName == "Title") {
 						NotifyPropertyChanged("GroupTitle");
@@ -47,17 +47,17 @@ namespace ViewModelExtended.ViewModel
 			get { return (SelectedGroupViewModel != null) ? SelectedGroupViewModel.Title : string.Empty; }
 		}
 
-		private GroupListObjectViewModel? m_SelectedGroupViewModel;
+		private GroupListObjectViewModel? f_SelectedGroupViewModel;
 
 		/// <summary>
 		/// the NoteViewModel selected in the Group Contents tab
 		/// </summary>
 		public GroupObjectViewModel? SelectedGroupNoteViewModel {
-			get { return m_SelectedGroupNoteViewModel; }
-			set { Set(ref m_SelectedGroupNoteViewModel, value); }
+			get { return f_SelectedGroupNoteViewModel; }
+			set { Set(ref f_SelectedGroupNoteViewModel, value); }
 		}
 
-		private GroupObjectViewModel? m_SelectedGroupNoteViewModel;
+		private GroupObjectViewModel? f_SelectedGroupNoteViewModel;
 
 		#endregion
 
@@ -74,32 +74,32 @@ namespace ViewModelExtended.ViewModel
 		#region GroupList Commands
 
 		public ICommand SwitchTabsCommand {
-			get { return m_SwitchTabsCommand ?? throw new MissingCommandException(); }
-			set { if (m_SwitchTabsCommand == null) m_SwitchTabsCommand = value; }
+			get { return f_SwitchTabsCommand ?? throw new MissingCommandException(); }
+			set { if (f_SwitchTabsCommand == null) f_SwitchTabsCommand = value; }
 		}
 
-		private ICommand? m_SwitchTabsCommand;
+		private ICommand? f_SwitchTabsCommand;
 
 		public ICommand GroupSelectCommand {
-			get { return m_GroupSelectCommand ?? throw new MissingCommandException(); }
-			set { if (m_GroupSelectCommand == null) m_GroupSelectCommand = value; }
+			get { return f_GroupSelectCommand ?? throw new MissingCommandException(); }
+			set { if (f_GroupSelectCommand == null) f_GroupSelectCommand = value; }
 		}
 
-		private ICommand? m_GroupSelectCommand;
+		private ICommand? f_GroupSelectCommand;
 
 		public ICommand GroupCreateCommand {
-			get { return m_GroupCreateCommand ?? throw new MissingCommandException(); }
-			set { if (m_GroupCreateCommand == null) m_GroupCreateCommand = value; }
+			get { return f_GroupCreateCommand ?? throw new MissingCommandException(); }
+			set { if (f_GroupCreateCommand == null) f_GroupCreateCommand = value; }
 		}
 
-		private ICommand? m_GroupCreateCommand;
+		private ICommand? f_GroupCreateCommand;
 
 		public ICommand GroupDestroyCommand {
-			get { return m_GroupDestroyCommand ?? throw new MissingCommandException(); }
-			set { if (m_GroupDestroyCommand == null) m_GroupDestroyCommand = value; }
+			get { return f_GroupDestroyCommand ?? throw new MissingCommandException(); }
+			set { if (f_GroupDestroyCommand == null) f_GroupDestroyCommand = value; }
 		}
 
-		private ICommand? m_GroupDestroyCommand;
+		private ICommand? f_GroupDestroyCommand;
 
 		#endregion
 
@@ -108,18 +108,18 @@ namespace ViewModelExtended.ViewModel
 		#region Group Commands
 
 		public ICommand GroupNoteSelectCommand {
-			get { return m_GroupNoteSelectCommand ?? throw new MissingCommandException(); }
-			set { if (m_GroupNoteSelectCommand == null) m_GroupNoteSelectCommand = value; }
+			get { return f_GroupNoteSelectCommand ?? throw new MissingCommandException(); }
+			set { if (f_GroupNoteSelectCommand == null) f_GroupNoteSelectCommand = value; }
 		}
 
-		private ICommand? m_GroupNoteSelectCommand;
+		private ICommand? f_GroupNoteSelectCommand;
 
 		public ICommand GroupNoteDestroyCommand {
-			get { return m_GroupNoteDestroyCommand ?? throw new MissingCommandException(); }
-			set { if (m_GroupNoteDestroyCommand == null) m_GroupNoteDestroyCommand = value; }
+			get { return f_GroupNoteDestroyCommand ?? throw new MissingCommandException(); }
+			set { if (f_GroupNoteDestroyCommand == null) f_GroupNoteDestroyCommand = value; }
 		}
 
-		private ICommand? m_GroupNoteDestroyCommand;
+		private ICommand? f_GroupNoteDestroyCommand;
 
 		#endregion
 
@@ -130,8 +130,8 @@ namespace ViewModelExtended.ViewModel
 		public GroupTabsViewModel (IViewModelResource resource)
 		{
 			Resource = resource;
-			m_SelectedGroupViewModel = null;
-			m_SelectedGroupNoteViewModel = null;
+			f_SelectedGroupViewModel = null;
+			f_SelectedGroupNoteViewModel = null;
 			SelectedTabIndex = 0;
 			Resource.CommandBuilder.MakeGroupTabs(this);
 		}

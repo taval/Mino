@@ -11,16 +11,16 @@ namespace ViewModelExtended.Command
 {
 	public class MainWindowCloseCommand : CommandBase
 	{
-		private readonly MainWindowViewModel m_MainWindowViewModel;
+		private readonly MainWindowViewModel f_MainWindowViewModel;
 
 		public MainWindowCloseCommand (MainWindowViewModel mainWindowViewModel)
 		{
-			m_MainWindowViewModel = mainWindowViewModel;
+			f_MainWindowViewModel = mainWindowViewModel;
 		}
 
 		public override void Execute (object parameter)
 		{
-			m_MainWindowViewModel.Resource.PrimeViewModel.Shutdown();
+			f_MainWindowViewModel.Resource.PrimeViewModel.Shutdown();
 			System.Windows.Application.Current.Shutdown();
 		}
 	}

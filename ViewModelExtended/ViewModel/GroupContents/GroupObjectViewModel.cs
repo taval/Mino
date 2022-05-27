@@ -12,10 +12,10 @@ namespace ViewModelExtended.ViewModel
 		#region Model
 
 		public GroupObject Model {
-			get { return m_Model; }
+			get { return f_Model; }
 		}
 
-		private readonly GroupObject m_Model;
+		private readonly GroupObject f_Model;
 
 		#endregion
 
@@ -55,37 +55,37 @@ namespace ViewModelExtended.ViewModel
 		#region ISelectable
 
 		public bool IsSelected {
-			get { return m_IsSelected; }
-			set { Set(ref m_IsSelected, value); }
+			get { return f_IsSelected; }
+			set { Set(ref f_IsSelected, value); }
 		}
 
-		private bool m_IsSelected;
+		private bool f_IsSelected;
 
 		#endregion
 
 
 
-		#region Model Properties
+		#region Data
 
 		public string Title {
 			get {
 				Title = Model.Data.Title;
-				return m_Title;
+				return f_Title;
 			}
-			private set { Set(ref m_Title, value); }
+			private set { Set(ref f_Title, value); }
 		}
 
-		private string m_Title;
+		private string f_Title;
 
 		public string Text {
 			get {
 				Text = Model.Data.Text;
-				return m_Text;
+				return f_Text;
 			}
-			private set { Set(ref m_Text, value); }
+			private set { Set(ref f_Text, value); }
 		}
 
-		private string m_Text;
+		private string f_Text;
 
 		#endregion
 
@@ -95,14 +95,14 @@ namespace ViewModelExtended.ViewModel
 
 		public GroupObjectViewModel (GroupObject model)
 		{
-			m_Model = model;
+			f_Model = model;
 			Previous = null;
 			Next = null;
-			m_IsSelected = false;
-			m_Title = Model.Data.Title;
-			Title = m_Title;
-			m_Text = Model.Data.Text;
-			Text = m_Text;
+			f_IsSelected = false;
+			f_Title = Model.Data.Title;
+			Title = f_Title;
+			f_Text = Model.Data.Text;
+			Text = f_Text;
 		}
 
 		#endregion

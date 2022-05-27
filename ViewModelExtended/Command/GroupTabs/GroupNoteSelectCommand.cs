@@ -11,19 +11,16 @@ namespace ViewModelExtended.Command
 {
 	public class GroupNoteSelectCommand : CommandBase
 	{
-		private readonly GroupTabsViewModel m_GroupTabsViewModel;
+		private readonly GroupTabsViewModel f_GroupTabsViewModel;
 
 		public GroupNoteSelectCommand (GroupTabsViewModel groupTabsViewModel)
 		{
-			m_GroupTabsViewModel = groupTabsViewModel;
+			f_GroupTabsViewModel = groupTabsViewModel;
 		}
 
 		public override void Execute (object parameter)
 		{
-			//if (m_GroupTabsViewModel.SelectedNoteViewModel != null) {
-			//	m_GroupTabsViewModel.SelectNote(m_GroupTabsViewModel.SelectedNoteViewModel);
-			//}
-			m_GroupTabsViewModel.SelectGroupNote((GroupObjectViewModel)parameter);
+			f_GroupTabsViewModel.SelectGroupNote((GroupObjectViewModel)parameter);
 		}
 	}
 }

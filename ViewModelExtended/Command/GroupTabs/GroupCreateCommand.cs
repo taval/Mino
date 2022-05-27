@@ -13,11 +13,11 @@ namespace ViewModelExtended.Command
 {
 	public class GroupCreateCommand : CommandBase
 	{
-		private readonly GroupTabsViewModel m_GroupTabsViewModel;
+		private readonly GroupTabsViewModel f_GroupTabsViewModel;
 
 		public GroupCreateCommand (GroupTabsViewModel groupTabsViewModel)
 		{
-			m_GroupTabsViewModel = groupTabsViewModel;
+			f_GroupTabsViewModel = groupTabsViewModel;
 		}
 
 		public override void Execute (object parameter)
@@ -34,9 +34,9 @@ namespace ViewModelExtended.Command
 			tabControl.SelectedItem = tabItem;
 
 			// add a new Group to the GroupList
-			m_GroupTabsViewModel.CreateGroup(
-				m_GroupTabsViewModel.Resource.GroupListViewModel.Highlighted,
-				m_GroupTabsViewModel.Resource.GroupListViewModel.Create()
+			f_GroupTabsViewModel.CreateGroup(
+				f_GroupTabsViewModel.Resource.GroupListViewModel.Highlighted,
+				f_GroupTabsViewModel.Resource.GroupListViewModel.Create()
 			);
 		}
 	}

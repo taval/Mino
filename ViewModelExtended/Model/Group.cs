@@ -14,11 +14,11 @@ namespace ViewModelExtended.Model
 		public string Title { get; set; }
 
 		public string Color {
-			get => m_Color;
+			get => f_Color;
 			set {
 				try {
 					Color c = System.Drawing.ColorTranslator.FromHtml(value);
-					m_Color = value;
+					f_Color = value;
 				}
 				catch (Exception ex) {
 					throw new ArgumentException(
@@ -29,12 +29,12 @@ namespace ViewModelExtended.Model
 			}
 		}
 
-		private string m_Color;
+		private string f_Color;
 
 		public Group ()
 		{
 			//Id = 0;
-			m_Color = "#000";
+			f_Color = "#000";
 			Title = String.Empty;
 		}
 	}

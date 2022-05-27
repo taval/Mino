@@ -22,11 +22,11 @@ namespace ViewModelExtended.ViewModel
 		/// NOTE: this is bound for purpose of NoteText population operation
 		/// </summary>
 		public NoteListObjectViewModel? SelectedNoteViewModel {
-			get { return m_SelectedNoteViewModel; }
-			set { Set(ref m_SelectedNoteViewModel, value); }
+			get { return f_SelectedNoteViewModel; }
+			set { Set(ref f_SelectedNoteViewModel, value); }
 		}
 
-		private NoteListObjectViewModel? m_SelectedNoteViewModel;
+		private NoteListObjectViewModel? f_SelectedNoteViewModel;
 
 		#endregion
 
@@ -35,58 +35,48 @@ namespace ViewModelExtended.ViewModel
 		#region Commands
 
 		public ICommand GroupNoteHoldCommand {
-			get { return m_GroupNoteHoldCommand ?? throw new MissingCommandException(); }
-			set { if (m_GroupNoteHoldCommand == null) m_GroupNoteHoldCommand = value; }
+			get { return f_GroupNoteHoldCommand ?? throw new MissingCommandException(); }
+			set { if (f_GroupNoteHoldCommand == null) f_GroupNoteHoldCommand = value; }
 		}
 
-		private ICommand? m_GroupNoteHoldCommand;
+		private ICommand? f_GroupNoteHoldCommand;
 
 		public ICommand GroupNoteDropCommand {
-			get { return m_GroupNoteDropCommand ?? throw new MissingCommandException(); }
-			set { if (m_GroupNoteDropCommand == null) m_GroupNoteDropCommand = value; }
+			get { return f_GroupNoteDropCommand ?? throw new MissingCommandException(); }
+			set { if (f_GroupNoteDropCommand == null) f_GroupNoteDropCommand = value; }
 		}
 
-		private ICommand? m_GroupNoteDropCommand;
+		private ICommand? f_GroupNoteDropCommand;
 
 		/// <summary>
 		/// selects a Note in the NoteList
 		/// </summary>
 		public ICommand NoteSelectCommand {
-			get { return m_NoteSelectCommand ?? throw new MissingCommandException(); }
-			set { if (m_NoteSelectCommand == null) m_NoteSelectCommand = value; }
+			get { return f_NoteSelectCommand ?? throw new MissingCommandException(); }
+			set { if (f_NoteSelectCommand == null) f_NoteSelectCommand = value; }
 		}
 
-		private ICommand? m_NoteSelectCommand;
+		private ICommand? f_NoteSelectCommand;
 
 		/// <summary>
 		/// inserts an empty note into NoteList
 		/// </summary>
 		public ICommand NoteCreateCommand {
-			get { return m_NoteCreateCommand ?? throw new MissingCommandException(); }
-			set { if (m_NoteCreateCommand == null) m_NoteCreateCommand = value; }
+			get { return f_NoteCreateCommand ?? throw new MissingCommandException(); }
+			set { if (f_NoteCreateCommand == null) f_NoteCreateCommand = value; }
 		}
 
-		private ICommand? m_NoteCreateCommand;
+		private ICommand? f_NoteCreateCommand;
 
 		/// <summary>
 		/// removes a note from the NoteList
 		/// </summary>
 		public ICommand NoteDestroyCommand {
-			get { return m_NoteDestroyCommand ?? throw new MissingCommandException(); }
-			set { if (m_NoteDestroyCommand == null) m_NoteDestroyCommand = value; }
+			get { return f_NoteDestroyCommand ?? throw new MissingCommandException(); }
+			set { if (f_NoteDestroyCommand == null) f_NoteDestroyCommand = value; }
 		}
 
-		private ICommand? m_NoteDestroyCommand;
-
-		/// <summary>
-		/// loads ViewModel
-		/// </summary>
-		//public ICommand PrimeLoadCommand {
-		//	get { return m_PrimeLoadCommand ?? throw new MissingCommandException(); }
-		//	set { if (m_PrimeLoadCommand == null) m_PrimeLoadCommand = value; }
-		//}
-
-		//private ICommand? m_PrimeLoadCommand;
+		private ICommand? f_NoteDestroyCommand;
 
 		#endregion
 
@@ -105,7 +95,7 @@ namespace ViewModelExtended.ViewModel
 		public PrimeViewModel (IViewModelResource resource)
 		{
 			Resource = resource;
-			m_SelectedNoteViewModel = null;
+			f_SelectedNoteViewModel = null;
 			Resource.CommandBuilder.MakePrime(this);
 			SetPropertyChangedEventHandler(Resource.StatusBarViewModel);
 		}

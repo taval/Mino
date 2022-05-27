@@ -12,11 +12,11 @@ namespace ViewModelExtended.Command
 {
 	public class NoteReceiveCommand : CommandBase
 	{
-		private readonly GroupContentsViewModel m_GroupContentsViewModel;
+		private readonly GroupContentsViewModel f_GroupContentsViewModel;
 
 		public NoteReceiveCommand (GroupContentsViewModel groupContentsViewModel)
 		{
-			m_GroupContentsViewModel = groupContentsViewModel;
+			f_GroupContentsViewModel = groupContentsViewModel;
 		}
 
 		public override void Execute (object parameter)
@@ -26,26 +26,28 @@ namespace ViewModelExtended.Command
 			// prevent close button from performing operation
 			Button? closeButton = UIHelper.FindChild<Button>(((FrameworkElement)e.Source).Parent, "RemoveItemButton");
 
-			if (e == null || e.Handled || !(e.Source is FrameworkElement) || closeButton?.IsMouseOver == true) return;
+			if (e == null || e.Handled || !(e.Source is ListView) || closeButton?.IsMouseOver == true) return;
 
 			e.Handled = true;
+
+			// get the event source element
+			ListView listView = (ListView)e.Source;
 
 			// get the data from DragDrop operation
 			Tuple<string, object> data =
 				(Tuple<string, object>)e.Data.GetData(DataFormats.Serializable);
 
 			// if the item comes from the same ListView, bail out
-			string itemName = data.Item1;
+			string itemListName = data.Item1;
 
-			if (itemName.Equals("ListView_GroupContentsView")) return; // TODO: should not have to bind this command to any particular instance of a listview - see NoteList reorder command
+			if (itemListName.Equals(listView.Name)) return;
 
 			// get the actual data to be sent
 			if (data.Item2 == null || !(data.Item2 is NoteListObjectViewModel)) return;
 
 			NoteListObjectViewModel dataContext = (NoteListObjectViewModel)data.Item2;
 
-			//m_GroupContentsViewModel.ReceiveGroupNote(dataContext);
-			m_GroupContentsViewModel.Incoming = dataContext;
+			f_GroupContentsViewModel.Incoming = dataContext;
 		}
 	}
 }

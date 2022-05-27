@@ -9,16 +9,16 @@ namespace ViewModelExtended.Command
 {
 	public class NoteChangeTextCommand : CommandBase
 	{
-		private readonly NoteTextViewModel m_NoteTextViewModel;
+		private readonly NoteTextViewModel f_NoteTextViewModel;
 
 		public NoteChangeTextCommand (NoteTextViewModel noteTextViewModel)
 		{
-			m_NoteTextViewModel = noteTextViewModel;
+			f_NoteTextViewModel = noteTextViewModel;
 		}
 
 		public override void Execute (object parameter)
 		{
-			m_NoteTextViewModel.UpdateText();
+			f_NoteTextViewModel.UpdateText();
 		}
 	}
 }

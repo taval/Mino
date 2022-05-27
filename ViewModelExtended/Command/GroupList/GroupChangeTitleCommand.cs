@@ -11,11 +11,11 @@ namespace ViewModelExtended.Command
 {
 	public class GroupChangeTitleCommand : CommandBase
 	{
-		private readonly GroupListViewModel m_GroupListViewModel;
+		private readonly GroupListViewModel f_GroupListViewModel;
 
 		public GroupChangeTitleCommand (GroupListViewModel groupListViewModel)
 		{
-			m_GroupListViewModel = groupListViewModel;
+			f_GroupListViewModel = groupListViewModel;
 		}
 
 		public override void Execute (object parameter)
@@ -39,7 +39,7 @@ namespace ViewModelExtended.Command
 				item.Focus();
 			}
 
-			m_GroupListViewModel.UpdateTitle();
+			f_GroupListViewModel.UpdateTitle();
 		}
 	}
 }

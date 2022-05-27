@@ -12,12 +12,14 @@ namespace ViewModelExtended.ViewModel
 		#region Model
 
 		public GroupListObject Model {
-			get { return m_Model; }
+			get { return f_Model; }
 		}
 
-		private readonly GroupListObject m_Model;
+		private readonly GroupListObject f_Model;
 
 		#endregion
+
+
 
 		#region IObject
 
@@ -30,6 +32,8 @@ namespace ViewModelExtended.ViewModel
 		}
 
 		#endregion
+
+
 
 		#region IListItem
 
@@ -46,57 +50,61 @@ namespace ViewModelExtended.ViewModel
 
 		#endregion
 
+
+
 		#region ISelectable
 
 		public bool IsSelected {
-			get { return m_IsSelected; }
-			set { Set(ref m_IsSelected, value); }
+			get { return f_IsSelected; }
+			set { Set(ref f_IsSelected, value); }
 		}
 
-		private bool m_IsSelected;
+		private bool f_IsSelected;
 
 		#endregion
 
-		//public int? PreviousId {
-		//	get { return Node.PreviousId; }
-		//}
 
-		//public int? NextId {
-		//	get { return Node.NextId; }
-		//}
+
+		#region Data
 
 		public string Title {
 			get { return Model.Data.Title; }
 			set {
-				//Set(ref m_Title, value);
 				Model.Data.Title = value;
-				Set(ref m_Title, value);
+				Set(ref f_Title, value);
 			}
 		}
 
-		private string m_Title;
+		private string f_Title;
 
 		public string Color {
 			get { return Model.Data.Color; }
 			set {
-				//Set(ref m_Color, value);
 				Model.Data.Color = value;
-				Set(ref m_Color, value);
+				Set(ref f_Color, value);
 			}
 		}
 
-		private string m_Color;
+		private string f_Color;
+
+		#endregion
+
+
+
+		#region Constructor
 
 		public GroupListObjectViewModel (GroupListObject model)
 		{
-			m_Model = model;
+			f_Model = model;
 			Previous = null;
 			Next = null;
-			m_IsSelected = false;
-			m_Title = Model.Data.Title;
-			Title = m_Title;
-			m_Color = Model.Data.Color;
-			Color = m_Color;
+			f_IsSelected = false;
+			f_Title = Model.Data.Title;
+			Title = f_Title;
+			f_Color = Model.Data.Color;
+			Color = f_Color;
 		}
+
+		#endregion
 	}
 }

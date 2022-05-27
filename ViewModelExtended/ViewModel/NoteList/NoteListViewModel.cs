@@ -160,7 +160,7 @@ namespace ViewModelExtended.ViewModel
 			PropertyChangedEventHandler handler = (sender, e) =>
 			{
 				if (e.PropertyName == "ItemCount") {
-					int _ = observer.ItemCount;
+					int _ = observer.NoteCount;
 				}
 			};
 

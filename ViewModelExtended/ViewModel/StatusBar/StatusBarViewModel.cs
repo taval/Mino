@@ -24,12 +24,12 @@ namespace ViewModelExtended.ViewModel
 					SelectedItemId = -1;
 				}
 
-				return m_SelectedItemId;
+				return f_SelectedItemId;
 			}
-			private set { Set(ref m_SelectedItemId, value); }
+			private set { Set(ref f_SelectedItemId, value); }
 		}
 
-		private int m_SelectedItemId;
+		private int f_SelectedItemId;
 
 		public DateTime SelectedDateCreated {
 			get {
@@ -40,27 +40,55 @@ namespace ViewModelExtended.ViewModel
 					SelectedDateCreated = new DateTime(1966, 9, 8);
 				}
 
-				return m_SelectedDateCreated;
+				return f_SelectedDateCreated;
 			}
-			private set { Set(ref m_SelectedDateCreated, value); }
+			private set { Set(ref f_SelectedDateCreated, value); }
 		}
 
-		private DateTime m_SelectedDateCreated;
+		private DateTime f_SelectedDateCreated;
 
-		public int ItemCount {
+		public int NoteCount {
 			get {
 				if (Resource.NoteListViewModel != null) {
-					ItemCount = Resource.NoteListViewModel.ItemCount;
+					f_NoteCount = Resource.NoteListViewModel.ItemCount;
 				}
 				else {
-					ItemCount = 0;
+					f_NoteCount = 0;
 				}
 
-				return m_ItemCount;
+				return f_NoteCount;
 			}
-			private set { Set(ref m_ItemCount, value); }
+			private set { Set(ref f_NoteCount, value); }
 		}
 
-		private int m_ItemCount;
+		private int f_NoteCount;
+
+		public int GroupCount {
+			get {
+				if (Resource.GroupListViewModel != null) {
+					f_GroupCount = Resource.GroupListViewModel.ItemCount;
+				}
+				else {
+					f_GroupCount = 0;
+				}
+
+				return f_GroupCount;
+			}
+			private set { Set(ref f_GroupCount, value); }
+		}
+
+		private int f_GroupCount;
+
+		public string CursorPos {
+			get {
+				f_CursorPos =
+					$"Line: { Resource.NoteTextViewModel.LineNumber }," +
+					$"Column: { Resource.NoteTextViewModel.ColumnNumber }";
+				return f_CursorPos;
+			}
+			private set { Set(ref f_CursorPos, value); }
+		}
+
+		private string f_CursorPos;
 	}
 }

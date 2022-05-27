@@ -9,16 +9,16 @@ namespace ViewModelExtended.Command
 {
 	public class GroupNoteDropCommand : CommandBase
 	{
-		private readonly PrimeViewModel m_PrimeViewModel;
+		private readonly PrimeViewModel f_PrimeViewModel;
 
 		public GroupNoteDropCommand (PrimeViewModel primeViewModel)
 		{
-			m_PrimeViewModel = primeViewModel;
+			f_PrimeViewModel = primeViewModel;
 		}
 
 		public override void Execute (object parameter)
 		{
-			m_PrimeViewModel.AddNoteToGroup();
+			f_PrimeViewModel.AddNoteToGroup();
 		}
 	}
 }

@@ -320,7 +320,7 @@ namespace ViewModelExtended.ViewModel
 			PropertyChangedEventHandler handler = (sender, e) =>
 			{
 				if (e.PropertyName == "ItemCount") {
-					int _ = observer.ItemCount;
+					int _ = observer.NoteCount;
 				}
 			};
 
@@ -514,7 +514,10 @@ namespace ViewModelExtended.ViewModel
 
 			IObservableList<GroupObjectViewModel> groupObjs = f_Contents.Lists[groop];
 
-			foreach (GroupObjectViewModel obj in groupObjs.Items) Remove(obj);
+			//foreach (GroupObjectViewModel obj in groupObjs.Items) Remove(obj);
+			Queue<GroupObjectViewModel> queue = new Queue<GroupObjectViewModel>(groupObjs.Items);
+			
+			while (queue.Any()) Remove(queue.Dequeue());
 
 			f_Contents.Lists.Remove(groop);
 		}

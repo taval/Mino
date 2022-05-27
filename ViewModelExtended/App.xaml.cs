@@ -8,15 +8,9 @@ using System.Windows;
 using ViewModelExtended.Model;
 using ViewModelExtended.ViewModel;
 
-// TODO: make sure objects using delegates, from the factory methods in particular, are keeping reference to delegate source (the real method) alive for as long as the delegate exists. some of these are discarding the source object and keeping the delegate by virtue of gc not destroying source until the delegate is no longer in use. This is not a good/reliable way to do it. If the methods were static it would be a different story but they are not
-
-// TODO: search for 'new' and any items with general behavior that extends the base object should break off into their own class
-
 // TODO: make modules for view, vm, db, etc.
 
 // TODO: most exceptions should trigger a rollback to the last known good state and shutdown/commit properly
-
-// TODO: use p_ for private properties, f_ for private fields (maybe m_ for private methods but prob best to keep camel case for that one)
 
 namespace ViewModelExtended
 {

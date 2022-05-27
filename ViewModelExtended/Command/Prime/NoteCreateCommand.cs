@@ -11,20 +11,19 @@ namespace ViewModelExtended.Command
 {
 	public class NoteCreateCommand : CommandBase
 	{
-		private readonly PrimeViewModel m_PrimeViewModel;
+		private readonly PrimeViewModel f_PrimeViewModel;
 
 		public NoteCreateCommand (PrimeViewModel primeViewModel)
 		{
-			m_PrimeViewModel = primeViewModel;
+			f_PrimeViewModel = primeViewModel;
 		}
 
 		public override void Execute (object parameter)
 		{
-			m_PrimeViewModel.CreateNote(
-				m_PrimeViewModel.Resource.NoteListViewModel.Highlighted,
-				m_PrimeViewModel.Resource.NoteListViewModel.Create()
+			f_PrimeViewModel.CreateNote(
+				f_PrimeViewModel.Resource.NoteListViewModel.Highlighted,
+				f_PrimeViewModel.Resource.NoteListViewModel.Create()
 			);
-			//m_PrimeViewModel.Resource.NoteListViewModel.Refresh();
 		}
 	}
 }

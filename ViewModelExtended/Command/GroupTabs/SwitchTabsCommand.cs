@@ -11,11 +11,11 @@ namespace ViewModelExtended.Command
 {
 	public class SwitchTabsCommand : CommandBase
 	{
-		private readonly GroupTabsViewModel m_GroupTabsViewModel;
+		private readonly GroupTabsViewModel f_GroupTabsViewModel;
 
 		public SwitchTabsCommand (GroupTabsViewModel groupTabsViewModel)
 		{
-			m_GroupTabsViewModel = groupTabsViewModel;
+			f_GroupTabsViewModel = groupTabsViewModel;
 		}
 
 		public override void Execute (object parameter)
@@ -25,13 +25,13 @@ namespace ViewModelExtended.Command
 			TabItem? tabItem = (TabItem)tabControl.FindName("GroupContentsTab");
 			if (tabItem == null) return;
 
-			if (m_GroupTabsViewModel.Resource.GroupContentsViewModel.HasGroup == false) {
+			if (f_GroupTabsViewModel.Resource.GroupContentsViewModel.HasGroup == false) {
 				// prevent tab switch
 				if (tabControl.SelectedItem == tabItem) {
-					tabControl.SelectedIndex = m_GroupTabsViewModel.SelectedTabIndex;
+					tabControl.SelectedIndex = f_GroupTabsViewModel.SelectedTabIndex;
 				}
 			}
-			m_GroupTabsViewModel.SelectedTabIndex = tabControl.SelectedIndex;
+			f_GroupTabsViewModel.SelectedTabIndex = tabControl.SelectedIndex;
 		}
 	}
 }

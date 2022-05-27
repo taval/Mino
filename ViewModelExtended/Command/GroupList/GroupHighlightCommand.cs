@@ -14,11 +14,11 @@ namespace ViewModelExtended.Command
 	/// </summary>
 	public class GroupHighlightCommand : CommandBase
 	{
-		private readonly GroupListViewModel m_GroupListViewModel;
+		private readonly GroupListViewModel f_GroupListViewModel;
 
 		public GroupHighlightCommand (GroupListViewModel groupListViewModel)
 		{
-			m_GroupListViewModel = groupListViewModel;
+			f_GroupListViewModel = groupListViewModel;
 		}
 
 		public override void Execute (object parameter)
@@ -34,7 +34,7 @@ namespace ViewModelExtended.Command
 			textBox.Focus();
 			GroupListObjectViewModel dataContext = (GroupListObjectViewModel)textBox.DataContext;
 
-			m_GroupListViewModel.Highlighted = dataContext;
+			f_GroupListViewModel.Highlighted = dataContext;
 
 			// if single-clicking, clear text edit selection
 			if (e.ClickCount == 1) {

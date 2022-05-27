@@ -11,19 +11,16 @@ namespace ViewModelExtended.Command
 {
 	public class NoteSelectCommand : CommandBase
 	{
-		private readonly PrimeViewModel m_PrimeViewModel;
+		private readonly PrimeViewModel f_PrimeViewModel;
 
 		public NoteSelectCommand (PrimeViewModel primeViewModel)
 		{
-			m_PrimeViewModel = primeViewModel;
+			f_PrimeViewModel = primeViewModel;
 		}
 
 		public override void Execute (object parameter)
 		{
-			//if (m_PrimeViewModel.SelectedNoteViewModel != null) {
-			//	m_PrimeViewModel.SelectNote(m_PrimeViewModel.SelectedNoteViewModel);
-			//}
-			m_PrimeViewModel.SelectNote((NoteListObjectViewModel)parameter);
+			f_PrimeViewModel.SelectNote((NoteListObjectViewModel)parameter);
 		}
 	}
 }

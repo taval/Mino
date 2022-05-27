@@ -14,13 +14,6 @@ namespace ViewModelExtended.ViewModel
 	{
 		#region Prime ViewModel
 
-		/// <summary>
-		/// The DataContext for the PrimeView
-		/// </summary>
-		//private PrimeViewModel m_PrimeViewModel;
-		//public PrimeViewModel PrimeViewModel {
-		//	get { return m_PrimeViewModel; }
-		//}
 		public IViewModelResource Resource { get; private set; }
 
 		#endregion

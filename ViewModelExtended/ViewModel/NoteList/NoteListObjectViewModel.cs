@@ -15,12 +15,14 @@ namespace ViewModelExtended.ViewModel
 		#region Model
 
 		public NoteListObject Model {
-			get { return m_Model; }
+			get { return f_Model; }
 		}
 
-		private readonly NoteListObject m_Model;
+		private readonly NoteListObject f_Model;
 
 		#endregion
+
+
 
 		#region IObject
 
@@ -34,6 +36,8 @@ namespace ViewModelExtended.ViewModel
 
 		#endregion
 
+
+
 		#region IListItem
 
 		public int ItemId {
@@ -45,37 +49,73 @@ namespace ViewModelExtended.ViewModel
 		}
 
 		public IListItem? Previous {
-			get { return m_Previous; }
+			get { return f_Previous; }
 			set {
-				Set(ref m_Previous, value);
+				Set(ref f_Previous, value);
 				NotifyPropertyChanged(nameof(PreviousId));
 			}
 		}
 
-		private IListItem? m_Previous;
+		private IListItem? f_Previous;
 
 		public IListItem? Next {
-			get { return m_Next; }
+			get { return f_Next; }
 			set {
-				Set(ref m_Next, value);
+				Set(ref f_Next, value);
 				NotifyPropertyChanged(nameof(NextId));
 			}
 		}
 
-		private IListItem? m_Next;
+		private IListItem? f_Next;
 
 		#endregion
+
+
 
 		#region ISelectable
 
 		public bool IsSelected {
-			get { return m_IsSelected; }
-			set { Set(ref m_IsSelected, value); }
+			get { return f_IsSelected; }
+			set { Set(ref f_IsSelected, value); }
 		}
 
-		private bool m_IsSelected;
+		private bool f_IsSelected;
 
 		#endregion
+
+
+
+		#region Data
+
+		public string Title {
+			get { return Model.Data.Title; }
+			set {
+				Model.Data.Title = value;
+				Set(ref f_Title, value);
+			}
+		}
+
+		private string f_Title;
+
+		public string Text {
+			get { return Model.Data.Text; }
+			set {
+				Model.Data.Text = value;
+				Set(ref f_Text, value);
+			}
+		}
+
+		private string f_Text;
+
+		public DateTime DateCreated {
+			get { return Utility.UnixToDateTime(Timestamp.UserCreated); }
+		}
+
+		#endregion
+
+
+
+		#region Node Id
 
 		public int? PreviousId {
 			get { return Node.PreviousId; }
@@ -85,40 +125,24 @@ namespace ViewModelExtended.ViewModel
 			get { return Node.NextId; }
 		}
 
-		public string Title {
-			get { return Model.Data.Title; }
-			set {
-				Model.Data.Title = value;
-				Set(ref m_Title, value);
-			}
-		}
+		#endregion
 
-		private string m_Title;
 
-		public string Text {
-			get { return Model.Data.Text; }
-			set {
-				Model.Data.Text = value;
-				Set(ref m_Text, value);
-			}
-		}
 
-		private string m_Text;
-
-		public DateTime DateCreated {
-			get { return Utility.UnixToDateTime(Timestamp.UserCreated); }
-		}
+		#region Constructor
 
 		public NoteListObjectViewModel (NoteListObject model)
 		{
-			m_Model = model;
+			f_Model = model;
 			Previous = null;
 			Next = null;
-			m_IsSelected = false;
-			m_Title = Model.Data.Title;
-			Title = m_Title;
-			m_Text = Model.Data.Text;
-			Text = m_Text;
+			f_IsSelected = false;
+			f_Title = Model.Data.Title;
+			Title = f_Title;
+			f_Text = Model.Data.Text;
+			Text = f_Text;
 		}
+
+		#endregion
 	}
 }

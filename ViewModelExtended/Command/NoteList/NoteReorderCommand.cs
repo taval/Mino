@@ -13,11 +13,11 @@ namespace ViewModelExtended.Command
 {
 	public class NoteReorderCommand : CommandBase
 	{
-		private readonly NoteListViewModel m_ListViewModel;
+		private readonly NoteListViewModel f_ListViewModel;
 
 		public NoteReorderCommand (NoteListViewModel listViewModel)
 		{
-			m_ListViewModel = listViewModel;
+			f_ListViewModel = listViewModel;
 		}
 
 		public override void Execute (object parameter)
@@ -45,7 +45,7 @@ namespace ViewModelExtended.Command
 			if (item == null) return;
 			ListView listView = (ListView)ItemsControl.ItemsControlFromItemContainer(item);
 
-			if (!itemListName.Equals(listView.Name)) return; // TODO: copy this version of the name comparison to the other reorder commands to separate them from a particular view instance
+			if (!itemListName.Equals(listView.Name)) return;
 
 			// do scroll
 			//ScrollListView(e, listView); // TODO: uncomment and test when dragleave is stable, then incorporate into the other listviews
@@ -60,7 +60,7 @@ namespace ViewModelExtended.Command
 			NoteListObjectViewModel source = (NoteListObjectViewModel)data.Item2;
 
 			// reorder
-			m_ListViewModel.Reorder(source, target);
+			f_ListViewModel.Reorder(source, target);
 		}
 
 		private void ScrollListView (DragEventArgs e, ListView listView)

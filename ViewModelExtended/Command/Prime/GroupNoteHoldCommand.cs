@@ -11,11 +11,11 @@ namespace ViewModelExtended.Command
 {
 	public class GroupNoteHoldCommand : CommandBase
 	{
-		private readonly PrimeViewModel m_PrimeViewModel;
+		private readonly PrimeViewModel f_PrimeViewModel;
 
 		public GroupNoteHoldCommand (PrimeViewModel primeViewModel)
 		{
-			m_PrimeViewModel = primeViewModel;
+			f_PrimeViewModel = primeViewModel;
 		}
 
 		public override void Execute (object parameter)
@@ -31,7 +31,7 @@ namespace ViewModelExtended.Command
 
 			// if out of bounds of hit test, remove the item from the list
 			if (result == null) {
-				m_PrimeViewModel.HoldGroupNote();
+				f_PrimeViewModel.HoldGroupNote();
 			}
 		}
 	}

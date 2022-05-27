@@ -19,15 +19,15 @@ namespace ViewModelExtended.ViewModel
 		#region Content Data: displayed data from a list source
 
 		public NoteListObjectViewModel? ContentData {
-			get { return m_ContentData; }
+			get { return f_ContentData; }
 			set {
-				Set(ref m_ContentData, value);
+				Set(ref f_ContentData, value);
 				NotifyPropertyChanged(nameof(Title));
 				NotifyPropertyChanged(nameof(Text));
 			}
 		}
 
-		private NoteListObjectViewModel? m_ContentData;
+		private NoteListObjectViewModel? f_ContentData;
 
 		#endregion
 
@@ -37,13 +37,13 @@ namespace ViewModelExtended.ViewModel
 
 		public string Title {
 			get {
-				if (m_ContentData != null) return m_ContentData.Title;
+				if (f_ContentData != null) return f_ContentData.Title;
 				return String.Empty;
 			}
 			set {
-				if (m_ContentData != null) {
-					if (Equals(m_ContentData.Title, value)) return;
-					m_ContentData.Title = value;
+				if (f_ContentData != null) {
+					if (Equals(f_ContentData.Title, value)) return;
+					f_ContentData.Title = value;
 					NotifyPropertyChanged(nameof(Title));
 				}
 			}
@@ -51,17 +51,21 @@ namespace ViewModelExtended.ViewModel
 
 		public string Text {
 			get {
-				if (m_ContentData != null) return m_ContentData.Text;
+				if (f_ContentData != null) return f_ContentData.Text;
 				return "Nada";
 			}
 			set {
-				if (m_ContentData != null) {
-					if (Equals(m_ContentData.Text, value)) return;
-					m_ContentData.Text = value;
+				if (f_ContentData != null) {
+					if (Equals(f_ContentData.Text, value)) return;
+					f_ContentData.Text = value;
 					NotifyPropertyChanged(nameof(Text));
 				}
 			}
 		}
+
+		public int LineNumber { get; set; }
+
+		public int ColumnNumber { get; set; }
 
 		#endregion
 
@@ -70,18 +74,25 @@ namespace ViewModelExtended.ViewModel
 		#region Commands
 
 		public ICommand ChangeTitleCommand {
-			get { return m_ChangeTitleCommand ?? throw new MissingCommandException(); }
-			set { if (m_ChangeTitleCommand == null) m_ChangeTitleCommand = value; }
+			get { return f_ChangeTitleCommand ?? throw new MissingCommandException(); }
+			set { if (f_ChangeTitleCommand == null) f_ChangeTitleCommand = value; }
 		}
 
-		private ICommand? m_ChangeTitleCommand;
+		private ICommand? f_ChangeTitleCommand;
 
 		public ICommand ChangeTextCommand {
-			get { return m_ChangeTextCommand ?? throw new MissingCommandException(); }
-			set { if (m_ChangeTextCommand == null) m_ChangeTextCommand = value; }
+			get { return f_ChangeTextCommand ?? throw new MissingCommandException(); }
+			set { if (f_ChangeTextCommand == null) f_ChangeTextCommand = value; }
 		}
 
-		private ICommand? m_ChangeTextCommand;
+		private ICommand? f_ChangeTextCommand;
+
+		public ICommand CalcCursorPosCommand {
+			get { return f_CalcCursorPosCommand ?? throw new MissingCommandException(); }
+			set { if (f_CalcCursorPosCommand == null) f_CalcCursorPosCommand = value; }
+		}
+
+		private ICommand? f_CalcCursorPosCommand;
 
 		#endregion
 
@@ -93,7 +104,7 @@ namespace ViewModelExtended.ViewModel
 		{
 			Resource = resource;
 			Resource.CommandBuilder.MakeNoteText(this);
-			m_ContentData = null;
+			f_ContentData = null;
 		}
 
 		#endregion
@@ -104,20 +115,20 @@ namespace ViewModelExtended.ViewModel
 
 		public void UpdateTitle ()
 		{
-			if (m_ContentData == null) return;
+			if (f_ContentData == null) return;
 
 			using (IDbContext dbContext = Resource.CreateDbContext()) {
-				dbContext.UpdateNote(m_ContentData.Model.Data, Title, null);
+				dbContext.UpdateNote(f_ContentData.Model.Data, Title, null);
 				dbContext.Save();
 			}
 		}
 
 		public void UpdateText ()
 		{
-			if (m_ContentData == null) return;
+			if (f_ContentData == null) return;
 
 			using (IDbContext dbContext = Resource.CreateDbContext()) {
-				dbContext.UpdateNote(m_ContentData.Model.Data, null, Text);
+				dbContext.UpdateNote(f_ContentData.Model.Data, null, Text);
 				dbContext.Save();
 			}
 		}

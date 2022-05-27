@@ -13,16 +13,16 @@ namespace ViewModelExtended.Command
 {
 	public class GroupSelectCommand : CommandBase
 	{
-		private readonly GroupTabsViewModel m_GroupTabsViewModel;
+		private readonly GroupTabsViewModel f_GroupTabsViewModel;
 
 		public GroupSelectCommand (GroupTabsViewModel groupTabsViewModel)
 		{
-			m_GroupTabsViewModel = groupTabsViewModel;
+			f_GroupTabsViewModel = groupTabsViewModel;
 		}
 
 		public override void Execute (object parameter)
 		{
-			m_GroupTabsViewModel.SelectGroup((GroupListObjectViewModel)parameter);
+			f_GroupTabsViewModel.SelectGroup((GroupListObjectViewModel)parameter);
 
 			// focus on the GroupList tab
 			TabControl? tabControl = UIHelper.FindChild<TabControl>(Application.Current.MainWindow, "GroupTabControl");

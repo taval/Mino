@@ -12,10 +12,10 @@ namespace ViewModelExtended.ViewModel
 	{
 		#region Collection
 
-		protected readonly ObservableCollection<T> m_Observables = new ObservableCollection<T>();
+		protected readonly ObservableCollection<T> f_Observables = new ObservableCollection<T>();
 
 		public IEnumerable<T> Items {
-			get { return m_Observables; }
+			get { return f_Observables; }
 		}
 
 		#endregion
@@ -35,20 +35,20 @@ namespace ViewModelExtended.ViewModel
 		public void AddSortedRange (IEnumerable<T> source)
 		{
 			if (Any()) {
-				source.First().Previous = m_Observables.Last();
-				m_Observables.Last().Next = source.First();
+				source.First().Previous = f_Observables.Last();
+				f_Observables.Last().Next = source.First();
 			}
 
 			foreach (T item in source) {
-				if (!m_Observables.Contains(item)) m_Observables.Add(item);
+				if (!f_Observables.Contains(item)) f_Observables.Add(item);
 			}
 		}
 
 		public void AddRange (IEnumerable<T> source)
 		{
 			if (Any()) {
-				source.First().Previous = m_Observables.Last();
-				m_Observables.Last().Next = source.First();
+				source.First().Previous = f_Observables.Last();
+				f_Observables.Last().Next = source.First();
 			}
 
 			foreach (T item in source) {
@@ -58,30 +58,30 @@ namespace ViewModelExtended.ViewModel
 
 		public void Add (T input)
 		{
-			if (m_Observables.Contains(input)) {
+			if (f_Observables.Contains(input)) {
 				return;
 			}
 
 			IListItem? previous = null;
 
 			if (Any()) {
-				previous = m_Observables.Last();
+				previous = f_Observables.Last();
 				previous.Next = input;
 			}
 
 			input.Previous = previous;
 
-			m_Observables.Add(input);
+			f_Observables.Add(input);
 		}
 
 		public void Insert (IListItem? target, T input)
 		{
-			if (m_Observables.Contains(input)) {
+			if (f_Observables.Contains(input)) {
 				return;
 			}
 
 			if (target == null && Any()) {
-				target = m_Observables.First();
+				target = f_Observables.First();
 			}
 
 			if (target != null) {
@@ -97,10 +97,10 @@ namespace ViewModelExtended.ViewModel
 
 			// insert node into list (> 0: at target obj's index; <= 0: first index; no list items: add the first obj)
 			if (Any()) {
-				m_Observables.Insert((target != null && Index(target) >= 0) ? Index(target) : 0, input);
+				f_Observables.Insert((target != null && Index(target) >= 0) ? Index(target) : 0, input);
 			}
 			else {
-				m_Observables.Add(input);
+				f_Observables.Add(input);
 			}
 		}
 
@@ -108,8 +108,8 @@ namespace ViewModelExtended.ViewModel
 		{
 			if (source == target) return;
 
-			int oldIdx = m_Observables.IndexOf((T)source);
-			int newIdx = m_Observables.IndexOf((T)target);
+			int oldIdx = f_Observables.IndexOf((T)source);
+			int newIdx = f_Observables.IndexOf((T)target);
 
 			IListItem? sourcePrevious = source.Previous;
 			IListItem? sourceNext = source.Next;
@@ -161,7 +161,7 @@ namespace ViewModelExtended.ViewModel
 			// perform move within the container
 			// if both items exist, move model w/ oldIdx to newIdx
 			if (oldIdx != -1 && newIdx != -1) {
-				m_Observables.Move(oldIdx, newIdx);
+				f_Observables.Move(oldIdx, newIdx);
 			}
 		}
 
@@ -178,29 +178,29 @@ namespace ViewModelExtended.ViewModel
 				oldNext.Previous = input.Previous;
 			}
 
-			m_Observables.Remove((T)input);
+			f_Observables.Remove((T)input);
 		}
 
 		public int Index (IListItem input)
 		{
-			return Array.IndexOf(m_Observables.ToArray(), input);
+			return Array.IndexOf(f_Observables.ToArray(), input);
 		}
 
 		public void Clear ()
 		{
-			m_Observables.Clear();
+			f_Observables.Clear();
 		}
 
 		public T Find (Func<T, bool> predicate)
 		{
-			IEnumerable<T> match = m_Observables.Where(predicate);
+			IEnumerable<T> match = f_Observables.Where(predicate);
 			if (!match.Any()) throw new Exception($"no matching { nameof(T) } records found");
 			return match.First();
 		}
 
 		public bool Any ()
 		{
-			return m_Observables.Any();
+			return f_Observables.Any();
 		}
 
 		#endregion

@@ -63,7 +63,7 @@ namespace ViewModelExtended.ViewModel
 		/// </summary>
 		public int ItemCount {
 			get { return f_ItemCount; }
-			private set { Set(ref f_ItemCount, value); } // TODO: display this on StatusBar
+			private set { Set(ref f_ItemCount, value); }
 		}
 
 		private int f_ItemCount;
@@ -188,7 +188,7 @@ namespace ViewModelExtended.ViewModel
 			PropertyChangedEventHandler handler = (sender, e) =>
 			{
 				if (e.PropertyName == "ItemCount") {
-					int _ = observer.ItemCount;
+					int _ = observer.NoteCount;
 				}
 			};
 
