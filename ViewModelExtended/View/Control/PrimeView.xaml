@@ -31,11 +31,11 @@
 
             <local:NoteListView
 				Margin="8 0 4 0"
-				DataContext="{ Binding Resource.NoteListViewModel, diag:PresentationTraceSources.TraceLevel=High }"
+				DataContext="{ Binding NoteListViewModel, diag:PresentationTraceSources.TraceLevel=High }"
 
-				local:ListAction.InsertCommand="{ Binding
+				local:ListAction.CreateAtCommand="{ Binding
 					RelativeSource={ RelativeSource AncestorType={ x:Type local:PrimeView } },
-					Path=DataContext.NoteCreateCommand,
+					Path=DataContext.NoteCreateAtCommand,
 					diag:PresentationTraceSources.TraceLevel=High }"
 
 				local:ListAction.SelectCommand="{ Binding
@@ -51,7 +51,7 @@
             <local:NoteTextView
 				Margin="4 0 4 0"
 				Grid.Column="1"
-				DataContext="{ Binding Resource.NoteTextViewModel }" />
+				DataContext="{ Binding NoteTextViewModel }" />
 
             <!--local:ListAction.ReceiveCommand="{ Binding
 					RelativeSource={ RelativeSource AncestorType={ x:Type local:PrimeView } },
@@ -60,7 +60,7 @@
             <local:GroupTabsView
 				Margin="4 0 8 0"
 				Grid.Column="2"
-				DataContext="{ Binding Resource.GroupTabsViewModel }"
+				DataContext="{ Binding GroupTabsViewModel }"
 
                 local:ListAction.HoldCommand="{ Binding
 					RelativeSource={ RelativeSource AncestorType={ x:Type local:PrimeView } },
@@ -76,7 +76,7 @@
 
         <!-- footer -->
         <local:StatusBarView
-            DataContext="{ Binding Resource.StatusBarViewModel }" />
+            DataContext="{ Binding StatusBarViewModel }" />
 
     </StackPanel>
 	

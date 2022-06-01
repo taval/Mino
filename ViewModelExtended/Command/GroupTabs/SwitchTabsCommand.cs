@@ -25,7 +25,7 @@ namespace ViewModelExtended.Command
 			TabItem? tabItem = (TabItem)tabControl.FindName("GroupContentsTab");
 			if (tabItem == null) return;
 
-			if (f_GroupTabsViewModel.Resource.GroupContentsViewModel.HasGroup == false) {
+			if ((f_GroupTabsViewModel.IsGroupSelected == false) || (f_GroupTabsViewModel.HasGroup == false)) {
 				// prevent tab switch
 				if (tabControl.SelectedItem == tabItem) {
 					tabControl.SelectedIndex = f_GroupTabsViewModel.SelectedTabIndex;

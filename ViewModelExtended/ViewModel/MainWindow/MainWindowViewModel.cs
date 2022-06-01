@@ -5,27 +5,41 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Input;
-using ViewModelExtended.Command;
-using ViewModelExtended.ViewModel;
+
+
 
 namespace ViewModelExtended.ViewModel
 {
 	public class MainWindowViewModel : ViewModelBase
 	{
-		#region Prime ViewModel
+		#region Kit
 
-		public IViewModelResource Resource { get; private set; }
+		//private IViewModelKit f_ViewModelKit;
 
 		#endregion
 
-		public ICommand CloseCommand { get; set; }
+
+
+		#region Command
+
+		public ICommand CloseCommand {
+			get { return f_CloseCommand ?? throw new MissingCommandException(); }
+			set { if (f_CloseCommand == null) f_CloseCommand = value; }
+		}
+
+		private ICommand? f_CloseCommand;
+
+		#endregion
+
+
 
 		#region Constructor
 
-		public MainWindowViewModel (IViewModelResource resource)
+		//public MainWindowViewModel (IViewModelKit viewModelKit)
+		public MainWindowViewModel ()
 		{
-			Resource = resource;
-			Resource.CommandBuilder.MakeMainWindow(this);
+			//f_ViewModelKit = viewModelKit;
+			//f_ViewModelKit.CommandBuilder.MakeMainWindow(this);
 		}
 
 		#endregion

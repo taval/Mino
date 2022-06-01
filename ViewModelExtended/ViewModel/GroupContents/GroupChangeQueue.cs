@@ -33,7 +33,7 @@ namespace ViewModelExtended.ViewModel
 
 
 
-		#region Resource
+		#region Kit
 
 		/// <summary>
 		/// the dictionary creation mechanism

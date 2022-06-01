@@ -57,7 +57,7 @@ namespace ViewModelExtended.ViewModel
 
 		#region GroupContents
 
-		public GroupContentsViewModel CreateGroupContentsViewModel ();
+		public GroupContentsViewModel CreateGroupContentsViewModel (NoteListViewModel noteListViewModel);
 
 		// new
 		// note there is no default for a GroupObject because it is dependent on an existing Group and specific Note
@@ -92,7 +92,8 @@ namespace ViewModelExtended.ViewModel
 
 		#region GroupTabs
 
-		public GroupTabsViewModel CreateGroupTabsViewModel ();
+		public GroupTabsViewModel CreateGroupTabsViewModel (
+			GroupListViewModel groupListViewModel, GroupContentsViewModel groupContentsViewModel);
 		public void DestroyGroupTabsViewModel (GroupTabsViewModel target);
 
 		#endregion
@@ -110,7 +111,11 @@ namespace ViewModelExtended.ViewModel
 
 		#region Prime
 
-		public PrimeViewModel CreatePrimeViewModel ();
+		public PrimeViewModel CreatePrimeViewModel (
+			StatusBarViewModel statusBarViewModel,
+			NoteTextViewModel noteTextViewModel,
+			GroupTabsViewModel groupTabsViewModel,
+			NoteListViewModel noteListViewModel);
 		public void DestroyPrimeViewModel (PrimeViewModel target);
 
 		#endregion

@@ -85,27 +85,12 @@ namespace ViewModelExtended
 		/// <summary>
 		/// add a new item to the list
 		/// </summary>
-		public static readonly DependencyProperty InsertCommand = DependencyProperty.RegisterAttached(
-			nameof(InsertCommand), typeof(ICommand), typeof(ListAction), new PropertyMetadata(null));
-		public static ICommand GetInsertCommand (DependencyObject o) => (ICommand)o.GetValue(InsertCommand);
-		public static void SetInsertCommand (DependencyObject o, ICommand val) => o.SetValue(InsertCommand, val);
-
-		/// <summary>
-		/// resend data
-		/// </summary>
-		public static readonly DependencyProperty RefreshCommand = DependencyProperty.RegisterAttached(
-			nameof(RefreshCommand), typeof(ICommand), typeof(ListAction), new PropertyMetadata(null));
-		public static ICommand GetRefreshCommand (DependencyObject o) => (ICommand)o.GetValue(RefreshCommand);
-		public static void SetRefreshCommand (DependencyObject o, ICommand val) => o.SetValue(RefreshCommand, val);
+		public static readonly DependencyProperty CreateAtCommand = DependencyProperty.RegisterAttached(
+			nameof(CreateAtCommand), typeof(ICommand), typeof(ListAction), new PropertyMetadata(null));
+		public static ICommand GetCreateAtCommand (DependencyObject o) => (ICommand)o.GetValue(CreateAtCommand);
+		public static void SetCreateAtCommand (DependencyObject o, ICommand val) => o.SetValue(CreateAtCommand, val);
 
 
-		/// <summary>
-		/// differentiate a currently chosen item without presenting it to view
-		/// </summary>
-		public static readonly DependencyProperty DummyCommand = DependencyProperty.RegisterAttached(
-			nameof(DummyCommand), typeof(ICommand), typeof(ListAction), new PropertyMetadata(null));
-		public static ICommand GetDummyCommand (DependencyObject o) => (ICommand)o.GetValue(DummyCommand);
-		public static void SetDummyCommand (DependencyObject o, ICommand val) => o.SetValue(DummyCommand, val);
 
 		/// <summary>
 		/// captures the highlighted item

@@ -41,6 +41,7 @@
 		<!-- the Add Note button -->
 
 		<Grid Height="32" Margin="0 16 0 8" Background="Transparent">
+
 			<Grid.ColumnDefinitions>
 				<ColumnDefinition Width="*" />
 				<ColumnDefinition Width="*" />
@@ -58,17 +59,20 @@
 				Grid.Row="1"
 				FontSize="9"
 				Text="{ Binding Highlighted.Title }" />
-			<Button
+
+            <Button
 				Grid.Column="1"
 				Grid.RowSpan="2"
 				Template="{ StaticResource buttonTemplate }"
 				Style="{ StaticResource buttonStyle }"
 				Name="AddButton"
 				Content="+"
-				Command="{ Binding
-					(local:ListAction.InsertCommand),
+                DataContext="{ Binding Highlighted }"
+                Command="{ Binding
+					(local:ListAction.CreateAtCommand),
 					RelativeSource={ RelativeSource AncestorType={ x:Type local:NoteListView } } }" />
-		</Grid>
+
+        </Grid>
 
 		<ListView
 			Background="Transparent"

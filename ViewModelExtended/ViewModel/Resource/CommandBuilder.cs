@@ -13,13 +13,6 @@ namespace ViewModelExtended
 	
 	public class CommandBuilder : ICommandBuilder
 	{
-		private IViewModelResource Resource { get; set; }
-
-		public CommandBuilder (IViewModelResource resource)
-		{
-			Resource = resource;
-		}
-
 		public void MakeGroup (GroupContentsViewModel target)
 		{
 			target.NoteReceiveCommand = new NoteReceiveCommand(target);
@@ -41,12 +34,10 @@ namespace ViewModelExtended
 
 		public void MakeGroupTabs (GroupTabsViewModel target)
 		{
-			//target.GroupTabsLoadCommand = new GroupTabsLoadCommand(target);
-
 			target.SwitchTabsCommand = new SwitchTabsCommand(target);
 
 			target.GroupSelectCommand = new GroupSelectCommand(target);
-			target.GroupCreateCommand = new GroupCreateCommand(target);
+			target.GroupCreateAtCommand = new GroupCreateAtCommand(target);
 			target.GroupDestroyCommand = new GroupDestroyCommand(target);
 
 			target.GroupNoteSelectCommand = new GroupNoteSelectCommand(target);
@@ -61,13 +52,10 @@ namespace ViewModelExtended
 
 		public void MakePrime (PrimeViewModel target)
 		{
-			//target.PrimeLoadCommand = new PrimeLoadCommand(target);
-
 			target.NoteSelectCommand = new NoteSelectCommand(target);
-			target.NoteCreateCommand = new NoteCreateCommand(target);
+			target.NoteCreateAtCommand = new NoteCreateAtCommand(target);
 			target.NoteDestroyCommand = new NoteDestroyCommand(target);
 
-			
 			target.GroupNoteHoldCommand = new GroupNoteHoldCommand(target);
 			target.GroupNoteDropCommand = new GroupNoteDropCommand(target);
 		}

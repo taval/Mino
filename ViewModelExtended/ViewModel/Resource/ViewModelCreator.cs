@@ -9,9 +9,9 @@ namespace ViewModelExtended.ViewModel
 {
 	public class ViewModelCreator : IViewModelCreator
 	{
-		#region Resource
+		#region Kit
 
-		private IViewModelResource Resource { get; set; }
+		private IViewModelKit f_ViewModelKit;
 
 		#endregion
 
@@ -19,9 +19,9 @@ namespace ViewModelExtended.ViewModel
 
 		#region Constructor
 
-		public ViewModelCreator (IViewModelResource resource)
+		public ViewModelCreator (IViewModelKit viewModelKit)
 		{
-			Resource = resource;
+			f_ViewModelKit = viewModelKit;
 		}
 
 		#endregion
@@ -32,7 +32,9 @@ namespace ViewModelExtended.ViewModel
 
 		public NoteListViewModel CreateNoteListViewModel ()
 		{
-			return new NoteListViewModel(Resource);
+			NoteListViewModel output = new NoteListViewModel(f_ViewModelKit);
+			f_ViewModelKit.CommandBuilder.MakeNoteList(output);
+			return output;
 		}
 
 		public NoteListObjectViewModel CreateNoteListObjectViewModel (IDbContext dbContext)
@@ -95,7 +97,9 @@ namespace ViewModelExtended.ViewModel
 
 		public GroupListViewModel CreateGroupListViewModel ()
 		{
-			return new GroupListViewModel(Resource);
+			GroupListViewModel output = new GroupListViewModel(f_ViewModelKit);
+			f_ViewModelKit.CommandBuilder.MakeGroupList(output);
+			return output;
 		}
 
 		public GroupListObjectViewModel CreateGroupListObjectViewModel (IDbContext dbContext)
@@ -156,9 +160,11 @@ namespace ViewModelExtended.ViewModel
 
 		#region Group
 
-		public GroupContentsViewModel CreateGroupContentsViewModel ()
+		public GroupContentsViewModel CreateGroupContentsViewModel (NoteListViewModel noteListViewModel)
 		{
-			return new GroupContentsViewModel(Resource);
+			GroupContentsViewModel output = new GroupContentsViewModel(f_ViewModelKit, noteListViewModel);
+			f_ViewModelKit.CommandBuilder.MakeGroup(output);
+			return output;
 		}
 
 		public GroupObjectViewModel CreateGroupObjectViewModel (IDbContext dbContext, Group groop, Note data)
@@ -240,7 +246,9 @@ namespace ViewModelExtended.ViewModel
 
 		public NoteTextViewModel CreateNoteTextViewModel ()
 		{
-			return new NoteTextViewModel(Resource);
+			NoteTextViewModel output = new NoteTextViewModel(f_ViewModelKit);
+			f_ViewModelKit.CommandBuilder.MakeNoteText(output);
+			return output;
 		}
 
 		#endregion
@@ -249,9 +257,12 @@ namespace ViewModelExtended.ViewModel
 
 		#region GroupTabs
 
-		public GroupTabsViewModel CreateGroupTabsViewModel ()
+		public GroupTabsViewModel CreateGroupTabsViewModel (
+			GroupListViewModel groupListViewModel, GroupContentsViewModel groupContentsViewModel)
 		{
-			return new GroupTabsViewModel(Resource);
+			GroupTabsViewModel output = new GroupTabsViewModel(f_ViewModelKit, groupListViewModel, groupContentsViewModel);
+			f_ViewModelKit.CommandBuilder.MakeGroupTabs(output);
+			return output;
 		}
 
 		#endregion
@@ -262,7 +273,7 @@ namespace ViewModelExtended.ViewModel
 
 		public StatusBarViewModel CreateStatusBarViewModel ()
 		{
-			return new StatusBarViewModel(Resource);
+			return new StatusBarViewModel();
 		}
 
 		#endregion
@@ -271,9 +282,18 @@ namespace ViewModelExtended.ViewModel
 
 		#region PrimeViewModel
 
-		public PrimeViewModel CreatePrimeViewModel ()
+		public PrimeViewModel CreatePrimeViewModel (
+			StatusBarViewModel statusBarViewModel,
+			NoteTextViewModel noteTextViewModel,
+			GroupTabsViewModel groupTabsViewModel,
+			NoteListViewModel noteListViewModel)
 		{
-			return new PrimeViewModel(Resource);
+			//PrimeViewModel output = new PrimeViewModel(
+			//	f_ViewModelKit, statusBarViewModel, noteTextViewModel, groupTabsViewModel, noteListViewModel);
+			PrimeViewModel output = new PrimeViewModel(
+				statusBarViewModel, noteTextViewModel, groupTabsViewModel, noteListViewModel);
+			f_ViewModelKit.CommandBuilder.MakePrime(output);
+			return output;
 		}
 
 		#endregion
@@ -284,7 +304,10 @@ namespace ViewModelExtended.ViewModel
 
 		public MainWindowViewModel CreateMainWindowViewModel ()
 		{
-			return new MainWindowViewModel(Resource);
+			//MainWindowViewModel output = new MainWindowViewModel(f_ViewModelKit);
+			MainWindowViewModel output = new MainWindowViewModel();
+			f_ViewModelKit.CommandBuilder.MakeMainWindow(output);
+			return output;
 		}
 
 		#endregion

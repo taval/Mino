@@ -61,12 +61,12 @@ namespace ViewModelExtended.ViewModel
 		/// <summary>
 		/// inserts an empty note into NoteList
 		/// </summary>
-		public ICommand NoteCreateCommand {
-			get { return f_NoteCreateCommand ?? throw new MissingCommandException(); }
-			set { if (f_NoteCreateCommand == null) f_NoteCreateCommand = value; }
+		public ICommand NoteCreateAtCommand {
+			get { return f_NoteCreateAtCommand ?? throw new MissingCommandException(); }
+			set { if (f_NoteCreateAtCommand == null) f_NoteCreateAtCommand = value; }
 		}
 
-		private ICommand? f_NoteCreateCommand;
+		private ICommand? f_NoteCreateAtCommand;
 
 		/// <summary>
 		/// removes a note from the NoteList
@@ -82,9 +82,20 @@ namespace ViewModelExtended.ViewModel
 
 
 
-		#region Resource
+		#region Kit
 
-		public IViewModelResource Resource { get; private set; }
+		//private IViewModelKit f_ViewModelKit;
+
+		#endregion
+
+
+
+		#region ViewModel Contexts
+
+		public StatusBarViewModel StatusBarViewModel { get; private set; }
+		public NoteTextViewModel NoteTextViewModel { get; private set; }
+		public GroupTabsViewModel GroupTabsViewModel { get; private set; }
+		public NoteListViewModel NoteListViewModel { get; private set; }
 
 		#endregion
 
@@ -92,25 +103,94 @@ namespace ViewModelExtended.ViewModel
 
 		#region Constructor
 
-		public PrimeViewModel (IViewModelResource resource)
+		//public PrimeViewModel (
+		//	IViewModelKit viewModelKit,
+		//	StatusBarViewModel statusBarViewModel,
+		//	NoteTextViewModel noteTextViewModel,
+		//	GroupTabsViewModel groupTabsViewModel,
+		//	NoteListViewModel noteListViewModel)
+		//{
+		public PrimeViewModel (
+			StatusBarViewModel statusBarViewModel,
+			NoteTextViewModel noteTextViewModel,
+			GroupTabsViewModel groupTabsViewModel,
+			NoteListViewModel noteListViewModel)
 		{
-			Resource = resource;
+			// set ViewModel kit
+			//f_ViewModelKit = viewModelKit;
+
+			// set ViewModel context dependencies
+			StatusBarViewModel = statusBarViewModel;
+			NoteTextViewModel = noteTextViewModel;
+			GroupTabsViewModel = groupTabsViewModel;
+			NoteListViewModel = noteListViewModel;
+
+			// default to no selected item
 			f_SelectedNoteViewModel = null;
-			Resource.CommandBuilder.MakePrime(this);
-			SetPropertyChangedEventHandler(Resource.StatusBarViewModel);
+
+			// attach commands
+			//f_ViewModelKit.CommandBuilder.MakePrime(this);
+
+			// attach handlers
+			SetSelectedChangedEventHandler();
+			SetNoteCountChangedEventHandler();
+			SetGroupCountChangedEventHandler();
+			SetGroupNoteCountChangedEventHandler();
 		}
 
-		public void SetPropertyChangedEventHandler (StatusBarViewModel observer)
+		public void SetSelectedChangedEventHandler ()
 		{
 			PropertyChangedEventHandler handler = (sender, e) =>
 			{
 				if (e.PropertyName == "SelectedNoteViewModel") {
-					int dummySelectedItemId = observer.SelectedItemId;
-					DateTime dummySelectedDateCreated = observer.SelectedDateCreated;
+					if (SelectedNoteViewModel != null) {
+						StatusBarViewModel.SelectedItemId = SelectedNoteViewModel.ItemId;
+						StatusBarViewModel.SelectedDateCreated = SelectedNoteViewModel.DateCreated;
+					}
+					else {
+						StatusBarViewModel.SelectedItemId = -1;
+						StatusBarViewModel.SelectedDateCreated = DateTime.MinValue;
+					}
 				}
 			};
 
 			PropertyChanged += handler;
+		}
+
+		private void SetNoteCountChangedEventHandler ()
+		{
+			PropertyChangedEventHandler handler = (sender, e) =>
+			{
+				if (e.PropertyName == "ItemCount") {
+					StatusBarViewModel.NoteCount = NoteListViewModel.ItemCount;
+				}
+			};
+
+			NoteListViewModel.PropertyChanged += handler;
+		}
+
+		private void SetGroupCountChangedEventHandler ()
+		{
+			PropertyChangedEventHandler handler = (sender, e) =>
+			{
+				if (e.PropertyName == "GroupCount") {
+					StatusBarViewModel.GroupCount = GroupTabsViewModel.GroupCount;
+				}
+			};
+
+			GroupTabsViewModel.PropertyChanged += handler;
+		}
+
+		private void SetGroupNoteCountChangedEventHandler ()
+		{
+			PropertyChangedEventHandler handler = (sender, e) =>
+			{
+				if (e.PropertyName == "GroupNoteCount") {
+					StatusBarViewModel.GroupNoteCount = GroupTabsViewModel.GroupNoteCount;
+				}
+			};
+
+			GroupTabsViewModel.PropertyChanged += handler;
 		}
 
 		#endregion
@@ -125,21 +205,21 @@ namespace ViewModelExtended.ViewModel
 		public void Load ()
 		{
 			// if no notes exist, create one
-			if (Resource.NoteListViewModel.Items.Count() == 0) {
-				AddNote(Resource.NoteListViewModel.Create());
+			if (NoteListViewModel.Items.Count() == 0) {
+				AddNote(NoteListViewModel.Create());
 			}
 
 			// select the first note
-			SelectedNoteViewModel = Resource.NoteListViewModel.Items.First();
+			SelectedNoteViewModel = NoteListViewModel.Items.First();
 			if (SelectedNoteViewModel != null) {
 				SelectNote(SelectedNoteViewModel);
 			}
 
 			// highlight the first note
-			Resource.NoteListViewModel.Highlighted = SelectedNoteViewModel;
+			NoteListViewModel.Highlighted = SelectedNoteViewModel;
 
 			// perform GroupTabs setup
-			Resource.GroupTabsViewModel.Load();
+			GroupTabsViewModel.Load();
 		}
 
 		#endregion
@@ -154,22 +234,37 @@ namespace ViewModelExtended.ViewModel
 		/// <param name="input"></param>
 		public void AddNote (NoteListObjectViewModel input)
 		{
-			Resource.NoteListViewModel.Add(input);
+			NoteListViewModel.Add(input);
 		}
+
+
 
 		/// <summary>
 		/// inserts a new note into the note list; selects the newly created note
 		/// </summary>
 		/// <param name="target">the location at where the item will be inserted</param>
 		/// <param name="input">the item to insert</param>
-		public void CreateNote (NoteListObjectViewModel? target, NoteListObjectViewModel input)
+		//public void CreateNote (NoteListObjectViewModel? target, NoteListObjectViewModel input)
+		//{
+		//	// if target is null, try to use the selected item
+		//	if (target == null) {
+		//		target = SelectedNoteViewModel;
+		//	}
+
+		//	// de-select the target
+		//	if (target != null) {
+		//		target.IsSelected = false;
+		//	}
+
+		//	f_NoteListViewModel.Insert(target, input);
+
+		//	// set text viewer
+		//	SelectNote(input);
+		//}
+
+		public NoteListObjectViewModel CreateNoteAt (NoteListObjectViewModel? target)
 		{
-			// the insert target is the most recently highlighted Item
-			//NoteListViewModel.Target = target;
-
-			// using default NoteViewModel for creating a blank Note
-			//NoteListViewModel.Inserted = input;
-
+			NoteListObjectViewModel output = NoteListViewModel.Create();
 			// if target is null, try to use the selected item
 			if (target == null) {
 				target = SelectedNoteViewModel;
@@ -180,13 +275,12 @@ namespace ViewModelExtended.ViewModel
 				target.IsSelected = false;
 			}
 
-			Resource.NoteListViewModel.Insert(target, input);
-
-			// selected should now be set to the newly inserted item
-			//SelectedNoteViewModel = input;
+			NoteListViewModel.Insert(target, output);
 
 			// set text viewer
-			SelectNote(input);
+			SelectNote(output);
+
+			return output;
 		}
 
 		/// <summary>
@@ -196,8 +290,8 @@ namespace ViewModelExtended.ViewModel
 		public void SelectNote (NoteListObjectViewModel note)
 		{
 			SelectedNoteViewModel = note;
-			Resource.NoteTextViewModel.ContentData = note;
-			Resource.NoteTextViewModel.ContentData.IsSelected = true;
+			NoteTextViewModel.ContentData = note;
+			NoteTextViewModel.ContentData.IsSelected = true;
 		}
 
 		/// <summary>
@@ -210,36 +304,33 @@ namespace ViewModelExtended.ViewModel
 			AutoSelectFailSafe(input);
 
 			// add a list item if none remain
-			if (Resource.NoteListViewModel.Items.Count() == 1) {
-				NoteListObjectViewModel newNote = Resource.NoteListViewModel.Create();
-				CreateNote(null, newNote);
+			if (NoteListViewModel.Items.Count() == 1) {
+				//NoteListObjectViewModel newNote = f_NoteListViewModel.Create();
+				//CreateNote(null, newNote);
+				NoteListObjectViewModel newNote = CreateNoteAt(null);
 				SelectNote(newNote);
-				Resource.NoteListViewModel.Highlighted = newNote;
+				NoteListViewModel.Highlighted = newNote;
 			}
 
 			// remove any existing note objects matching the input in any of the groups
-			Resource.GroupTabsViewModel.RemoveGroupObjectsByNote(input.Model.Data);
+			GroupTabsViewModel.RemoveGroupObjectsByNote(input.Model.Data);
 
 			// remove the note
-			Resource.NoteListViewModel.Remove(input);
+			NoteListViewModel.Remove(input);
 		}
 
 
-		//// Receive
-		//public void AddNoteToGroup (NoteListObjectViewModel input)
-		//{
-		//	Resource.GroupTabsViewModel.AddNoteToGroup(input);
-		//}
-
-		// Receive
+		/// <summary>
+		/// take temporary GroupObject and make it a permanent addition to the group
+		/// </summary>
 		public void AddNoteToGroup ()
 		{
-			Resource.GroupTabsViewModel.AddNoteToGroup();
+			GroupTabsViewModel.AddNoteToGroup();
 		}
 
 		public void HoldGroupNote ()
 		{
-			Resource.GroupTabsViewModel.HoldGroupNote();
+			GroupTabsViewModel.HoldGroupNote();
 		}
 
 		/// <summary>
@@ -249,28 +340,28 @@ namespace ViewModelExtended.ViewModel
 		private void AutoSelectFailSafe (NoteListObjectViewModel input)
 		{
 			// don't let lack of highlighted item cause deleted item to not be de-selected
-			if (Resource.NoteListViewModel.Highlighted == null) {
-				Resource.NoteListViewModel.Highlighted = SelectedNoteViewModel;
+			if (NoteListViewModel.Highlighted == null) {
+				NoteListViewModel.Highlighted = SelectedNoteViewModel;
 			}
 
 			// compare what is selected to what is highlighted and what is to be deleted
 			if (SelectedNoteViewModel == input) {
-				if (Resource.NoteListViewModel.Highlighted == input) {
+				if (NoteListViewModel.Highlighted == input) {
 					if (input.Next != null) {
 						SelectNote((NoteListObjectViewModel)input.Next);
 					}
 					else if (input.Previous != null) {
 						SelectNote((NoteListObjectViewModel)input.Previous);
 					}
-					Resource.NoteListViewModel.Highlighted = SelectedNoteViewModel;
+					NoteListViewModel.Highlighted = SelectedNoteViewModel;
 				}
-				else if (Resource.NoteListViewModel.Highlighted != null) {
-					SelectNote(Resource.NoteListViewModel.Highlighted);
+				else if (NoteListViewModel.Highlighted != null) {
+					SelectNote(NoteListViewModel.Highlighted);
 				}
 			}
 			else {
-				if (Resource.NoteListViewModel.Highlighted == input) {
-					Resource.NoteListViewModel.Highlighted = SelectedNoteViewModel;
+				if (NoteListViewModel.Highlighted == input) {
+					NoteListViewModel.Highlighted = SelectedNoteViewModel;
 
 				}
 				else {
@@ -286,9 +377,11 @@ namespace ViewModelExtended.ViewModel
 		public void Shutdown ()
 		{
 			RemoveAllEventHandlers();
-			Resource.GroupContentsViewModel.Shutdown();
-			Resource.GroupListViewModel.Shutdown();
-			Resource.NoteListViewModel.Shutdown();
+
+			//f_GroupContentsViewModel.Shutdown();
+			//f_GroupListViewModel.Shutdown();
+			GroupTabsViewModel.Shutdown();
+			NoteListViewModel.Shutdown();
 		}
 
 		#endregion

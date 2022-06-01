@@ -30,12 +30,12 @@ namespace ViewModelExtended.ViewModel
 
 
 
-		#region Resource
+		#region Kit
 
 		/// <summary>
-		/// the viewmodel datacontext
+		/// facilities for constructing and modifying ViewModels
 		/// </summary>
-		private IViewModelResource f_Resource;
+		private IViewModelKit f_ViewModelKit;
 
 		/// <summary>
 		/// viewmodel component creation methods
@@ -62,11 +62,12 @@ namespace ViewModelExtended.ViewModel
 		/// the number of items in the container
 		/// </summary>
 		public int ItemCount {
-			get { return f_ItemCount; }
-			private set { Set(ref f_ItemCount, value); }
+			get { return f_List.Items.Count(); }
 		}
 
-		private int f_ItemCount;
+		public bool HasGroup {
+			get { return f_List.Any(); }
+		}
 
 		#endregion
 
@@ -141,16 +142,13 @@ namespace ViewModelExtended.ViewModel
 
 		#region Constructor
 
-		public GroupListViewModel (IViewModelResource resource)
+		public GroupListViewModel (IViewModelKit viewModelKit)
 		{
 			f_ComponentCreator = new ComponentCreator();
 
 			// attach commands
-			f_Resource = resource;
-			f_Resource.CommandBuilder.MakeGroupList(this);
-
-			// attach handlers
-			SetPropertyChangedEventHandler(f_Resource.StatusBarViewModel);
+			f_ViewModelKit = viewModelKit;
+			//f_ViewModelKit.CommandBuilder.MakeGroupList(this);
 
 			// init change 'queue'
 			f_Changes = f_ComponentCreator.CreateChangeQueue<GroupListObjectViewModel>();
@@ -164,42 +162,49 @@ namespace ViewModelExtended.ViewModel
 			 */
 			f_List = f_ComponentCreator.CreateObservableList<GroupListObjectViewModel>();
 
-			using (IDbContext dbContext = f_Resource.CreateDbContext()) {
+			using (IDbContext dbContext = f_ViewModelKit.CreateDbContext()) {
 				IQueryable<GroupListObjectViewModel> unsortedObjects =
-					f_Resource.DbQueryHelper.GetAllGroupListObjects(dbContext);
+					f_ViewModelKit.DbQueryHelper.GetAllGroupListObjects(dbContext);
 
 				IEnumerable<GroupListObjectViewModel> sortedObjects =
-					f_Resource.DbListHelper.SortListObjects(unsortedObjects.ToList());
+					f_ViewModelKit.DbListHelper.SortListObjects(unsortedObjects.ToList());
 
 				f_List.Clear();
 				f_List.AddSortedRange(sortedObjects);
 			}
 
 			// set the viewmodel list count
-			ItemCount = f_List.Items.Count();
+			//ItemCount = f_List.Items.Count();
+			AlertSizeChanged();
 		}
 
-		/// <summary>
-		/// create a selection of listeners on this object
-		/// </summary>
-		/// <param name="observer"></param>
-		private void SetPropertyChangedEventHandler (StatusBarViewModel observer)
-		{
-			PropertyChangedEventHandler handler = (sender, e) =>
-			{
-				if (e.PropertyName == "ItemCount") {
-					int _ = observer.NoteCount;
-				}
-			};
+		///// <summary>
+		///// create a selection of listeners on this object
+		///// </summary>
+		///// <param name="observer"></param>
+		//private void SetPropertyChangedEventHandler (StatusBarViewModel observer)
+		//{
+		//	PropertyChangedEventHandler handler = (sender, e) =>
+		//	{
+		//		if (e.PropertyName == "ItemCount") {
+		//			int _ = observer.NoteCount;
+		//		}
+		//	};
 
-			PropertyChanged += handler;
-		}
+		//	PropertyChanged += handler;
+		//}
 
 		#endregion
 
 
 
 		#region List Access
+
+		private void AlertSizeChanged ()
+		{
+			NotifyPropertyChanged(nameof(ItemCount));
+			NotifyPropertyChanged(nameof(HasGroup));
+		}
 
 		/// <summary>
 		/// add item to end of list
@@ -208,7 +213,8 @@ namespace ViewModelExtended.ViewModel
 		public void Add (GroupListObjectViewModel input)
 		{
 			f_List.Add(input);
-			ItemCount = f_List.Items.Count();
+			//ItemCount = f_List.Items.Count();
+			AlertSizeChanged();
 
 			f_Changes.QueueOnAdd(input);
 		}
@@ -221,7 +227,8 @@ namespace ViewModelExtended.ViewModel
 		public void Insert (GroupListObjectViewModel? target, GroupListObjectViewModel input)
 		{
 			f_List.Insert(target, input);
-			ItemCount = f_List.Items.Count();
+			//ItemCount = f_List.Items.Count();
+			AlertSizeChanged();
 
 			f_Changes.QueueOnInsert(target, input);
 		}
@@ -247,10 +254,11 @@ namespace ViewModelExtended.ViewModel
 			f_Changes.QueueOnRemove(input);
 
 			f_List.Remove(input);
-			ItemCount = f_List.Items.Count();
+			//ItemCount = f_List.Items.Count();
+			AlertSizeChanged();
 
-			using (IDbContext dbContext = f_Resource.CreateDbContext()) {
-				f_Resource.ViewModelCreator.DestroyGroupListObjectViewModel(dbContext, input);
+			using (IDbContext dbContext = f_ViewModelKit.CreateDbContext()) {
+				f_ViewModelKit.ViewModelCreator.DestroyGroupListObjectViewModel(dbContext, input);
 			}
 		}
 
@@ -271,7 +279,8 @@ namespace ViewModelExtended.ViewModel
 		{
 			f_Changes.Clear();
 			f_List.Clear();
-			ItemCount = f_List.Items.Count();
+			//ItemCount = f_List.Items.Count();
+			AlertSizeChanged();
 		}
 
 		#endregion
@@ -302,8 +311,8 @@ namespace ViewModelExtended.ViewModel
 		/// <returns></returns>
 		public GroupListObjectViewModel Create ()
 		{
-			using (IDbContext dbContext = f_Resource.CreateDbContext()) {
-				return f_Resource.ViewModelCreator.CreateGroupListObjectViewModel(dbContext);
+			using (IDbContext dbContext = f_ViewModelKit.CreateDbContext()) {
+				return f_ViewModelKit.ViewModelCreator.CreateGroupListObjectViewModel(dbContext);
 			}
 		}
 
@@ -317,7 +326,7 @@ namespace ViewModelExtended.ViewModel
 		{
 			if (f_Highlighted == null) return;
 
-			using (IDbContext dbContext = f_Resource.CreateDbContext()) {
+			using (IDbContext dbContext = f_ViewModelKit.CreateDbContext()) {
 				dbContext.UpdateGroup(f_Highlighted.Model.Data, f_Highlighted.Title, null);
 				dbContext.Save();
 			}
@@ -327,7 +336,7 @@ namespace ViewModelExtended.ViewModel
 		{
 			if (f_Highlighted == null) return;
 
-			using (IDbContext dbContext = f_Resource.CreateDbContext()) {
+			using (IDbContext dbContext = f_ViewModelKit.CreateDbContext()) {
 				dbContext.UpdateGroup(f_Highlighted.Model.Data, f_Highlighted.Color, null);
 				dbContext.Save();
 			}
@@ -347,11 +356,11 @@ namespace ViewModelExtended.ViewModel
 			if (!f_Changes.IsDirty) return;
 
 			IEnumerable<KeyValuePair<IListItem, int>> sortedChanges =
-				f_Resource.DbListHelper.SortDictionaryObjects(f_Changes.Items);
+				f_ViewModelKit.DbListHelper.SortDictionaryObjects(f_Changes.Items);
 
-			using (IDbContext dbContext = f_Resource.CreateDbContext()) {
+			using (IDbContext dbContext = f_ViewModelKit.CreateDbContext()) {
 				foreach (KeyValuePair<IListItem, int> obj in sortedChanges) {
-					f_Resource.DbListHelper.UpdateNodes(dbContext, obj.Key);
+					f_ViewModelKit.DbListHelper.UpdateNodes(dbContext, obj.Key);
 					f_Changes.Remove(obj.Key);
 				}
 

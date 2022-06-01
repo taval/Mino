@@ -20,7 +20,7 @@ namespace ViewModelExtended.Command
 
 		public override void Execute (object parameter)
 		{
-			f_MainWindowViewModel.Resource.PrimeViewModel.Shutdown();
+			((ViewModelContext)parameter).Shutdown();
 			System.Windows.Application.Current.Shutdown();
 		}
 	}

@@ -33,9 +33,9 @@ namespace ViewModelExtended.ViewModel
 		#region ViewModelResource
 
 		/// <summary>
-		/// the viewmodel datacontext
+		/// facilities for constructing and modifying ViewModels
 		/// </summary>
-		private IViewModelResource f_Resource;
+		private IViewModelKit f_ViewModelKit;
 
 		/// <summary>
 		/// viewmodel component creation methods
@@ -62,11 +62,12 @@ namespace ViewModelExtended.ViewModel
 		/// the number of items in the container
 		/// </summary>
 		public int ItemCount {
-			get { return f_ItemCount; }
-			private set { Set(ref f_ItemCount, value); }
+			get { return f_List.Items.Count(); }
 		}
 
-		private int f_ItemCount;
+		public bool HasNote {
+			get { return f_List.Any(); }
+		}
 
 		#endregion
 
@@ -111,16 +112,13 @@ namespace ViewModelExtended.ViewModel
 
 		#region Constructor
 
-		public NoteListViewModel (IViewModelResource resource)
+		public NoteListViewModel (IViewModelKit viewModelKit)
 		{
 			f_ComponentCreator = new ComponentCreator();
 
 			// attach commands
-			f_Resource = resource;
-			f_Resource.CommandBuilder.MakeNoteList(this);
-
-			// attach handlers
-			SetPropertyChangedEventHandler(f_Resource.StatusBarViewModel);
+			f_ViewModelKit = viewModelKit;
+			//f_ViewModelKit.CommandBuilder.MakeNoteList(this);
 
 			// init change 'queue'
 			f_Changes = f_ComponentCreator.CreateChangeQueue<NoteListObjectViewModel>();
@@ -136,35 +134,20 @@ namespace ViewModelExtended.ViewModel
 			 */
 			f_List = f_ComponentCreator.CreateObservableList<NoteListObjectViewModel>();
 
-			using (IDbContext dbContext = f_Resource.CreateDbContext()) {
+			using (IDbContext dbContext = f_ViewModelKit.CreateDbContext()) {
 				IQueryable<NoteListObjectViewModel> unsortedObjects =
-					f_Resource.DbQueryHelper.GetAllNoteListObjects(dbContext);
+					f_ViewModelKit.DbQueryHelper.GetAllNoteListObjects(dbContext);
 
 				IEnumerable<NoteListObjectViewModel> sortedObjects =
-					f_Resource.DbListHelper.SortListObjects(unsortedObjects.ToList());
+					f_ViewModelKit.DbListHelper.SortListObjects(unsortedObjects.ToList());
 				
 				f_List.Clear();
 				f_List.AddSortedRange(sortedObjects);
 			}
 
 			// set the viewmodel list count
-			ItemCount = f_List.Items.Count();
-		}
-
-		/// <summary>
-		/// create a selection of listeners on this object
-		/// </summary>
-		/// <param name="observer"></param>
-		private void SetPropertyChangedEventHandler (StatusBarViewModel observer)
-		{
-			PropertyChangedEventHandler handler = (sender, e) =>
-			{
-				if (e.PropertyName == "ItemCount") {
-					int _ = observer.NoteCount;
-				}
-			};
-
-			PropertyChanged += handler;
+			//ItemCount = f_List.Items.Count();
+			AlertSizeChanged();
 		}
 
 		#endregion
@@ -173,6 +156,12 @@ namespace ViewModelExtended.ViewModel
 
 		#region List Access
 
+		private void AlertSizeChanged ()
+		{
+			NotifyPropertyChanged(nameof(ItemCount));
+			NotifyPropertyChanged(nameof(HasNote));
+		}
+
 		/// <summary>
 		/// add item to end of list
 		/// </summary>
@@ -180,7 +169,8 @@ namespace ViewModelExtended.ViewModel
 		public void Add (NoteListObjectViewModel input)
 		{
 			f_List.Add(input);
-			ItemCount = f_List.Items.Count();
+			//ItemCount = f_List.Items.Count();
+			AlertSizeChanged();
 
 			f_Changes.QueueOnAdd(input);
 		}
@@ -193,7 +183,8 @@ namespace ViewModelExtended.ViewModel
 		public void Insert (NoteListObjectViewModel? target, NoteListObjectViewModel input)
 		{
 			f_List.Insert(target, input);
-			ItemCount = f_List.Items.Count();
+			//ItemCount = f_List.Items.Count();
+			AlertSizeChanged();
 
 			f_Changes.QueueOnInsert(target, input);
 		}
@@ -219,10 +210,11 @@ namespace ViewModelExtended.ViewModel
 			f_Changes.QueueOnRemove(input);
 
 			f_List.Remove(input);
-			ItemCount = f_List.Items.Count();
+			//ItemCount = f_List.Items.Count();
+			AlertSizeChanged();
 
-			using (IDbContext dbContext = f_Resource.CreateDbContext()) {
-				f_Resource.ViewModelCreator.DestroyNoteListObjectViewModel(dbContext, input);
+			using (IDbContext dbContext = f_ViewModelKit.CreateDbContext()) {
+				f_ViewModelKit.ViewModelCreator.DestroyNoteListObjectViewModel(dbContext, input);
 			}
 		}
 
@@ -243,7 +235,8 @@ namespace ViewModelExtended.ViewModel
 		{
 			f_Changes.Clear();
 			f_List.Clear();
-			ItemCount = f_List.Items.Count();
+			//ItemCount = f_List.Items.Count();
+			AlertSizeChanged();
 		}
 
 		#endregion
@@ -274,8 +267,8 @@ namespace ViewModelExtended.ViewModel
 		/// <returns></returns>
 		public NoteListObjectViewModel Create ()
 		{
-			using (IDbContext dbContext = f_Resource.CreateDbContext()) {
-				return f_Resource.ViewModelCreator.CreateNoteListObjectViewModel(dbContext);
+			using (IDbContext dbContext = f_ViewModelKit.CreateDbContext()) {
+				return f_ViewModelKit.ViewModelCreator.CreateNoteListObjectViewModel(dbContext);
 			}
 		}
 
@@ -293,11 +286,11 @@ namespace ViewModelExtended.ViewModel
 			if (!f_Changes.IsDirty) return;
 
 			IEnumerable<KeyValuePair<IListItem, int>> sortedChanges =
-				f_Resource.DbListHelper.SortDictionaryObjects(f_Changes.Items);
+				f_ViewModelKit.DbListHelper.SortDictionaryObjects(f_Changes.Items);
 
-			using (IDbContext dbContext = f_Resource.CreateDbContext()) {
+			using (IDbContext dbContext = f_ViewModelKit.CreateDbContext()) {
 				foreach (KeyValuePair<IListItem, int> obj in sortedChanges) {
-					f_Resource.DbListHelper.UpdateNodes(dbContext, obj.Key);
+					f_ViewModelKit.DbListHelper.UpdateNodes(dbContext, obj.Key);
 					f_Changes.Remove(obj.Key);
 				}
 

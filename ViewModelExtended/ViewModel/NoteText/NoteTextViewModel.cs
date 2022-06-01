@@ -12,7 +12,11 @@ namespace ViewModelExtended.ViewModel
 {
 	public class NoteTextViewModel : ViewModelBase
 	{
-		public IViewModelResource Resource { get; private set; }
+		#region Kit
+
+		private IViewModelKit f_ViewModelKit;
+
+		#endregion
 
 
 
@@ -100,10 +104,10 @@ namespace ViewModelExtended.ViewModel
 
 		#region Constructor
 
-		public NoteTextViewModel (IViewModelResource resource)
+		public NoteTextViewModel (IViewModelKit viewModelKit)
 		{
-			Resource = resource;
-			Resource.CommandBuilder.MakeNoteText(this);
+			f_ViewModelKit = viewModelKit;
+			//f_ViewModelKit.CommandBuilder.MakeNoteText(this);
 			f_ContentData = null;
 		}
 
@@ -117,7 +121,7 @@ namespace ViewModelExtended.ViewModel
 		{
 			if (f_ContentData == null) return;
 
-			using (IDbContext dbContext = Resource.CreateDbContext()) {
+			using (IDbContext dbContext = f_ViewModelKit.CreateDbContext()) {
 				dbContext.UpdateNote(f_ContentData.Model.Data, Title, null);
 				dbContext.Save();
 			}
@@ -127,7 +131,7 @@ namespace ViewModelExtended.ViewModel
 		{
 			if (f_ContentData == null) return;
 
-			using (IDbContext dbContext = Resource.CreateDbContext()) {
+			using (IDbContext dbContext = f_ViewModelKit.CreateDbContext()) {
 				dbContext.UpdateNote(f_ContentData.Model.Data, null, Text);
 				dbContext.Save();
 			}

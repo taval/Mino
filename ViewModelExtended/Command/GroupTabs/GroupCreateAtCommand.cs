@@ -11,11 +11,11 @@ using ViewModelExtended.ViewModel;
 
 namespace ViewModelExtended.Command
 {
-	public class GroupCreateCommand : CommandBase
+	public class GroupCreateAtCommand : CommandBase
 	{
 		private readonly GroupTabsViewModel f_GroupTabsViewModel;
 
-		public GroupCreateCommand (GroupTabsViewModel groupTabsViewModel)
+		public GroupCreateAtCommand (GroupTabsViewModel groupTabsViewModel)
 		{
 			f_GroupTabsViewModel = groupTabsViewModel;
 		}
@@ -34,10 +34,7 @@ namespace ViewModelExtended.Command
 			tabControl.SelectedItem = tabItem;
 
 			// add a new Group to the GroupList
-			f_GroupTabsViewModel.CreateGroup(
-				f_GroupTabsViewModel.Resource.GroupListViewModel.Highlighted,
-				f_GroupTabsViewModel.Resource.GroupListViewModel.Create()
-			);
+			f_GroupTabsViewModel.CreateGroupAt((GroupListObjectViewModel)parameter);
 		}
 	}
 }

@@ -8,6 +8,8 @@ using System.Windows;
 using ViewModelExtended.Model;
 using ViewModelExtended.ViewModel;
 
+// TODO: the viewmodel is initialized before the view and so does not detect changes to the object prior to start. A separate OnLoad command could populate the data viewmodels. Or, the StatusBar could have a constructor that takes these values
+
 // TODO: make modules for view, vm, db, etc.
 
 // TODO: most exceptions should trigger a rollback to the last known good state and shutdown/commit properly
@@ -31,7 +33,15 @@ namespace ViewModelExtended
 			AddResource("ListViewItem");
 
 			//AddResource("TextBoxError");
-			IViewModelResource resource = new ViewModelResource();
+			IViewModelKit viewModelKit = new ViewModelKit();
+
+			#endregion
+
+
+
+			#region ViewModel Context
+
+			IViewModelContext context = new ViewModelContext(viewModelKit.ViewModelCreator);
 
 			#endregion
 
@@ -39,8 +49,8 @@ namespace ViewModelExtended
 
 			#region Load Test Data
 
-			//AddNoteListObjectTestData(resource);
-			//AddGroupListObjectTestData(resource);
+			//AddNoteListObjectTestData(viewModelKit, context);
+			//AddGroupListObjectTestData(viewModelKit, context);
 
 			#endregion
 
@@ -48,7 +58,7 @@ namespace ViewModelExtended
 
 			#region Setup ViewModel
 
-			resource.PrimeViewModel.Load();
+			context.Load();
 
 			#endregion
 
@@ -56,7 +66,7 @@ namespace ViewModelExtended
 
 			#region Load Main Window
 
-			MainWindow = new MainWindow() { DataContext = resource.MainWindowViewModel };
+			MainWindow = new MainWindow() { DataContext = context };
 			MainWindow.Show();
 
 			#endregion
@@ -88,33 +98,33 @@ namespace ViewModelExtended
 		/// <summary>
 		/// adds NoteListObject test data
 		/// </summary>
-		/// <param name="resource"></param>
-		private void AddNoteListObjectTestData (IViewModelResource resource)
+		/// <param name="viewModelKit"></param>
+		private void AddNoteListObjectTestData (IViewModelKit viewModelKit, IViewModelContext context)
 		{
-			using (IDbContext dbContext = resource.CreateDbContext()) {
-				resource.PrimeViewModel.AddNote(resource.ViewModelCreator.CreateNoteListObjectViewModel(
+			using (IDbContext dbContext = viewModelKit.CreateDbContext()) {
+				context.PrimeViewModel.AddNote(viewModelKit.ViewModelCreator.CreateNoteListObjectViewModel(
 					dbContext, c => { c.Title = "8:00 AM"; c.Text = "make video"; }));
-				resource.PrimeViewModel.AddNote(resource.ViewModelCreator.CreateNoteListObjectViewModel(
+				context.PrimeViewModel.AddNote(viewModelKit.ViewModelCreator.CreateNoteListObjectViewModel(
 					dbContext, c => { c.Title = "9:00 AM"; c.Text = "walk the dog"; }));
-				resource.PrimeViewModel.AddNote(resource.ViewModelCreator.CreateNoteListObjectViewModel(
+				context.PrimeViewModel.AddNote(viewModelKit.ViewModelCreator.CreateNoteListObjectViewModel(
 					dbContext, c => { c.Title = "9:30 AM"; c.Text = "eat dinner"; }));
-				resource.PrimeViewModel.AddNote(resource.ViewModelCreator.CreateNoteListObjectViewModel(
+				context.PrimeViewModel.AddNote(viewModelKit.ViewModelCreator.CreateNoteListObjectViewModel(
 					dbContext, c => { c.Title = "10:15 AM"; c.Text = "watch tv"; }));
-				resource.PrimeViewModel.AddNote(resource.ViewModelCreator.CreateNoteListObjectViewModel(
+				context.PrimeViewModel.AddNote(viewModelKit.ViewModelCreator.CreateNoteListObjectViewModel(
 					dbContext, c => { c.Title = "11:30 AM"; c.Text = "jog"; }));
-				resource.PrimeViewModel.AddNote(resource.ViewModelCreator.CreateNoteListObjectViewModel(
+				context.PrimeViewModel.AddNote(viewModelKit.ViewModelCreator.CreateNoteListObjectViewModel(
 					dbContext, c => { c.Title = "12:00 PM"; c.Text = "mop"; }));
-				resource.PrimeViewModel.AddNote(resource.ViewModelCreator.CreateNoteListObjectViewModel(
+				context.PrimeViewModel.AddNote(viewModelKit.ViewModelCreator.CreateNoteListObjectViewModel(
 					dbContext, c => { c.Title = "1:00 PM"; c.Text = "kick it"; }));
-				resource.PrimeViewModel.AddNote(resource.ViewModelCreator.CreateNoteListObjectViewModel(
+				context.PrimeViewModel.AddNote(viewModelKit.ViewModelCreator.CreateNoteListObjectViewModel(
 					dbContext, c => { c.Title = "2:45 PM"; c.Text = "throw things"; }));
-				resource.PrimeViewModel.AddNote(resource.ViewModelCreator.CreateNoteListObjectViewModel(
+				context.PrimeViewModel.AddNote(viewModelKit.ViewModelCreator.CreateNoteListObjectViewModel(
 					dbContext, c => { c.Title = "7:00 PM"; c.Text = "sweep"; }));
-				resource.PrimeViewModel.AddNote(resource.ViewModelCreator.CreateNoteListObjectViewModel(
+				context.PrimeViewModel.AddNote(viewModelKit.ViewModelCreator.CreateNoteListObjectViewModel(
 					dbContext, c => { c.Title = "7:30 PM"; c.Text = "chill"; }));
-				resource.PrimeViewModel.AddNote(resource.ViewModelCreator.CreateNoteListObjectViewModel(
+				context.PrimeViewModel.AddNote(viewModelKit.ViewModelCreator.CreateNoteListObjectViewModel(
 					dbContext, c => { c.Title = "8:00 PM"; c.Text = "run"; }));
-				resource.PrimeViewModel.AddNote(resource.ViewModelCreator.CreateNoteListObjectViewModel(
+				context.PrimeViewModel.AddNote(viewModelKit.ViewModelCreator.CreateNoteListObjectViewModel(
 					dbContext, c => { c.Title = "9:00 PM"; c.Text = "also run"; }));
 			}
 		}
@@ -122,15 +132,15 @@ namespace ViewModelExtended
 		/// <summary>
 		/// adds GroupListObject test data
 		/// </summary>
-		/// <param name="resource"></param>
-		private void AddGroupListObjectTestData (IViewModelResource resource)
+		/// <param name="viewModelKit"></param>
+		private void AddGroupListObjectTestData (IViewModelKit viewModelKit, IViewModelContext context)
 		{
-			using (IDbContext dbContext = resource.CreateDbContext()) {
-				resource.GroupTabsViewModel.AddGroup(resource.ViewModelCreator.CreateGroupListObjectViewModel(
+			using (IDbContext dbContext = viewModelKit.CreateDbContext()) {
+				context.GroupTabsViewModel.AddGroup(viewModelKit.ViewModelCreator.CreateGroupListObjectViewModel(
 					dbContext, c => { c.Title = "Chores"; }));
-				resource.GroupTabsViewModel.AddGroup(resource.ViewModelCreator.CreateGroupListObjectViewModel(
+				context.GroupTabsViewModel.AddGroup(viewModelKit.ViewModelCreator.CreateGroupListObjectViewModel(
 					dbContext, c => { c.Title = "Exercises"; }));
-				resource.GroupTabsViewModel.AddGroup(resource.ViewModelCreator.CreateGroupListObjectViewModel(
+				context.GroupTabsViewModel.AddGroup(viewModelKit.ViewModelCreator.CreateGroupListObjectViewModel(
 					dbContext, c => { c.Title = "Leisure"; }));
 			}
 		}

@@ -65,7 +65,7 @@ namespace ViewModelExtended.ViewModel
 		}
 
 		/// <summary>
-		/// the number of items in the container
+		/// the number of items in the selected container
 		/// </summary>
 		public int ItemCount {
 			get { return Items.Count(); }
