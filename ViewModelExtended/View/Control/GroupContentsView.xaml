@@ -12,30 +12,30 @@
 	d:DesignHeight="450"
 	d:DesignWidth="800">
 
-	<Grid>
+    <Grid>
 
         <!--DragLeave="List_DragLeave"
 			DragOver="List_DragOver"-->
-		<ListView
+        <ListView
 			FontSize="9"
 			x:Name="ListView_GroupContentsView"
 			AllowDrop="True"
 			
 			SelectedItem="{ Binding Highlighted }"
 			ItemsSource="{ Binding Items, UpdateSourceTrigger=PropertyChanged }">
-			<ListView.Resources>
-				<Style TargetType="{ x:Type GridViewColumnHeader }">
-					<Setter Property="HorizontalContentAlignment" Value="Left" />
-				</Style>
-			</ListView.Resources>
+            <ListView.Resources>
+                <Style TargetType="{ x:Type GridViewColumnHeader }">
+                    <Setter Property="HorizontalContentAlignment" Value="Left" />
+                </Style>
+            </ListView.Resources>
 
-			<ListView.ItemContainerStyle>
-				<Style TargetType="{ x:Type ListViewItem }">
-					<Setter Property="IsSelected" Value="{ Binding IsSelected }" />
-					<!--<EventSetter Event="MouseMove" Handler="Item_MouseMove" />-->
-					<!--<EventSetter Event="DragOver" Handler="Item_DragOver" />-->
-				</Style>
-			</ListView.ItemContainerStyle>
+            <ListView.ItemContainerStyle>
+                <Style TargetType="{ x:Type ListViewItem }">
+                    <Setter Property="IsSelected" Value="{ Binding IsSelected }" />
+                    <!--<EventSetter Event="MouseMove" Handler="Item_MouseMove" />-->
+                    <!--<EventSetter Event="DragOver" Handler="Item_DragOver" />-->
+                </Style>
+            </ListView.ItemContainerStyle>
 
             <i:Interaction.Triggers>
 
@@ -72,13 +72,13 @@
             </i:Interaction.Triggers>
 
             <ListView.ItemTemplate>
-				<DataTemplate>
-					<Grid>
-						<Grid.ColumnDefinitions>
-							<ColumnDefinition Width="*" />
-							<ColumnDefinition Width="*" />
-						</Grid.ColumnDefinitions>
-						<Button
+                <DataTemplate>
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="*" />
+                        </Grid.ColumnDefinitions>
+                        <Button
 							Template="{ StaticResource closeButtonTemplate }"
 							Style="{ StaticResource closeButtonStyle }"
 							Grid.Column="0"
@@ -90,14 +90,14 @@
 							Command="{ Binding
 								(local:ListAction.RemoveCommand),
 								RelativeSource={ RelativeSource AncestorType={ x:Type local:GroupContentsView } } }" />
-						<StackPanel Grid.Column="1">
+                        <StackPanel Grid.Column="1">
                             <TextBlock FontWeight="Bold" Text="{ Binding Title, UpdateSourceTrigger=PropertyChanged }" />
-							<TextBlock Text="{ Binding Text }" />
-						</StackPanel>
+                            <TextBlock Text="{ Binding Text }" />
+                        </StackPanel>
 
-						<i:Interaction.Triggers>
+                        <i:Interaction.Triggers>
 
-							<!--<i:EventTrigger
+                            <!--<i:EventTrigger
 								EventName="PreviewMouseLeftButtonDown"
 								SourceObject="{ Binding RelativeSource={ RelativeSource AncestorType={ x:Type ListViewItem } } }">
 								<i:InvokeCommandAction
@@ -129,21 +129,22 @@
                             <i:EventTrigger
 								EventName="MouseDoubleClick"
 								SourceObject="{ Binding RelativeSource={ RelativeSource AncestorType={ x:Type ListViewItem } } }">
-								<i:InvokeCommandAction
+                                <i:InvokeCommandAction
 									CommandParameter="{ Binding
 										Path=DataContext.Highlighted,
 										RelativeSource={ RelativeSource AncestorType={ x:Type local:GroupContentsView } } }"
 									Command="{ Binding
 										Path=(local:ListAction.SelectCommand),
 										RelativeSource={ RelativeSource AncestorType={ x:Type local:GroupContentsView } } }" />
-							</i:EventTrigger>
+                            </i:EventTrigger>
 
-						</i:Interaction.Triggers>
+                        </i:Interaction.Triggers>
 
-					</Grid>
-				</DataTemplate>
-			</ListView.ItemTemplate>
-		</ListView>
+                    </Grid>
+                </DataTemplate>
+            </ListView.ItemTemplate>
+        </ListView>
 
-	</Grid>
+    </Grid>
+
 </UserControl>

@@ -8,8 +8,6 @@ using System.Windows;
 using ViewModelExtended.Model;
 using ViewModelExtended.ViewModel;
 
-// TODO: the viewmodel is initialized before the view and so does not detect changes to the object prior to start. A separate OnLoad command could populate the data viewmodels. Or, the StatusBar could have a constructor that takes these values
-
 // TODO: make modules for view, vm, db, etc.
 
 // TODO: most exceptions should trigger a rollback to the last known good state and shutdown/commit properly
@@ -58,7 +56,7 @@ namespace ViewModelExtended
 
 			#region Setup ViewModel
 
-			context.Load();
+			//context.Load();
 
 			#endregion
 
@@ -126,6 +124,8 @@ namespace ViewModelExtended
 					dbContext, c => { c.Title = "8:00 PM"; c.Text = "run"; }));
 				context.PrimeViewModel.AddNote(viewModelKit.ViewModelCreator.CreateNoteListObjectViewModel(
 					dbContext, c => { c.Title = "9:00 PM"; c.Text = "also run"; }));
+
+				context.NoteListViewModel.SaveListOrder();
 			}
 		}
 
@@ -142,6 +142,8 @@ namespace ViewModelExtended
 					dbContext, c => { c.Title = "Exercises"; }));
 				context.GroupTabsViewModel.AddGroup(viewModelKit.ViewModelCreator.CreateGroupListObjectViewModel(
 					dbContext, c => { c.Title = "Leisure"; }));
+
+				context.GroupListViewModel.SaveListOrder();
 			}
 		}
 

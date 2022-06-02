@@ -33,10 +33,10 @@ namespace ViewModelExtended.ViewModel
 			MainWindowViewModel = viewModelCreator.CreateMainWindowViewModel();
 		}
 
-		public void Load ()
-		{
-			PrimeViewModel.Load();
-		}
+		//public void Load ()
+		//{
+			//PrimeViewModel.Load();
+		//}
 
 		public void Shutdown ()
 		{

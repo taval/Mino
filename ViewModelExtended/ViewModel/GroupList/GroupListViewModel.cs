@@ -162,6 +162,29 @@ namespace ViewModelExtended.ViewModel
 			 */
 			f_List = f_ComponentCreator.CreateObservableList<GroupListObjectViewModel>();
 
+			//using (IDbContext dbContext = f_ViewModelKit.CreateDbContext()) {
+			//	IQueryable<GroupListObjectViewModel> unsortedObjects =
+			//		f_ViewModelKit.DbQueryHelper.GetAllGroupListObjects(dbContext);
+
+			//	IEnumerable<GroupListObjectViewModel> sortedObjects =
+			//		f_ViewModelKit.DbListHelper.SortListObjects(unsortedObjects.ToList());
+
+			//	f_List.Clear();
+			//	f_List.AddSortedRange(sortedObjects);
+			//}
+
+			// notify the viewmodel list count has changed (zero is a size too)
+			AlertSizeChanged();
+		}
+
+		#endregion
+
+		
+		
+		#region Load
+
+		public void Load ()
+		{
 			using (IDbContext dbContext = f_ViewModelKit.CreateDbContext()) {
 				IQueryable<GroupListObjectViewModel> unsortedObjects =
 					f_ViewModelKit.DbQueryHelper.GetAllGroupListObjects(dbContext);
@@ -173,26 +196,9 @@ namespace ViewModelExtended.ViewModel
 				f_List.AddSortedRange(sortedObjects);
 			}
 
-			// set the viewmodel list count
-			//ItemCount = f_List.Items.Count();
+			// notify the viewmodel list count has changed
 			AlertSizeChanged();
 		}
-
-		///// <summary>
-		///// create a selection of listeners on this object
-		///// </summary>
-		///// <param name="observer"></param>
-		//private void SetPropertyChangedEventHandler (StatusBarViewModel observer)
-		//{
-		//	PropertyChangedEventHandler handler = (sender, e) =>
-		//	{
-		//		if (e.PropertyName == "ItemCount") {
-		//			int _ = observer.NoteCount;
-		//		}
-		//	};
-
-		//	PropertyChanged += handler;
-		//}
 
 		#endregion
 
@@ -351,7 +357,7 @@ namespace ViewModelExtended.ViewModel
 		/// <summary>
 		/// persist list node order
 		/// </summary>
-		private void SaveListOrder ()
+		public void SaveListOrder ()
 		{
 			if (!f_Changes.IsDirty) return;
 

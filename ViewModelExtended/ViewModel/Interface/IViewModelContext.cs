@@ -20,7 +20,7 @@ namespace ViewModelExtended.ViewModel
 
 		public MainWindowViewModel MainWindowViewModel { get; }
 
-		public void Load ();
+		//public void Load ();
 
 		public void Shutdown ();
 	}

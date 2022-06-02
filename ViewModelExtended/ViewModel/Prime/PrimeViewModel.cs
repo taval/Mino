@@ -120,10 +120,10 @@ namespace ViewModelExtended.ViewModel
 			//f_ViewModelKit = viewModelKit;
 
 			// set ViewModel context dependencies
-			StatusBarViewModel = statusBarViewModel;
-			NoteTextViewModel = noteTextViewModel;
-			GroupTabsViewModel = groupTabsViewModel;
 			NoteListViewModel = noteListViewModel;
+			GroupTabsViewModel = groupTabsViewModel;
+			NoteTextViewModel = noteTextViewModel;
+			StatusBarViewModel = statusBarViewModel;
 
 			// default to no selected item
 			f_SelectedNoteViewModel = null;
@@ -219,7 +219,7 @@ namespace ViewModelExtended.ViewModel
 			NoteListViewModel.Highlighted = SelectedNoteViewModel;
 
 			// perform GroupTabs setup
-			GroupTabsViewModel.Load();
+			//GroupTabsViewModel.Load();
 		}
 
 		#endregion

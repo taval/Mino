@@ -134,19 +134,41 @@ namespace ViewModelExtended.ViewModel
 			 */
 			f_List = f_ComponentCreator.CreateObservableList<NoteListObjectViewModel>();
 
+			//using (IDbContext dbContext = f_ViewModelKit.CreateDbContext()) {
+			//	IQueryable<NoteListObjectViewModel> unsortedObjects =
+			//		f_ViewModelKit.DbQueryHelper.GetAllNoteListObjects(dbContext);
+
+			//	IEnumerable<NoteListObjectViewModel> sortedObjects =
+			//		f_ViewModelKit.DbListHelper.SortListObjects(unsortedObjects.ToList());
+
+			//	f_List.Clear();
+			//	f_List.AddSortedRange(sortedObjects);
+			//}
+
+			// notify the viewmodel list count has changed (zero is a size too)
+			AlertSizeChanged();
+		}
+
+		#endregion
+
+
+
+		#region Load
+
+		public void Load ()
+		{
 			using (IDbContext dbContext = f_ViewModelKit.CreateDbContext()) {
 				IQueryable<NoteListObjectViewModel> unsortedObjects =
 					f_ViewModelKit.DbQueryHelper.GetAllNoteListObjects(dbContext);
 
 				IEnumerable<NoteListObjectViewModel> sortedObjects =
 					f_ViewModelKit.DbListHelper.SortListObjects(unsortedObjects.ToList());
-				
+
 				f_List.Clear();
 				f_List.AddSortedRange(sortedObjects);
 			}
 
-			// set the viewmodel list count
-			//ItemCount = f_List.Items.Count();
+			// notify the viewmodel list count has changed
 			AlertSizeChanged();
 		}
 
@@ -281,7 +303,7 @@ namespace ViewModelExtended.ViewModel
 		/// <summary>
 		/// persist list node order
 		/// </summary>
-		private void SaveListOrder ()
+		public void SaveListOrder ()
 		{
 			if (!f_Changes.IsDirty) return;
 

@@ -326,6 +326,17 @@ namespace ViewModelExtended.ViewModel
 
 
 
+		#region Load
+
+		public void Load ()
+		{
+			// TODO: do model stuff here
+		}
+
+		#endregion
+
+
+
 		#region List Access
 
 		private void AlertSizeChanged ()
@@ -705,7 +716,7 @@ namespace ViewModelExtended.ViewModel
 
 		#region Shutdown
 
-		private void SaveListOrder ()
+		public void SaveListOrder ()
 		{
 			if (!f_Changes.IsDirty) return;
 

@@ -11,38 +11,32 @@
 	xmlns:i="http://schemas.microsoft.com/xaml/behaviors"
 	d:DesignHeight="450" d:DesignWidth="800">
 
-	<!--<i:Interaction.Triggers>
-		<i:EventTrigger EventName="Loaded">
-			<i:InvokeCommandAction Command="{ Binding Path=GroupTabsLoadCommand, Mode=OneWay }"/>
-		</i:EventTrigger>
-	</i:Interaction.Triggers>-->
-
-	<Grid
+    <Grid
 		Height="{ Binding Parent.ActualHeight, Mode=OneWay, RelativeSource={ RelativeSource Self } }"
 		Width="{ Binding Parent.ActualWidth, Mode=OneWay, RelativeSource={ RelativeSource Self } }">
 
-		<Grid.ColumnDefinitions>
-			<ColumnDefinition Width="*" />
-		</Grid.ColumnDefinitions>
-		<Grid.RowDefinitions>
-			<RowDefinition Height="auto" />
-			<RowDefinition Height="*" />
-		</Grid.RowDefinitions>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*" />
+        </Grid.ColumnDefinitions>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="auto" />
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
 
-		<!-- Add Group button -->
+        <!-- Add Group button -->
 
-		<Grid Height="32" Margin="0 16 0 8">
+        <Grid Height="32" Margin="0 16 0 8">
 
-			<Grid.ColumnDefinitions>
-				<ColumnDefinition Width="*" />
-				<ColumnDefinition Width="*" />
-			</Grid.ColumnDefinitions>
-			<Grid.RowDefinitions>
-				<RowDefinition Height="*" />
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="*" />
+            </Grid.ColumnDefinitions>
+            <Grid.RowDefinitions>
                 <RowDefinition Height="*" />
-			</Grid.RowDefinitions>
+                <RowDefinition Height="*" />
+            </Grid.RowDefinitions>
 
-			<TextBlock
+            <TextBlock
                 FontWeight="Bold"
 				FontSize="12"
 				Text="Groups" />
@@ -65,7 +59,7 @@
 
         </Grid>
 
-		<TabControl x:Name="GroupTabControl" Grid.Row="1">
+        <TabControl x:Name="GroupTabControl" Grid.Row="1">
 
             <i:Interaction.Triggers>
 
@@ -79,18 +73,18 @@
 							RelativeSource={ RelativeSource AncestorType={ x:Type local:GroupTabsView } } }" />
                 </i:EventTrigger>
             </i:Interaction.Triggers>
-            
+
             <!-- GroupList -->
 
-			<TabItem x:Name="GroupListTab">
-				<TabItem.Header>
-					<StackPanel Orientation="Horizontal">
-						<Ellipse Width="10" Height="10" Fill="DarkGray" />
-						<TextBlock>List</TextBlock>
-					</StackPanel>
-				</TabItem.Header>
+            <TabItem x:Name="GroupListTab">
+                <TabItem.Header>
+                    <StackPanel Orientation="Horizontal">
+                        <Ellipse Width="10" Height="10" Fill="DarkGray" />
+                        <TextBlock>List</TextBlock>
+                    </StackPanel>
+                </TabItem.Header>
 
-				<local:GroupListView
+                <local:GroupListView
 					x:Name="GroupListView"
 					DataContext="{ Binding GroupListViewModel }"
 
@@ -104,17 +98,17 @@
 						Path=DataContext.GroupDestroyCommand,
 						diag:PresentationTraceSources.TraceLevel=High }" />
 
-			</TabItem>
+            </TabItem>
 
-			<!-- Group -->
+            <!-- Group -->
 
-			<TabItem x:Name="GroupContentsTab">
-				<TabItem.Header>
-					<StackPanel Orientation="Horizontal">
-						<Ellipse Width="10" Height="8" Fill="DarkGray" />
-						<TextBlock>Contents</TextBlock>
-					</StackPanel>
-				</TabItem.Header>
+            <TabItem x:Name="GroupContentsTab">
+                <TabItem.Header>
+                    <StackPanel Orientation="Horizontal">
+                        <Ellipse Width="10" Height="8" Fill="DarkGray" />
+                        <TextBlock>Contents</TextBlock>
+                    </StackPanel>
+                </TabItem.Header>
 
                 <!--local:ListState.Incoming="{ Binding
 						RelativeSource={ RelativeSource AncestorType={ x:Type local:GroupTabsView } },
@@ -125,7 +119,7 @@
 						RelativeSource={ RelativeSource AncestorType={ x:Type local:GroupTabsView } },
 						Path=(local:ListAction.ReceiveCommand),
 						diag:PresentationTraceSources.TraceLevel=High }"-->
-				<local:GroupContentsView
+                <local:GroupContentsView
 					x:Name="GroupContentsView"
 					DataContext="{ Binding GroupContentsViewModel }"
 
@@ -149,10 +143,10 @@
 						Path=DataContext.GroupNoteDestroyCommand,
 						diag:PresentationTraceSources.TraceLevel=High }" />
 
-			</TabItem>
-		</TabControl>
+            </TabItem>
+        </TabControl>
 
-		<!--<i:Interaction.Triggers>
+        <!--<i:Interaction.Triggers>
 
 			<i:EventTrigger
 				SourceObject="{ Binding ElementName=AddButton }"
@@ -165,7 +159,7 @@
 			</i:EventTrigger>
 
 		</i:Interaction.Triggers>-->
-	</Grid>
+    </Grid>
 
 </UserControl>
 

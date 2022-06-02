@@ -12,38 +12,38 @@
 	d:DesignHeight="450"
 	d:DesignWidth="800">
 
-	<Grid>
+    <Grid>
 
-		<ListView
+        <ListView
 			FontSize="9"
 			x:Name="ListView_GroupListView"
 			AllowDrop="True"
 			SelectedItem="{ Binding Highlighted }"
 			ItemsSource="{ Binding Items, UpdateSourceTrigger=PropertyChanged }">
-			<ListView.Resources>
-				<Style TargetType="{ x:Type GridViewColumnHeader }">
-					<Setter Property="HorizontalContentAlignment" Value="Left" />
-				</Style>
-			</ListView.Resources>
+            <ListView.Resources>
+                <Style TargetType="{ x:Type GridViewColumnHeader }">
+                    <Setter Property="HorizontalContentAlignment" Value="Left" />
+                </Style>
+            </ListView.Resources>
 
-			<ListView.ItemContainerStyle>
-				<Style TargetType="{ x:Type ListViewItem }" BasedOn="{ StaticResource listViewItemStyle }">
-					<Setter Property="IsSelected" Value="{ Binding IsSelected }" />
-					<!--<EventSetter Event="MouseMove" Handler="Item_MouseMove" />
+            <ListView.ItemContainerStyle>
+                <Style TargetType="{ x:Type ListViewItem }" BasedOn="{ StaticResource listViewItemStyle }">
+                    <Setter Property="IsSelected" Value="{ Binding IsSelected }" />
+                    <!--<EventSetter Event="MouseMove" Handler="Item_MouseMove" />
 					<EventSetter Event="DragOver" Handler="Item_DragOver" />-->
-				</Style>
-			</ListView.ItemContainerStyle>
+                </Style>
+            </ListView.ItemContainerStyle>
 
-			<ListView.ItemTemplate>
-				<DataTemplate>
-					<Grid>
+            <ListView.ItemTemplate>
+                <DataTemplate>
+                    <Grid>
 
-						<Grid.ColumnDefinitions>
-							<ColumnDefinition Width="*" />
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
                             <ColumnDefinition Width="*" />
                         </Grid.ColumnDefinitions>
 
-						<Button
+                        <Button
 							Template="{ StaticResource closeButtonTemplate }"
 							Style="{ StaticResource closeButtonStyle }"
 							Margin="0 0 10 0"
@@ -63,7 +63,7 @@
 							FontWeight="Bold"
                             Text="{ Binding Title, UpdateSourceTrigger=PropertyChanged }">
                             <i:Interaction.Triggers>
-								<!-- NOTE: in addition to the ListViewItem, the TextBox must also trigger highlighting
+                                <!-- NOTE: in addition to the ListViewItem, the TextBox must also trigger highlighting
 									 which requires its own separate handling on top of the default SelectedItem behavior -->
                                 <i:EventTrigger
 									EventName="PreviewMouseLeftButtonDown"
@@ -84,7 +84,7 @@
 											Path=DataContext.ChangeTitleCommand,
 											RelativeSource={ RelativeSource AncestorType={ x:Type local:GroupListView } } }" />
                                 </i:EventTrigger>
-                                
+
                                 <i:EventTrigger
 									EventName="LostFocus"
 									SourceObject="{ Binding RelativeSource={ RelativeSource AncestorType={ x:Type TextBox } } }">
@@ -96,7 +96,7 @@
                                 </i:EventTrigger>
 
                             </i:Interaction.Triggers>
-                        
+
                         </TextBox>
                         <!--<StackPanel Grid.Column="1">
 							<TextBlock Text="{ Binding Id,UpdateSourceTrigger=PropertyChanged }" />
@@ -132,31 +132,32 @@
                             <i:EventTrigger
 								EventName="DragOver"
 								SourceObject="{ Binding RelativeSource={ RelativeSource AncestorType={ x:Type ListViewItem } } }">
-								<i:InvokeCommandAction
+                                <i:InvokeCommandAction
 									PassEventArgsToCommand="True"
 									Command="{ Binding
 										Path=DataContext.ReorderCommand,
 										RelativeSource={ RelativeSource AncestorType={ x:Type local:GroupListView } } }" />
-							</i:EventTrigger>
+                            </i:EventTrigger>
 
-							<i:EventTrigger
+                            <i:EventTrigger
 								EventName="MouseDoubleClick"
 								SourceObject="{ Binding RelativeSource={ RelativeSource AncestorType={ x:Type ListViewItem } } }">
-								<i:InvokeCommandAction
+                                <i:InvokeCommandAction
 									CommandParameter="{ Binding
 										Path=DataContext.Highlighted,
 										RelativeSource={ RelativeSource AncestorType={ x:Type local:GroupListView } } }"
 									Command="{ Binding
 										Path=(local:ListAction.SelectCommand),
 										RelativeSource={ RelativeSource AncestorType={ x:Type local:GroupListView } } }" />
-							</i:EventTrigger>
+                            </i:EventTrigger>
 
-						</i:Interaction.Triggers>
-					</Grid>
-				</DataTemplate>
-			</ListView.ItemTemplate>
-		</ListView>
+                        </i:Interaction.Triggers>
+                    </Grid>
+                </DataTemplate>
+            </ListView.ItemTemplate>
+        </ListView>
 
-	</Grid>
+    </Grid>
+
 </UserControl>
 <!--</local:ListViewBase-->

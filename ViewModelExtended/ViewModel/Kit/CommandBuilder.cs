@@ -62,6 +62,7 @@ namespace ViewModelExtended
 
 		public void MakeMainWindow (MainWindowViewModel target)
 		{
+			target.LoadCommand = new MainWindowLoadCommand(target);
 			target.CloseCommand = new MainWindowCloseCommand(target);
 		}
 
