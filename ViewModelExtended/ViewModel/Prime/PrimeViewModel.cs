@@ -136,6 +136,7 @@ namespace ViewModelExtended.ViewModel
 			SetNoteCountChangedEventHandler();
 			SetGroupCountChangedEventHandler();
 			SetGroupNoteCountChangedEventHandler();
+			SetCursorPosChangedEventHandler();
 		}
 
 		public void SetSelectedChangedEventHandler ()
@@ -191,6 +192,21 @@ namespace ViewModelExtended.ViewModel
 			};
 
 			GroupTabsViewModel.PropertyChanged += handler;
+		}
+
+		private void SetCursorPosChangedEventHandler ()
+		{
+			PropertyChangedEventHandler handler = (sender, e) =>
+			{
+				if (e.PropertyName == "LineNumber") {
+					StatusBarViewModel.NoteTextCursorLinePos = NoteTextViewModel.LineNumber;
+				}
+				else if (e.PropertyName == "ColumnNumber") {
+					StatusBarViewModel.NoteTextCursorColumnPos = NoteTextViewModel.ColumnNumber;
+				}
+			};
+
+			NoteTextViewModel.PropertyChanged += handler;
 		}
 
 		#endregion

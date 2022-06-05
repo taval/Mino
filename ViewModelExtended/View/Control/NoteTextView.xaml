@@ -15,6 +15,7 @@
 		<Grid.RowDefinitions>
 			<RowDefinition Height="auto" />
 			<RowDefinition Height="*" />
+            <!--<RowDefinition Height="*" />-->
 		</Grid.RowDefinitions>
 
         <TextBox
@@ -42,23 +43,12 @@
             
         </TextBox>
 
-        <TextBox
+        <!--<TextBox
             x:Name="TextBox_Text"
 			Grid.Row="1"
             Text="{ Binding Path=Text, UpdateSourceTrigger=PropertyChanged }">
 
             <i:Interaction.Triggers>
-
-                <!--<i:EventTrigger
-				EventName="SelectionChanged"
-				SourceObject="{ Binding RelativeSource={ RelativeSource AncestorType={ x:Type RichTextBox } } }">
-                    <i:InvokeCommandAction
-					PassEventArgsToCommand="True"
-					Command="{ Binding
-						Path=DataContext.CalcCursorPosCommand,
-						RelativeSource={ RelativeSource AncestorType={ x:Type local:NoteTextView } } }" />
-
-                </i:EventTrigger>-->
 
                 <i:EventTrigger
 				EventName="LostFocus"
@@ -72,9 +62,34 @@
 
             </i:Interaction.Triggers>
 
-        </TextBox>
+        </TextBox>-->
 
-
+        <RichTextBox
+            x:Name="RichTextBox_Text"
+            Grid.Row="1">
+            
+            <i:Interaction.Triggers>
+                <i:EventTrigger
+					EventName="LostFocus"
+					SourceObject="{ Binding RelativeSource={ RelativeSource AncestorType={ x:Type RichTextBox } } }">
+                    <i:InvokeCommandAction
+						PassEventArgsToCommand="True"
+						Command="{ Binding
+							Path=DataContext.ChangeTextCommand,
+							RelativeSource={ RelativeSource AncestorType={ x:Type local:NoteTextView } } }" />
+                </i:EventTrigger>
+                <i:EventTrigger
+					EventName="SelectionChanged"
+					SourceObject="{ Binding RelativeSource={ RelativeSource AncestorType={ x:Type RichTextBox } } }">
+                    <i:InvokeCommandAction
+						PassEventArgsToCommand="True"
+						Command="{ Binding
+							Path=DataContext.CalcCursorPosCommand,
+							RelativeSource={ RelativeSource AncestorType={ x:Type local:NoteTextView } } }" />
+                </i:EventTrigger>
+            </i:Interaction.Triggers>
+            
+        </RichTextBox>
 
     </Grid>
 

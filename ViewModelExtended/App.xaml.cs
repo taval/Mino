@@ -47,8 +47,8 @@ namespace ViewModelExtended
 
 			#region Load Test Data
 
-			//AddNoteListObjectTestData(viewModelKit, context);
-			//AddGroupListObjectTestData(viewModelKit, context);
+			AddNoteListObjectTestData(viewModelKit, context);
+			AddGroupListObjectTestData(viewModelKit, context);
 
 			#endregion
 
@@ -93,6 +93,24 @@ namespace ViewModelExtended
 			Resources.MergedDictionaries.Add((ResourceDictionary)Application.LoadComponent(uri));
 		}
 
+		private string FlowDocumentWrap (string text)
+		{
+			return
+$@"
+<FlowDocument
+	PagePadding=""5,0,5,0""
+	AllowDrop=""True""
+	NumberSubstitution.CultureSource=""User""
+	xmlns=""http://schemas.microsoft.com/winfx/2006/xaml/presentation"">
+
+	<Paragraph>
+		{ text }
+	</Paragraph>
+
+</FlowDocument>
+";
+		}
+
 		/// <summary>
 		/// adds NoteListObject test data
 		/// </summary>
@@ -101,29 +119,29 @@ namespace ViewModelExtended
 		{
 			using (IDbContext dbContext = viewModelKit.CreateDbContext()) {
 				context.PrimeViewModel.AddNote(viewModelKit.ViewModelCreator.CreateNoteListObjectViewModel(
-					dbContext, c => { c.Title = "8:00 AM"; c.Text = "make video"; }));
+					dbContext, c => { c.Title = "8:00 AM"; c.Text = FlowDocumentWrap("make video"); }));
 				context.PrimeViewModel.AddNote(viewModelKit.ViewModelCreator.CreateNoteListObjectViewModel(
-					dbContext, c => { c.Title = "9:00 AM"; c.Text = "walk the dog"; }));
+					dbContext, c => { c.Title = "9:00 AM"; c.Text = FlowDocumentWrap("walk the dog"); }));
 				context.PrimeViewModel.AddNote(viewModelKit.ViewModelCreator.CreateNoteListObjectViewModel(
-					dbContext, c => { c.Title = "9:30 AM"; c.Text = "eat dinner"; }));
+					dbContext, c => { c.Title = "9:30 AM"; c.Text = FlowDocumentWrap("eat dinner"); }));
 				context.PrimeViewModel.AddNote(viewModelKit.ViewModelCreator.CreateNoteListObjectViewModel(
-					dbContext, c => { c.Title = "10:15 AM"; c.Text = "watch tv"; }));
+					dbContext, c => { c.Title = "10:15 AM"; c.Text = FlowDocumentWrap("watch tv"); }));
 				context.PrimeViewModel.AddNote(viewModelKit.ViewModelCreator.CreateNoteListObjectViewModel(
-					dbContext, c => { c.Title = "11:30 AM"; c.Text = "jog"; }));
+					dbContext, c => { c.Title = "11:30 AM"; c.Text = FlowDocumentWrap("jog"); }));
 				context.PrimeViewModel.AddNote(viewModelKit.ViewModelCreator.CreateNoteListObjectViewModel(
-					dbContext, c => { c.Title = "12:00 PM"; c.Text = "mop"; }));
+					dbContext, c => { c.Title = "12:00 PM"; c.Text = FlowDocumentWrap("mop"); }));
 				context.PrimeViewModel.AddNote(viewModelKit.ViewModelCreator.CreateNoteListObjectViewModel(
-					dbContext, c => { c.Title = "1:00 PM"; c.Text = "kick it"; }));
+					dbContext, c => { c.Title = "1:00 PM"; c.Text = FlowDocumentWrap("kick it"); }));
 				context.PrimeViewModel.AddNote(viewModelKit.ViewModelCreator.CreateNoteListObjectViewModel(
-					dbContext, c => { c.Title = "2:45 PM"; c.Text = "throw things"; }));
+					dbContext, c => { c.Title = "2:45 PM"; c.Text = FlowDocumentWrap("throw things"); }));
 				context.PrimeViewModel.AddNote(viewModelKit.ViewModelCreator.CreateNoteListObjectViewModel(
-					dbContext, c => { c.Title = "7:00 PM"; c.Text = "sweep"; }));
+					dbContext, c => { c.Title = "7:00 PM"; c.Text = FlowDocumentWrap("sweep"); }));
 				context.PrimeViewModel.AddNote(viewModelKit.ViewModelCreator.CreateNoteListObjectViewModel(
-					dbContext, c => { c.Title = "7:30 PM"; c.Text = "chill"; }));
+					dbContext, c => { c.Title = "7:30 PM"; c.Text = FlowDocumentWrap("chill"); }));
 				context.PrimeViewModel.AddNote(viewModelKit.ViewModelCreator.CreateNoteListObjectViewModel(
-					dbContext, c => { c.Title = "8:00 PM"; c.Text = "run"; }));
+					dbContext, c => { c.Title = "8:00 PM"; c.Text = FlowDocumentWrap("run"); }));
 				context.PrimeViewModel.AddNote(viewModelKit.ViewModelCreator.CreateNoteListObjectViewModel(
-					dbContext, c => { c.Title = "9:00 PM"; c.Text = "also run"; }));
+					dbContext, c => { c.Title = "9:00 PM"; c.Text = FlowDocumentWrap("also run"); }));
 
 				context.NoteListViewModel.SaveListOrder();
 			}

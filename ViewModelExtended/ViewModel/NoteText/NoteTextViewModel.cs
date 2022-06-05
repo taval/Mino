@@ -67,9 +67,19 @@ namespace ViewModelExtended.ViewModel
 			}
 		}
 
-		public int LineNumber { get; set; }
+		public int LineNumber {
+			get { return f_LineNumber; }
+			set { Set(ref f_LineNumber, value); }
+		}
 
-		public int ColumnNumber { get; set; }
+		private int f_LineNumber;
+
+		public int ColumnNumber {
+			get { return f_ColumnNumber; }
+			set { Set(ref f_ColumnNumber, value); }
+		}
+
+		private int f_ColumnNumber;
 
 		#endregion
 

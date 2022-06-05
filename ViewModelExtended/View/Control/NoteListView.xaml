@@ -136,7 +136,7 @@
                         <StackPanel Grid.Column="1" Background="Transparent">
                             <TextBlock Text="{ Binding ItemId, StringFormat='Id: {0}', UpdateSourceTrigger=PropertyChanged }" />
                             <TextBlock FontWeight="Bold" Text="{ Binding Title }" />
-                            <TextBlock Text="{ Binding Text }" />
+                            <TextBlock Text="{ Binding Text, Converter={local:FlowDocumentStringToStubConverter} }" />
                         </StackPanel>
 
                         <i:Interaction.Triggers>
@@ -164,10 +164,15 @@
                             <i:EventTrigger
 								EventName="MouseDoubleClick"
 								SourceObject="{ Binding RelativeSource={ RelativeSource AncestorType={ x:Type ListViewItem } } }">
-                                <i:InvokeCommandAction
+                                <!--<i:InvokeCommandAction
 									CommandParameter="{ Binding
 										Path=DataContext.Highlighted,
 										RelativeSource={ RelativeSource AncestorType={ x:Type local:NoteListView } } }"
+									Command="{ Binding
+										Path=(local:ListAction.SelectCommand),
+										RelativeSource={ RelativeSource AncestorType={ x:Type local:NoteListView } } }" />-->
+                                <i:InvokeCommandAction
+									PassEventArgsToCommand="True"
 									Command="{ Binding
 										Path=(local:ListAction.SelectCommand),
 										RelativeSource={ RelativeSource AncestorType={ x:Type local:NoteListView } } }" />

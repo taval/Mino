@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Documents;
 using ViewModelExtended.ViewModel;
@@ -18,9 +19,12 @@ namespace ViewModelExtended.Command
 
 		public override void Execute (object parameter)
 		{
-			if (parameter == null || !(parameter is TextBox)) return;
+			if (parameter == null || !(parameter is RoutedEventArgs)) return;
+			RoutedEventArgs e = (RoutedEventArgs)parameter;
 
-			RichTextBox textBox = (RichTextBox)parameter;
+			if (!(e.Source is RichTextBox)) return;
+
+			RichTextBox textBox = (RichTextBox)e.Source;
 			TextPointer ptr1 = textBox.Selection.Start.GetLineStartPosition(0);
 			TextPointer ptr2 = textBox.Selection.Start;
 
