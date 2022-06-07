@@ -226,33 +226,12 @@ namespace ViewModelExtended.ViewModel
 
 		#region Load
 
+		/// <summary>
+		/// post-view-load behavior and assignments for the viewmodel
+		/// </summary>
 		public void Load ()
 		{
-			// NOTE: NOT creating a new group if none exist - must be done manually by design
-
-			if (GroupListViewModel.Items.Count() == 0) return;
-
-			// select the first group
-			SelectedGroupViewModel = GroupListViewModel.Items.First();
-
-			if (SelectedGroupViewModel != null) {
-				SelectGroup(SelectedGroupViewModel);
-			}
-
-			// highlight the first group
-			GroupListViewModel.Highlighted = SelectedGroupViewModel;
-
-			// select the first note in the selected group
-			if (GroupContentsViewModel.Items.Count() == 0) return;
-
-			SelectedGroupNoteViewModel = GroupContentsViewModel.Items.First();
-
-			if (SelectedGroupNoteViewModel != null) {
-				SelectGroupNote(SelectedGroupNoteViewModel);
-			}
-
-			// highlight the first note in the selected group
-			GroupContentsViewModel.Highlighted = SelectedGroupNoteViewModel;
+			// do GroupTabs-related viewmodel stuff
 		}
 
 		#endregion

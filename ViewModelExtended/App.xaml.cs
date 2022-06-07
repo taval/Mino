@@ -47,8 +47,8 @@ namespace ViewModelExtended
 
 			#region Load Test Data
 
-			AddNoteListObjectTestData(viewModelKit, context);
-			AddGroupListObjectTestData(viewModelKit, context);
+			//AddNoteListObjectTestData(viewModelKit, context);
+			//AddGroupListObjectTestData(viewModelKit, context);
 
 			#endregion
 

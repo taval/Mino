@@ -28,7 +28,9 @@ namespace ViewModelExtended.Command
 			TextPointer ptr1 = textBox.Selection.Start.GetLineStartPosition(0);
 			TextPointer ptr2 = textBox.Selection.Start;
 
-			int columnNumber = ptr1.GetOffsetToPosition(ptr2);
+			int columnPos = ptr1.GetOffsetToPosition(ptr2);
+
+			int columnNumber = (columnPos > 0) ? columnPos - 1 : columnPos;
 
 			int bigNumber = int.MaxValue;
 			int lineMoved = 0;

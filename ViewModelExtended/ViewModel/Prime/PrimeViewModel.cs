@@ -216,26 +216,11 @@ namespace ViewModelExtended.ViewModel
 		#region Load
 
 		/// <summary>
-		/// upon view init, display the first Note
+		/// post-view-load behavior and assignments for the viewmodel
 		/// </summary>
 		public void Load ()
 		{
-			// if no notes exist, create one
-			if (NoteListViewModel.Items.Count() == 0) {
-				AddNote(NoteListViewModel.Create());
-			}
-
-			// select the first note
-			SelectedNoteViewModel = NoteListViewModel.Items.First();
-			if (SelectedNoteViewModel != null) {
-				SelectNote(SelectedNoteViewModel);
-			}
-
-			// highlight the first note
-			NoteListViewModel.Highlighted = SelectedNoteViewModel;
-
-			// perform GroupTabs setup
-			//GroupTabsViewModel.Load();
+			// do Prime-related viewmodel stuff
 		}
 
 		#endregion
@@ -294,7 +279,10 @@ namespace ViewModelExtended.ViewModel
 			NoteListViewModel.Insert(target, output);
 
 			// set text viewer
-			SelectNote(output);
+			//SelectNote(output);
+			if (NoteSelectCommand.CanExecute(output)) {
+				NoteSelectCommand.Execute(output);
+			}
 
 			return output;
 		}
@@ -324,7 +312,10 @@ namespace ViewModelExtended.ViewModel
 				//NoteListObjectViewModel newNote = f_NoteListViewModel.Create();
 				//CreateNote(null, newNote);
 				NoteListObjectViewModel newNote = CreateNoteAt(null);
-				SelectNote(newNote);
+				//SelectNote(newNote);
+				if (NoteSelectCommand.CanExecute(newNote)) {
+					NoteSelectCommand.Execute(newNote);
+				}
 				NoteListViewModel.Highlighted = newNote;
 			}
 
@@ -364,15 +355,24 @@ namespace ViewModelExtended.ViewModel
 			if (SelectedNoteViewModel == input) {
 				if (NoteListViewModel.Highlighted == input) {
 					if (input.Next != null) {
-						SelectNote((NoteListObjectViewModel)input.Next);
+						//SelectNote((NoteListObjectViewModel)input.Next);
+						if (NoteSelectCommand.CanExecute((NoteListObjectViewModel)input.Next)) {
+							NoteSelectCommand.Execute((NoteListObjectViewModel)input.Next);
+						}
 					}
 					else if (input.Previous != null) {
-						SelectNote((NoteListObjectViewModel)input.Previous);
+						//SelectNote((NoteListObjectViewModel)input.Previous);
+						if (NoteSelectCommand.CanExecute((NoteListObjectViewModel)input.Previous)) {
+							NoteSelectCommand.Execute((NoteListObjectViewModel)input.Previous);
+						}
 					}
 					NoteListViewModel.Highlighted = SelectedNoteViewModel;
 				}
 				else if (NoteListViewModel.Highlighted != null) {
-					SelectNote(NoteListViewModel.Highlighted);
+					//SelectNote(NoteListViewModel.Highlighted);
+					if (NoteSelectCommand.CanExecute(NoteListViewModel.Highlighted)) {
+						NoteSelectCommand.Execute(NoteListViewModel.Highlighted);
+					}
 				}
 			}
 			else {

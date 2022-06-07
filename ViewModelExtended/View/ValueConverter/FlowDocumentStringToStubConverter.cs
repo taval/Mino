@@ -16,7 +16,8 @@ namespace ViewModelExtended
         {
             XamlStringToFlowDocumentConverter converter = new XamlStringToFlowDocumentConverter();
             FlowDocument flowDocument = (FlowDocument)converter.Convert(value, targetType, parameter, culture);
-            Block firstBlock = flowDocument.Blocks.FirstBlock;
+            Block? firstBlock = flowDocument.Blocks.FirstBlock;
+            if (firstBlock == null) return string.Empty;
             Paragraph p = (Paragraph)firstBlock;
             string text = ((Run)p.Inlines.FirstInline).Text;
             

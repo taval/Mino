@@ -40,14 +40,14 @@ namespace ViewModelExtended.Command
 
 			string xamlToString = Encoding.UTF8.GetString(stream.ToArray());
 
-			// TODO: the string should be saved in the database
-			// TODO: NoteListObjectViewModel itself takes a serialized xaml string; the NoteListView takes the first line (or the whole paragraph, doesnt really matter) and strips it to raw text. NoteTextView takes the whole serialized string and deserializes it as FlowDocument.
+
+			
 
 			//MessageBox.Show(xamlToString);
 
 			f_NoteTextViewModel.Text = xamlToString;
 
-			f_NoteTextViewModel.UpdateText();
+			//f_NoteTextViewModel.UpdateText();
 		}
 	}
 }

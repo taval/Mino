@@ -38,12 +38,19 @@
             DataContext="{ Binding PrimeViewModel }" />
 	</StackPanel>
 
-    <i:Interaction.Triggers>
+    <!--<i:Interaction.Triggers>
         <i:EventTrigger EventName="Loaded">
             <i:InvokeCommandAction
                 CommandParameter="{ Binding
 					Path=DataContext,
 					RelativeSource={ RelativeSource AncestorType={ x:Type local:MainWindow } } }"
+                Command="{ Binding Path=MainWindowViewModel.LoadCommand, Mode=OneWay }"/>
+        </i:EventTrigger>
+    </i:Interaction.Triggers>-->
+    <i:Interaction.Triggers>
+        <i:EventTrigger EventName="Loaded">
+            <i:InvokeCommandAction
+                PassEventArgsToCommand="True"
                 Command="{ Binding Path=MainWindowViewModel.LoadCommand, Mode=OneWay }"/>
         </i:EventTrigger>
     </i:Interaction.Triggers>

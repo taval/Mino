@@ -69,8 +69,9 @@
             Grid.Row="1">
             
             <i:Interaction.Triggers>
+
                 <i:EventTrigger
-					EventName="LostFocus"
+					EventName="TextChanged"
 					SourceObject="{ Binding RelativeSource={ RelativeSource AncestorType={ x:Type RichTextBox } } }">
                     <i:InvokeCommandAction
 						PassEventArgsToCommand="True"
@@ -78,6 +79,17 @@
 							Path=DataContext.ChangeTextCommand,
 							RelativeSource={ RelativeSource AncestorType={ x:Type local:NoteTextView } } }" />
                 </i:EventTrigger>
+                
+                <i:EventTrigger
+					EventName="LostFocus"
+					SourceObject="{ Binding RelativeSource={ RelativeSource AncestorType={ x:Type RichTextBox } } }">
+                    <i:InvokeCommandAction
+						PassEventArgsToCommand="True"
+						Command="{ Binding
+							Path=DataContext.UpdateTextCommand,
+							RelativeSource={ RelativeSource AncestorType={ x:Type local:NoteTextView } } }" />
+                </i:EventTrigger>
+
                 <i:EventTrigger
 					EventName="SelectionChanged"
 					SourceObject="{ Binding RelativeSource={ RelativeSource AncestorType={ x:Type RichTextBox } } }">
@@ -87,8 +99,9 @@
 							Path=DataContext.CalcCursorPosCommand,
 							RelativeSource={ RelativeSource AncestorType={ x:Type local:NoteTextView } } }" />
                 </i:EventTrigger>
+
             </i:Interaction.Triggers>
-            
+
         </RichTextBox>
 
     </Grid>

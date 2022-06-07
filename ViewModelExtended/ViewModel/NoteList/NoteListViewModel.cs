@@ -69,6 +69,16 @@ namespace ViewModelExtended.ViewModel
 			get { return f_List.Any(); }
 		}
 
+		public string DefaultText {
+			get {
+				if (f_DefaultText.Equals(String.Empty)) throw new Exception("default text cannot be empty");
+				return f_DefaultText;
+			}
+			set { f_DefaultText = value; }
+		}
+
+		private string f_DefaultText;
+
 		#endregion
 
 
@@ -114,6 +124,9 @@ namespace ViewModelExtended.ViewModel
 
 		public NoteListViewModel (IViewModelKit viewModelKit)
 		{
+			// set default text value - not guaranteed to be compatible with any user of NoteListViewModel
+			DefaultText = String.Empty;
+
 			f_ComponentCreator = new ComponentCreator();
 
 			// attach commands
@@ -290,7 +303,8 @@ namespace ViewModelExtended.ViewModel
 		public NoteListObjectViewModel Create ()
 		{
 			using (IDbContext dbContext = f_ViewModelKit.CreateDbContext()) {
-				return f_ViewModelKit.ViewModelCreator.CreateNoteListObjectViewModel(dbContext);
+				return f_ViewModelKit.ViewModelCreator.CreateNoteListObjectViewModel(dbContext,
+					(vm) => { vm.Text = DefaultText; });
 			}
 		}
 

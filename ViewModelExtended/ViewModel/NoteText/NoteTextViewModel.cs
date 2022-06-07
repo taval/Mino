@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 using System.Windows.Input;
 using ViewModelExtended.Model;
 
-// TODO: line/column numbers for text cursor posted to status bar
+
 
 namespace ViewModelExtended.ViewModel
 {
@@ -100,6 +100,13 @@ namespace ViewModelExtended.ViewModel
 		}
 
 		private ICommand? f_ChangeTextCommand;
+
+		public ICommand UpdateTextCommand {
+			get { return f_UpdateTextCommand ?? throw new MissingCommandException(); }
+			set { if (f_UpdateTextCommand == null) f_UpdateTextCommand = value; }
+		}
+
+		private ICommand? f_UpdateTextCommand;
 
 		public ICommand CalcCursorPosCommand {
 			get { return f_CalcCursorPosCommand ?? throw new MissingCommandException(); }

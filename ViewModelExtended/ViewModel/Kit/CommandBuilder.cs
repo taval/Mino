@@ -70,6 +70,9 @@ namespace ViewModelExtended
 		{
 			target.ChangeTitleCommand = new NoteChangeTitleCommand(target);
 			target.ChangeTextCommand = new NoteChangeTextCommand(target);
+
+			target.UpdateTextCommand = new NoteUpdateTextCommand(target);
+
 			target.CalcCursorPosCommand = new CalcCursorPosCommand(target);
 		}
 	}

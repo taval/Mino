@@ -1,9 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
+using System.Windows.Documents;
+using System.Windows.Markup;
 using System.Windows.Media;
 
 
@@ -101,6 +104,18 @@ namespace ViewModelExtended
 				if (result != null) return result;
 			}
 			return null;
+		}
+
+		public static string CreateEmptyFlowDocument ()
+		{
+			FlowDocument doc = new FlowDocument();
+
+			// serialize XAML
+			MemoryStream stream = new MemoryStream();
+
+			XamlWriter.Save(doc, stream);
+
+			return Encoding.UTF8.GetString(stream.ToArray());
 		}
 	}
 }
