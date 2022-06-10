@@ -231,7 +231,31 @@ namespace ViewModelExtended.ViewModel
 		/// </summary>
 		public void Load ()
 		{
-			// do GroupTabs-related viewmodel stuff
+			// NOTE: NOT creating a new group if none exist - must be done manually by design
+			if (GroupListViewModel.Items.Count() == 0) return;
+
+			// select the first group
+			GroupListViewModel.Highlighted = GroupListViewModel.Items.First();
+			GroupListObjectViewModel? highlightedGroup = GroupListViewModel.Highlighted;
+
+			if (highlightedGroup != null) {
+				if (GroupSelectCommand.CanExecute(highlightedGroup)) {
+					GroupSelectCommand.Execute(highlightedGroup);
+				}
+			}
+
+			// if no notes exist in the group, do nothing
+			if (GroupContentsViewModel.Items.Count() == 0) return;
+
+			// select the first note in the selected group
+			GroupContentsViewModel.Highlighted = GroupContentsViewModel.Items.First();
+			GroupObjectViewModel highlightedGroupNote = GroupContentsViewModel.Highlighted;
+
+			if (highlightedGroupNote != null) {
+				if (GroupNoteSelectCommand.CanExecute(highlightedGroupNote)) {
+					GroupNoteSelectCommand.Execute(highlightedGroupNote);
+				}
+			}
 		}
 
 		#endregion

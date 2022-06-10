@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Drawing;
 using System.Text;
 using ViewModelExtended.Model;
 
@@ -17,11 +18,21 @@ namespace ViewModelExtended.ViewModel
 
 
 
+		//#region Color Generator
+
+		//private ColorGenerator f_ColorGenerator;
+
+		//#endregion
+
+
+
 		#region Constructor
 
 		public ViewModelCreator (IViewModelKit viewModelKit)
 		{
 			f_ViewModelKit = viewModelKit;
+
+			//f_ColorGenerator = new ColorGenerator();
 		}
 
 		#endregion
@@ -106,6 +117,8 @@ namespace ViewModelExtended.ViewModel
 		{
 			// create basic data components
 			Group data = dbContext.CreateGroup("", "#999");
+			//Color newColor = f_ColorGenerator.Generate();
+			//Group data = dbContext.CreateGroup("", ColorTranslator.ToHtml(newColor));
 			Node node = dbContext.CreateNode(null, null);
 			Timestamp timestamp = dbContext.CreateTimestamp();
 			dbContext.Save();

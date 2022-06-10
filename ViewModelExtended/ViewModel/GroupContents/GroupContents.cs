@@ -210,6 +210,18 @@ namespace ViewModelExtended.ViewModel
 			return false;
 		}
 
+		public bool HasNoteInGroup (Group groop, Note note)
+		{
+			IObservableList<GroupObjectViewModel> list = GetListByGroupKey(groop);
+			return list.Where((groupNote) => groupNote.DataId == note.Id).Any();
+		}
+
+		#endregion
+
+
+
+		#region IEnumerable
+
 		public IEnumerator<GroupObjectViewModel> GetEnumerator ()
 		{
 			return Items.GetEnumerator();

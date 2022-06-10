@@ -34,6 +34,9 @@ namespace ViewModelExtended.ViewModel
 
 		#region Commands
 
+		/// <summary>
+		/// witholds/cancels dragdrop on dragleave operation
+		/// </summary>
 		public ICommand GroupNoteHoldCommand {
 			get { return f_GroupNoteHoldCommand ?? throw new MissingCommandException(); }
 			set { if (f_GroupNoteHoldCommand == null) f_GroupNoteHoldCommand = value; }
@@ -41,6 +44,9 @@ namespace ViewModelExtended.ViewModel
 
 		private ICommand? f_GroupNoteHoldCommand;
 
+		/// <summary>
+		/// adds note to group on dragdrop release
+		/// </summary>
 		public ICommand GroupNoteDropCommand {
 			get { return f_GroupNoteDropCommand ?? throw new MissingCommandException(); }
 			set { if (f_GroupNoteDropCommand == null) f_GroupNoteDropCommand = value; }
@@ -77,6 +83,16 @@ namespace ViewModelExtended.ViewModel
 		}
 
 		private ICommand? f_NoteDestroyCommand;
+
+		/// <summary>
+		/// adds or removes groups attached to a particular note
+		/// </summary>
+		public ICommand NoteChangeGroupsCommand {
+			get { return f_NoteChangeGroupsCommand ?? throw new MissingCommandException(); }
+			set { if (f_NoteChangeGroupsCommand == null) f_NoteChangeGroupsCommand = value; }
+		}
+
+		private ICommand? f_NoteChangeGroupsCommand;
 
 		#endregion
 
@@ -220,7 +236,20 @@ namespace ViewModelExtended.ViewModel
 		/// </summary>
 		public void Load ()
 		{
-			// do Prime-related viewmodel stuff
+			// if no notes exist, create one
+			if (NoteListViewModel.Items.Count() == 0) {
+				AddNote(NoteListViewModel.Create());
+			}
+
+			// select the first note
+			NoteListViewModel.Highlighted = NoteListViewModel.Items.First();
+			NoteListObjectViewModel highlighted = NoteListViewModel.Highlighted;
+
+			if (highlighted != null) {
+				if (NoteSelectCommand.CanExecute(highlighted)) {
+					NoteSelectCommand.Execute(highlighted);
+				}
+			}
 		}
 
 		#endregion
@@ -228,6 +257,56 @@ namespace ViewModelExtended.ViewModel
 
 
 		#region Events
+
+		
+
+		public void SetGroupsOnNote (NoteListObjectViewModel target)
+		{
+			// get data sources
+			IEnumerable<string> groupTitleStrings = NoteTextViewModel.GroupStringList;
+			IEnumerable<GroupListObjectViewModel> searchTarget = GroupTabsViewModel.GroupListViewModel.Items;
+
+			// insert existing groups into the groups-to-associate-with-notes queue and remove them from missing list
+			List<string> missingGroups = new List<string>(groupTitleStrings);
+			List<GroupListObjectViewModel> groups = new List<GroupListObjectViewModel>();
+			IEnumerable<GroupListObjectViewModel> foundGroups =
+				NoteTextViewModel.FindExistingGroupsInStrings(groupTitleStrings, searchTarget);
+
+			foreach (GroupListObjectViewModel groop in foundGroups) {
+				groups.Add(groop);
+				missingGroups.Remove(groop.Title);
+			}
+
+			if (NoteTextViewModel.IsNewGroupAllowed) {
+				foreach (string groupTitle in missingGroups) {
+					GroupListObjectViewModel newGroup =
+						GroupTabsViewModel.GroupListViewModel.Create((obj) => { obj.Title = groupTitle; });
+					GroupTabsViewModel.GroupListViewModel.Add(newGroup);
+					groups.Add(newGroup);
+				}
+			}
+			// NOTE: this case should be handled by validation and is almost identical in functionality
+			//       to the above, so nothing more should need to be done here.
+			else if (missingGroups.Any()) {
+				return;
+			}
+
+			foreach (GroupListObjectViewModel groop in groups) {
+				// create a GroupObjectViewModel (a 'GroupNote') for each group, if one does not already exist
+				Group groopData = groop.Model.Data;
+				Note noteData = target.Model.Data;
+
+				if (GroupTabsViewModel.GroupContentsViewModel.HasNoteInGroup(groopData, noteData)) continue;
+
+				// associate a newly created GroupObject with the given temporary GroupObject
+				GroupObjectViewModel groupNote = GroupTabsViewModel.GroupContentsViewModel.Create(groopData, noteData);
+
+				// add the GroupObject to the contents list
+				GroupTabsViewModel.GroupContentsViewModel.Add(groupNote);
+			}
+		}
+
+
 
 		/// <summary>
 		/// adds external data to the NoteList, e.g. test data

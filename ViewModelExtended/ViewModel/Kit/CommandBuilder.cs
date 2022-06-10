@@ -46,6 +46,8 @@ namespace ViewModelExtended
 
 		public void MakeNoteList (NoteListViewModel target)
 		{
+			target.SetDefaultTextCommand = new NoteSetDefaultTextCommand(target);
+
 			target.PickupCommand = new NotePickupCommand(target);
 			target.ReorderCommand = new NoteReorderCommand(target);
 		}
@@ -58,6 +60,8 @@ namespace ViewModelExtended
 
 			target.GroupNoteHoldCommand = new GroupNoteHoldCommand(target);
 			target.GroupNoteDropCommand = new GroupNoteDropCommand(target);
+
+			target.NoteChangeGroupsCommand = new NoteChangeGroupsCommand(target);
 		}
 
 		public void MakeMainWindow (MainWindowViewModel target)

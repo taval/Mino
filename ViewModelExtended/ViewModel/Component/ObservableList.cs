@@ -4,7 +4,10 @@ using System.Collections.ObjectModel;
 using System.Linq;
 using System.Text;
 
-
+/** NOTE:
+ * because there is no input option for a comparator object, the input type must implement IEquatable<IListItem>
+ * so that it does not rely on reference equality
+ */
 
 namespace ViewModelExtended.ViewModel
 {
@@ -201,6 +204,11 @@ namespace ViewModelExtended.ViewModel
 		public bool Any ()
 		{
 			return f_Observables.Any();
+		}
+
+		public IEnumerable<T> Where (Func<T, bool> predicate)
+		{
+			return f_Observables.Where(predicate);
 		}
 
 		#endregion

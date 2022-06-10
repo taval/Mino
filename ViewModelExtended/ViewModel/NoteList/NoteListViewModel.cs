@@ -6,7 +6,9 @@ using System.Text;
 using System.Windows.Input;
 using ViewModelExtended.Model;
 
+// TODO: each note should be assigned a priority (important, urgent, etc). from a dropdown on NoteTextView. this priority value will be displayed in the form of a color on each note/groupnote
 
+// TODO: Group should be renamed Tag, as in 'this entry is tagged with x, y, and z.'
 
 namespace ViewModelExtended.ViewModel
 {
@@ -70,14 +72,11 @@ namespace ViewModelExtended.ViewModel
 		}
 
 		public string DefaultText {
-			get {
-				if (f_DefaultText.Equals(String.Empty)) throw new Exception("default text cannot be empty");
-				return f_DefaultText;
-			}
-			set { f_DefaultText = value; }
+			get { return f_DefaultText ?? String.Empty; }
+			set { Set(ref f_DefaultText, value); }
 		}
 
-		private string f_DefaultText;
+		private string? f_DefaultText;
 
 		#endregion
 
@@ -95,6 +94,16 @@ namespace ViewModelExtended.ViewModel
 
 
 		#region Commands
+
+		/// <summary>
+		/// sets the serialized equivalent of the default document
+		/// </summary>
+		public ICommand SetDefaultTextCommand {
+			get { return f_SetDefaultTextCommand ?? throw new MissingCommandException(); }
+			set { if (f_SetDefaultTextCommand == null) f_SetDefaultTextCommand = value; }
+		}
+
+		private ICommand? f_SetDefaultTextCommand;
 
 		/// <summary>
 		/// rearrange two nodes
@@ -127,11 +136,10 @@ namespace ViewModelExtended.ViewModel
 			// set default text value - not guaranteed to be compatible with any user of NoteListViewModel
 			DefaultText = String.Empty;
 
+			// set references to creation classes
+			f_ViewModelKit = viewModelKit;
 			f_ComponentCreator = new ComponentCreator();
 
-			// attach commands
-			f_ViewModelKit = viewModelKit;
-			//f_ViewModelKit.CommandBuilder.MakeNoteList(this);
 
 			// init change 'queue'
 			f_Changes = f_ComponentCreator.CreateChangeQueue<NoteListObjectViewModel>();
@@ -139,27 +147,10 @@ namespace ViewModelExtended.ViewModel
 			// init highlighted
 			f_Highlighted = null;
 
-			/** populate list:
-			 * - set the viewmodel list to a new IObservableList
-			 * - get list objects from database
-			 * - sort the instantiated list
-			 * - add the data to the viewmodel's list
-			 */
 			f_List = f_ComponentCreator.CreateObservableList<NoteListObjectViewModel>();
 
-			//using (IDbContext dbContext = f_ViewModelKit.CreateDbContext()) {
-			//	IQueryable<NoteListObjectViewModel> unsortedObjects =
-			//		f_ViewModelKit.DbQueryHelper.GetAllNoteListObjects(dbContext);
-
-			//	IEnumerable<NoteListObjectViewModel> sortedObjects =
-			//		f_ViewModelKit.DbListHelper.SortListObjects(unsortedObjects.ToList());
-
-			//	f_List.Clear();
-			//	f_List.AddSortedRange(sortedObjects);
-			//}
-
 			// notify the viewmodel list count has changed (zero is a size too)
-			AlertSizeChanged();
+			NotifySizeChanged();
 		}
 
 		#endregion
@@ -167,6 +158,14 @@ namespace ViewModelExtended.ViewModel
 
 
 		#region Load
+
+		/// <summary>
+		/// populate list:
+		/// - set the viewmodel list to a new IObservableList
+		/// - get list objects from database
+		/// - sort the instantiated list
+		/// - add the data to the viewmodel's list
+		/// </summary>
 
 		public void Load ()
 		{
@@ -182,7 +181,11 @@ namespace ViewModelExtended.ViewModel
 			}
 
 			// notify the viewmodel list count has changed
-			AlertSizeChanged();
+			NotifySizeChanged();
+
+			if (SetDefaultTextCommand.CanExecute(null)) {
+				SetDefaultTextCommand.Execute(null);
+			}
 		}
 
 		#endregion
@@ -191,7 +194,7 @@ namespace ViewModelExtended.ViewModel
 
 		#region List Access
 
-		private void AlertSizeChanged ()
+		private void NotifySizeChanged ()
 		{
 			NotifyPropertyChanged(nameof(ItemCount));
 			NotifyPropertyChanged(nameof(HasNote));
@@ -204,8 +207,8 @@ namespace ViewModelExtended.ViewModel
 		public void Add (NoteListObjectViewModel input)
 		{
 			f_List.Add(input);
-			//ItemCount = f_List.Items.Count();
-			AlertSizeChanged();
+
+			NotifySizeChanged();
 
 			f_Changes.QueueOnAdd(input);
 		}
@@ -218,8 +221,8 @@ namespace ViewModelExtended.ViewModel
 		public void Insert (NoteListObjectViewModel? target, NoteListObjectViewModel input)
 		{
 			f_List.Insert(target, input);
-			//ItemCount = f_List.Items.Count();
-			AlertSizeChanged();
+
+			NotifySizeChanged();
 
 			f_Changes.QueueOnInsert(target, input);
 		}
@@ -245,8 +248,8 @@ namespace ViewModelExtended.ViewModel
 			f_Changes.QueueOnRemove(input);
 
 			f_List.Remove(input);
-			//ItemCount = f_List.Items.Count();
-			AlertSizeChanged();
+
+			NotifySizeChanged();
 
 			using (IDbContext dbContext = f_ViewModelKit.CreateDbContext()) {
 				f_ViewModelKit.ViewModelCreator.DestroyNoteListObjectViewModel(dbContext, input);
@@ -270,8 +273,8 @@ namespace ViewModelExtended.ViewModel
 		{
 			f_Changes.Clear();
 			f_List.Clear();
-			//ItemCount = f_List.Items.Count();
-			AlertSizeChanged();
+
+			NotifySizeChanged();
 		}
 
 		#endregion

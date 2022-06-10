@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Text;
 using ViewModelExtended.Model;
 
@@ -7,7 +8,7 @@ using ViewModelExtended.Model;
 
 namespace ViewModelExtended.ViewModel
 {
-	public class GroupObjectViewModel : ViewModelBase, IListItem, ISelectable
+	public class GroupObjectViewModel : ViewModelBase, IListItem, ISelectable, IEquatable<IListItem>
 	{
 		#region Model
 
@@ -106,5 +107,10 @@ namespace ViewModelExtended.ViewModel
 		}
 
 		#endregion
+
+		public bool Equals ([AllowNull] IListItem other)
+		{
+			return DataId == other?.DataId;
+		}
 	}
 }

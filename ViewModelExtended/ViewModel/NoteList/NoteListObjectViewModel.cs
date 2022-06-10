@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Diagnostics.CodeAnalysis;
 using System.Runtime.CompilerServices;
 using System.Text;
 using System.Windows;
@@ -10,7 +11,7 @@ using ViewModelExtended.Model;
 
 namespace ViewModelExtended.ViewModel
 {
-	public class NoteListObjectViewModel : ViewModelBase, IListItem, ISelectable
+	public class NoteListObjectViewModel : ViewModelBase, IListItem, ISelectable, IEquatable<IListItem>
 	{
 		#region Model
 
@@ -144,5 +145,10 @@ namespace ViewModelExtended.ViewModel
 		}
 
 		#endregion
+
+		public bool Equals ([AllowNull] IListItem other)
+		{
+			return DataId == other?.DataId;
+		}
 	}
 }

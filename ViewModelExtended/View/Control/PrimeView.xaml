@@ -45,12 +45,13 @@
             <local:NoteTextView
 				Margin="4 0 4 0"
 				Grid.Column="1"
-				DataContext="{ Binding NoteTextViewModel }" />
-
-            <!--local:ListAction.ReceiveCommand="{ Binding
+				DataContext="{ Binding NoteTextViewModel }"
+                
+                local:TextAction.ChangeGroupsCommand="{ Binding
 					RelativeSource={ RelativeSource AncestorType={ x:Type local:PrimeView } },
-					Path=DataContext.NoteReceiveCommand,
-					diag:PresentationTraceSources.TraceLevel=High }"-->
+					Path=DataContext.NoteChangeGroupsCommand,
+					diag:PresentationTraceSources.TraceLevel=High }" />
+
             <local:GroupTabsView
 				Margin="4 0 8 0"
 				Grid.Column="2"

@@ -6,7 +6,7 @@ using System.Text;
 using System.Windows.Input;
 using ViewModelExtended.Model;
 
-
+// TODO: review this and all other classes for single-use event handlers which may outlive the source object and assign them to a container which can be cleared on delete
 
 namespace ViewModelExtended.ViewModel
 {
@@ -216,6 +216,8 @@ namespace ViewModelExtended.ViewModel
 				// create a temporary GroupObject with the given NoteListObject
 				f_TempGroupObjectViewModel = CreateTemp(ContentData.Model.Data, value.Model.Data);
 
+				f_Contents.Add(f_TempGroupObjectViewModel);
+
 				// set the incoming note for further reference
 				f_Incoming = value;
 			}
@@ -298,15 +300,11 @@ namespace ViewModelExtended.ViewModel
 			// set viewmodel context dependencies
 			f_NoteListViewModel = noteListViewModel;
 
-			// attach commands
-			//f_ViewModelKit.CommandBuilder.MakeGroup(this);
-
 			// init contents container
 			f_Contents = f_GroupContentsComponentCreator.CreateGroupContents(
 				() => f_ComponentCreator.CreateObservableList<GroupObjectViewModel>());
 
 			AlertSizeChanged();
-			//ItemCount = f_Contents.ItemCount;
 
 			// init change 'queue'
 			f_Changes = f_GroupContentsComponentCreator.CreateGroupChangeQueue(
@@ -356,7 +354,7 @@ namespace ViewModelExtended.ViewModel
 			SetNoteObserver(match, input);
 
 			f_Contents.Add(input);
-			//ItemCount = f_Contents.ItemCount;
+
 			AlertSizeChanged();
 
 			f_Changes.QueueOnAdd(input);
@@ -374,7 +372,7 @@ namespace ViewModelExtended.ViewModel
 			SetNoteObserver(match, input);
 
 			f_Contents.Insert(target, input);
-			//ItemCount = f_Contents.ItemCount;
+
 			AlertSizeChanged();
 
 			f_Changes.QueueOnInsert(target, input);
@@ -404,7 +402,7 @@ namespace ViewModelExtended.ViewModel
 			f_Changes.QueueOnRemove(input);
 
 			f_Contents.Remove(input);
-			//ItemCount = f_Contents.ItemCount;
+
 			AlertSizeChanged();
 
 			using (IDbContext dbContext = f_ViewModelKit.CreateDbContext()) {
@@ -438,6 +436,11 @@ namespace ViewModelExtended.ViewModel
 			return f_NoteListViewModel.Find((noteListViewModel) => noteListViewModel.DataId == input.DataId);
 		}
 
+		public bool HasNoteInGroup (Group groop, Note note)
+		{
+			return f_Contents.HasNoteInGroup(groop, note);
+		}
+
 		#endregion
 
 
@@ -456,8 +459,6 @@ namespace ViewModelExtended.ViewModel
 				GroupObjectViewModel output =
 					f_ViewModelKit.ViewModelCreator.CreateTempGroupObjectViewModel(dbContext, groop, data);
 
-				f_Contents.Add(output);
-
 				return output;
 			}
 		}
@@ -474,12 +475,11 @@ namespace ViewModelExtended.ViewModel
 				GroupObjectViewModel output =
 					f_ViewModelKit.ViewModelCreator.CreateGroupObjectViewModel(dbContext, groop, data);
 
-				Add(output);
-
 				return output;
 			}
 		}
 
+		// TODO: this is sort of a hack, should go back to normal assignment and notify and not depend on getter to always be called when changes are made
 		public void SetNoteObserver (NoteListObjectViewModel subject, GroupObjectViewModel observer)
 		{
 			int observerId = observer.ItemId;
@@ -561,7 +561,7 @@ namespace ViewModelExtended.ViewModel
 				if (f_Changes.Dictionaries.ContainsKey(list.Key)) f_Changes.Dictionaries[list.Key].Clear();
 				ClearList(list.Value);
 			}
-			//ItemCount = f_Contents.ItemCount;
+
 			AlertSizeChanged();
 		}
 
@@ -603,24 +603,27 @@ namespace ViewModelExtended.ViewModel
 			GroupObjectViewModel groupNote = Create(groop, note);
 
 			// add the GroupObject to the contents list
+			Add(groupNote);
+
+			// clear incoming for next transfer
 			f_TempGroupObjectViewModel = null;
 			Incoming = null;
 		}
 
 		/// <summary>
-		/// set the given list with all sorted GroupObjects (notes) within a Group
+		/// set the given list with all sorted GroupObjects (notes) within a Group:
+		/// - a GroupObjectViewModel loaded from db is constructed partially from live data.
+		/// - iterate through the database items for ObjectId used to identify the associated Note data
+		/// - construct the GroupObjectViewModel
+		/// - set GroupObjectViewModel's event handler on NoteListObjectViewModel
+		/// - add it to list
 		/// </summary>
-		/// <param name="dbContext"></param>
-		/// <param name="list"></param>
-		/// <param name="groop"></param>
+		/// <param name="dbContext">database context</param>
+		/// <param name="list">target list to populate</param>
+		/// <param name="groop">the group from which the items are sourced</param>
 		private void PopulateGroup (IDbContext dbContext, IList<GroupObjectViewModel> list, Group groop)
 		{
-			/** a GroupObjectViewModel loaded from db is constructed partially from live data.
-			 * - iterate through the database items for ObjectId used to identify the associated Note data
-			 * - construct the GroupObjectViewModel
-			 * - set GroupObjectViewModel's event handler on NoteListObjectViewModel
-			 * - add it to list
-			 */
+			
 			IQueryable<Tuple<GroupItem, ObjectRoot>> unsortedObjects =
 				f_ViewModelKit.DbQueryHelper.GetGroupItemsInGroup(dbContext, groop);
 			IList<Tuple<GroupItem, ObjectRoot>> groupItemsInGroup = unsortedObjects.ToList();
@@ -700,7 +703,6 @@ namespace ViewModelExtended.ViewModel
 						list.Remove(item);
 
 						// notify the view the size has changed
-						//if (list == f_Contents.List) ItemCount = f_Contents.ItemCount;
 						if (list == f_Contents.List) AlertSizeChanged();
 
 						// destroy the database record

@@ -25,7 +25,6 @@ namespace ViewModelExtended.Command
 			f_GroupTabsViewModel.SelectGroup((GroupListObjectViewModel)parameter);
 
 			// focus on the GroupList tab
-			//TabControl? tabControl = UIHelper.FindChild<TabControl>(Application.Current.MainWindow, "GroupTabControl");
 			TabControl? tabControl = UIHelper.GetChildOfType<TabControl>(Application.Current.MainWindow);
 
 			if (tabControl == null) {

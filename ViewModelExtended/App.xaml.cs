@@ -30,7 +30,7 @@ namespace ViewModelExtended
 			//AddResource("ListView");
 			AddResource("ListViewItem");
 
-			//AddResource("TextBoxError");
+			AddResource("TextBoxError");
 			IViewModelKit viewModelKit = new ViewModelKit();
 
 			#endregion
@@ -47,8 +47,8 @@ namespace ViewModelExtended
 
 			#region Load Test Data
 
-			//AddNoteListObjectTestData(viewModelKit, context);
-			//AddGroupListObjectTestData(viewModelKit, context);
+			AddNoteListObjectTestData(viewModelKit, context);
+			AddGroupListObjectTestData(viewModelKit, context);
 
 			#endregion
 

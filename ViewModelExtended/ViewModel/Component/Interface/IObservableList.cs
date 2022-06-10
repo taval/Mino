@@ -70,5 +70,7 @@ namespace ViewModelExtended.ViewModel
 		public T Find (Func<T, bool> predicate);
 
 		public bool Any ();
+
+		public IEnumerable<T> Where (Func<T, bool> predicate);
 	}
 }

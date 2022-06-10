@@ -81,6 +81,44 @@ namespace ViewModelExtended.ViewModel
 
 		private int f_ColumnNumber;
 
+		/// <summary>
+		/// user-inputted space-separated string list of Groups to which the Note will be attached
+		/// </summary>
+		public string GroupStrings {
+			get { return f_GroupStrings ?? String.Empty; }
+			set {
+				Set(ref f_GroupStrings, value);
+				NotifyPropertyChanged(nameof(GroupStringList));
+			}
+		}
+
+		private string? f_GroupStrings;
+
+		/// <summary>
+		/// list of groups to store
+		/// </summary>
+		public IEnumerable<string> GroupStringList {
+			get {
+				if (f_GroupStrings != null) {
+					return GroupStringListFromString(f_GroupStrings);
+				}
+				else {
+					return Enumerable.Empty<string>();
+				}
+			}
+		}
+
+		/// <summary>
+		/// if user selects true, ad-hoc group names are converted into new groups
+		/// else, validation will fail and no changes to the groups attached to the note are made
+		/// </summary>
+		public bool IsNewGroupAllowed {
+			get { return f_IsNewGroupAllowed; }
+			set { Set(ref f_IsNewGroupAllowed, value); }
+		}
+
+		private bool f_IsNewGroupAllowed;
+
 		#endregion
 
 
@@ -124,7 +162,6 @@ namespace ViewModelExtended.ViewModel
 		public NoteTextViewModel (IViewModelKit viewModelKit)
 		{
 			f_ViewModelKit = viewModelKit;
-			//f_ViewModelKit.CommandBuilder.MakeNoteText(this);
 			f_ContentData = null;
 		}
 
@@ -132,7 +169,7 @@ namespace ViewModelExtended.ViewModel
 
 
 
-		#region Update
+		#region Note
 
 		public void UpdateTitle ()
 		{
@@ -151,6 +188,42 @@ namespace ViewModelExtended.ViewModel
 			using (IDbContext dbContext = f_ViewModelKit.CreateDbContext()) {
 				dbContext.UpdateNote(f_ContentData.Model.Data, null, Text);
 				dbContext.Save();
+			}
+		}
+
+		#endregion
+
+
+
+		#region Group
+
+		/// <summary>
+		/// convert a string of group names into a list of group names
+		/// </summary>
+		/// <param name="listString"></param>
+		/// <returns></returns>
+		public IEnumerable<string> GroupStringListFromString (string listString)
+		{
+			if ((listString == null) || listString.Equals(String.Empty)) return Enumerable.Empty<string>();
+			return listString.Split(new char[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
+		}
+
+		/// <summary>
+		/// get a list of existing groups given a list of title strings
+		/// </summary>
+		/// <param name="groupTitleStrings"></param>
+		/// <param name="searchTarget"></param>
+		/// <returns></returns>
+		public IEnumerable<GroupListObjectViewModel> FindExistingGroupsInStrings (
+			IEnumerable<string> groupTitleStrings, IEnumerable<GroupListObjectViewModel> searchTarget)
+		{
+			foreach (string groupTitle in groupTitleStrings) {
+				IEnumerable<GroupListObjectViewModel> hasTitleGroup =
+					searchTarget.Where((item) => item.Title.Equals(groupTitle));
+
+				if (hasTitleGroup.Any()) {
+					yield return hasTitleGroup.Single();
+				}
 			}
 		}
 

@@ -146,35 +146,18 @@ namespace ViewModelExtended.ViewModel
 		{
 			f_ComponentCreator = new ComponentCreator();
 
-			// attach commands
+			// set reference to viewmodelkit
 			f_ViewModelKit = viewModelKit;
-			//f_ViewModelKit.CommandBuilder.MakeGroupList(this);
 
 			// init change 'queue'
 			f_Changes = f_ComponentCreator.CreateChangeQueue<GroupListObjectViewModel>();
 			f_Highlighted = null;
 
-			/** populate list:
-			 * - set the viewmodel list to a new IObservableList
-			 * - get list objects from database
-			 * - sort the instantiated list
-			 * - add the data to the viewmodel's list
-			 */
+			// init the observables list
 			f_List = f_ComponentCreator.CreateObservableList<GroupListObjectViewModel>();
 
-			//using (IDbContext dbContext = f_ViewModelKit.CreateDbContext()) {
-			//	IQueryable<GroupListObjectViewModel> unsortedObjects =
-			//		f_ViewModelKit.DbQueryHelper.GetAllGroupListObjects(dbContext);
-
-			//	IEnumerable<GroupListObjectViewModel> sortedObjects =
-			//		f_ViewModelKit.DbListHelper.SortListObjects(unsortedObjects.ToList());
-
-			//	f_List.Clear();
-			//	f_List.AddSortedRange(sortedObjects);
-			//}
-
 			// notify the viewmodel list count has changed (zero is a size too)
-			AlertSizeChanged();
+			NotifySizeChanged();
 		}
 
 		#endregion
@@ -183,8 +166,17 @@ namespace ViewModelExtended.ViewModel
 		
 		#region Load
 
+		/// <summary>
+		/// post-view-load initialization
+		/// </summary>
 		public void Load ()
 		{
+			/** populate list:
+			 * - set the viewmodel list to a new IObservableList
+			 * - get list objects from database
+			 * - sort the instantiated list
+			 * - add the data to the viewmodel's list
+			 */
 			using (IDbContext dbContext = f_ViewModelKit.CreateDbContext()) {
 				IQueryable<GroupListObjectViewModel> unsortedObjects =
 					f_ViewModelKit.DbQueryHelper.GetAllGroupListObjects(dbContext);
@@ -196,8 +188,7 @@ namespace ViewModelExtended.ViewModel
 				f_List.AddSortedRange(sortedObjects);
 			}
 
-			// notify the viewmodel list count has changed
-			AlertSizeChanged();
+			NotifySizeChanged();
 		}
 
 		#endregion
@@ -206,7 +197,10 @@ namespace ViewModelExtended.ViewModel
 
 		#region List Access
 
-		private void AlertSizeChanged ()
+		/// <summary>
+		/// notify that the viewmodel list count has changed
+		/// </summary>
+		private void NotifySizeChanged ()
 		{
 			NotifyPropertyChanged(nameof(ItemCount));
 			NotifyPropertyChanged(nameof(HasGroup));
@@ -219,8 +213,8 @@ namespace ViewModelExtended.ViewModel
 		public void Add (GroupListObjectViewModel input)
 		{
 			f_List.Add(input);
-			//ItemCount = f_List.Items.Count();
-			AlertSizeChanged();
+
+			NotifySizeChanged();
 
 			f_Changes.QueueOnAdd(input);
 		}
@@ -233,8 +227,8 @@ namespace ViewModelExtended.ViewModel
 		public void Insert (GroupListObjectViewModel? target, GroupListObjectViewModel input)
 		{
 			f_List.Insert(target, input);
-			//ItemCount = f_List.Items.Count();
-			AlertSizeChanged();
+
+			NotifySizeChanged();
 
 			f_Changes.QueueOnInsert(target, input);
 		}
@@ -260,8 +254,8 @@ namespace ViewModelExtended.ViewModel
 			f_Changes.QueueOnRemove(input);
 
 			f_List.Remove(input);
-			//ItemCount = f_List.Items.Count();
-			AlertSizeChanged();
+
+			NotifySizeChanged();
 
 			using (IDbContext dbContext = f_ViewModelKit.CreateDbContext()) {
 				f_ViewModelKit.ViewModelCreator.DestroyGroupListObjectViewModel(dbContext, input);
@@ -285,8 +279,8 @@ namespace ViewModelExtended.ViewModel
 		{
 			f_Changes.Clear();
 			f_List.Clear();
-			//ItemCount = f_List.Items.Count();
-			AlertSizeChanged();
+
+			NotifySizeChanged();
 		}
 
 		#endregion
@@ -322,12 +316,22 @@ namespace ViewModelExtended.ViewModel
 			}
 		}
 
+		public GroupListObjectViewModel Create (Action<GroupListObjectViewModel> action)
+		{
+			using (IDbContext dbContext = f_ViewModelKit.CreateDbContext()) {
+				return f_ViewModelKit.ViewModelCreator.CreateGroupListObjectViewModel(dbContext, action);
+			}
+		}
+
 		#endregion
 
 
 
 		#region Update
 
+		/// <summary>
+		/// update the group's title in the database
+		/// </summary>
 		public void UpdateTitle ()
 		{
 			if (f_Highlighted == null) return;
@@ -338,6 +342,9 @@ namespace ViewModelExtended.ViewModel
 			}
 		}
 
+		/// <summary>
+		/// update the group's color in the database
+		/// </summary>
 		public void UpdateColor ()
 		{
 			if (f_Highlighted == null) return;
@@ -394,4 +401,4 @@ namespace ViewModelExtended.ViewModel
 // TODO: double-clicking the group's title should only select an item upon the first double-click. Subsequent double-clicks should cause it to edit the text.
 // UPDATE: implemented single/double click choice behavior - review and determine if this is sufficient
 
-// TODO: each group is assigned a color. each associated NoteListObjectViewModel should receive a color if it is associated with a group. when removed from group, it goes back to colorless.
+// TODO: each group is assigned a random color (for cosmetic purposes only).
