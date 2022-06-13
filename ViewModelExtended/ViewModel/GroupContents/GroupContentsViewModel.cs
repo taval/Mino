@@ -480,6 +480,26 @@ namespace ViewModelExtended.ViewModel
 		}
 
 		// TODO: this is sort of a hack, should go back to normal assignment and notify and not depend on getter to always be called when changes are made
+		//public void SetNoteObserver (NoteListObjectViewModel subject, GroupObjectViewModel observer)
+		//{
+		//	int observerId = observer.ItemId;
+
+		//	if (f_Delegates.ContainsKey(observerId)) return;
+
+		//	PropertyChangedEventHandler handler = (sender, e) =>
+		//	{
+		//		if (e.PropertyName == "Title") {
+		//			string _ = observer.Title;
+		//		}
+		//		else if (e.PropertyName == "Text") {
+		//			string _ = observer.Text;
+		//		}
+		//	};
+
+		//	subject.PropertyChanged += handler;
+
+		//	f_Delegates.Add(observerId, f_Delegates.Create(subject, handler));
+		//}
 		public void SetNoteObserver (NoteListObjectViewModel subject, GroupObjectViewModel observer)
 		{
 			int observerId = observer.ItemId;
@@ -489,10 +509,13 @@ namespace ViewModelExtended.ViewModel
 			PropertyChangedEventHandler handler = (sender, e) =>
 			{
 				if (e.PropertyName == "Title") {
-					string _ = observer.Title;
+					observer.NotifyTitleChanged();
 				}
 				else if (e.PropertyName == "Text") {
-					string _ = observer.Text;
+					observer.NotifyTextChanged();
+				}
+				else if (e.PropertyName == "Priority") {
+					observer.NotifyPriorityChanged();
 				}
 			};
 
@@ -670,13 +693,13 @@ namespace ViewModelExtended.ViewModel
 					IObservableList<GroupObjectViewModel>? list = null;
 
 					// select the list of the particular group or the display group
-					list = f_Contents.GetListByGroupKey(obj.Model.Group);
+					list = f_Contents.GetListByGroupKey(obj.Group);
 
 					// populate the viewmodel list of that group
 					if (!list.Any()) {
 						IList<GroupObjectViewModel> tempList = new List<GroupObjectViewModel>();
 
-						PopulateGroup(dbContext, tempList, obj.Model.Group);
+						PopulateGroup(dbContext, tempList, obj.Group);
 
 						IEnumerable<GroupObjectViewModel> sortedObjects =
 							f_ViewModelKit.DbListHelper.SortListObjects(tempList);

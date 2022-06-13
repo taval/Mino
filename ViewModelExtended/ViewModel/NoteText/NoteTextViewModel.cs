@@ -6,7 +6,10 @@ using System.Threading.Tasks;
 using System.Windows.Input;
 using ViewModelExtended.Model;
 
+// TODO: convert the list of group names associated with a particular note and populate the tags form with a string containing those names. The form should always represent the existing state
+// TODO: there should be no error on the tags list if no tags are present in the form or attached to the note
 
+// TODO: selected priority is not displayed on load, but shows up when an item is selected.
 
 namespace ViewModelExtended.ViewModel
 {
@@ -28,6 +31,7 @@ namespace ViewModelExtended.ViewModel
 				Set(ref f_ContentData, value);
 				NotifyPropertyChanged(nameof(Title));
 				NotifyPropertyChanged(nameof(Text));
+				NotifyPropertyChanged(nameof(Priority));
 			}
 		}
 
@@ -38,6 +42,10 @@ namespace ViewModelExtended.ViewModel
 
 
 		#region Properties
+
+		public IList<string> PriorityTypes {
+			get { return NoteListObjectViewModel.PriorityTypes; }
+		}
 
 		public string Title {
 			get {
@@ -66,6 +74,23 @@ namespace ViewModelExtended.ViewModel
 				}
 			}
 		}
+
+		public int Priority {
+			get {
+				if (f_ContentData != null) return f_ContentData.Priority;
+				return 0;
+			}
+			set {
+				if (f_ContentData != null) {
+					if (Equals(f_ContentData.Priority, value)) return;
+					f_ContentData.Priority = value;
+					NotifyPropertyChanged(nameof(Priority));
+				}
+			}
+		}
+
+		// TODO: integer is set on model, not string. make sure when the model is loaded, integers are set and read by view as strings (Priority), and when saving, all priority strings convert to int correctly
+		// alternatively, populate the PriorityTypes and ItemsSource at the same time, to ensure the ItemsSource index is equivalent to the priority type id on PriorityTypes. then just pass the id around and bind to SelectedIndex rather than SelectedValue.
 
 		public int LineNumber {
 			get { return f_LineNumber; }
@@ -146,12 +171,26 @@ namespace ViewModelExtended.ViewModel
 
 		private ICommand? f_UpdateTextCommand;
 
+		public ICommand ChangePriorityCommand {
+			get { return f_ChangePriorityCommand ?? throw new MissingCommandException(); }
+			set { if (f_ChangePriorityCommand == null) f_ChangePriorityCommand = value; }
+		}
+
+		private ICommand? f_ChangePriorityCommand;
+
 		public ICommand CalcCursorPosCommand {
 			get { return f_CalcCursorPosCommand ?? throw new MissingCommandException(); }
 			set { if (f_CalcCursorPosCommand == null) f_CalcCursorPosCommand = value; }
 		}
 
 		private ICommand? f_CalcCursorPosCommand;
+
+		public ICommand LoadCommand {
+			get { return f_LoadCommand ?? throw new MissingCommandException(); }
+			set { if (f_LoadCommand == null) f_LoadCommand = value; }
+		}
+
+		private ICommand? f_LoadCommand;
 
 		#endregion
 
@@ -162,7 +201,23 @@ namespace ViewModelExtended.ViewModel
 		public NoteTextViewModel (IViewModelKit viewModelKit)
 		{
 			f_ViewModelKit = viewModelKit;
-			f_ContentData = null;
+			ContentData = null;
+		}
+
+		#endregion
+
+
+
+		#region Load
+
+		public void Load ()
+		{
+			// TODO: datamodel load stuff here
+			// TODO: this is a hack: the PriorityTypes of NoteListObjectViewModel are set in the wrapper command of this function. This should actually operate the same as any other property: PrimeViewModel should set a PropertyChangedEventHandler on the static PriorityTypes property somehow which bubbles up to NoteTextViewModel and repeats it
+			NotifyPropertyChanged(nameof(PriorityTypes));
+			NotifyPropertyChanged(nameof(Title));
+			NotifyPropertyChanged(nameof(Text));
+			NotifyPropertyChanged(nameof(Priority));
 		}
 
 		#endregion
@@ -176,7 +231,7 @@ namespace ViewModelExtended.ViewModel
 			if (f_ContentData == null) return;
 
 			using (IDbContext dbContext = f_ViewModelKit.CreateDbContext()) {
-				dbContext.UpdateNote(f_ContentData.Model.Data, Title, null);
+				dbContext.UpdateNote(f_ContentData.Model.Data, Title, null, null);
 				dbContext.Save();
 			}
 		}
@@ -186,7 +241,17 @@ namespace ViewModelExtended.ViewModel
 			if (f_ContentData == null) return;
 
 			using (IDbContext dbContext = f_ViewModelKit.CreateDbContext()) {
-				dbContext.UpdateNote(f_ContentData.Model.Data, null, Text);
+				dbContext.UpdateNote(f_ContentData.Model.Data, null, Text, null);
+				dbContext.Save();
+			}
+		}
+
+		public void UpdatePriority ()
+		{
+			if (f_ContentData == null) return;
+
+			using (IDbContext dbContext = f_ViewModelKit.CreateDbContext()) {
+				dbContext.UpdateNote(f_ContentData.Model.Data, null, null, Priority);
 				dbContext.Save();
 			}
 		}

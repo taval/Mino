@@ -9,8 +9,8 @@ using ViewModelExtended.Model;
 namespace ViewModelExtended.Migrations
 {
     [DbContext(typeof(ViewModelExtended.Model.DbContext))]
-    [Migration("20220419020029_CreateDatabase")]
-    partial class CreateDatabase
+    [Migration("20220613030409_Initial")]
+    partial class Initial
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -103,6 +103,9 @@ namespace ViewModelExtended.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("INTEGER");
 
+                    b.Property<int>("Priority")
+                        .HasColumnType("INTEGER");
+
                     b.Property<string>("Text")
                         .IsRequired()
                         .HasColumnType("TEXT");
@@ -134,24 +137,6 @@ namespace ViewModelExtended.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("NoteListItems");
-                });
-
-            modelBuilder.Entity("ViewModelExtended.Model.State", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("INTEGER");
-
-                    b.Property<string>("SKey")
-                        .IsRequired()
-                        .HasColumnType("TEXT");
-
-                    b.Property<int>("SValue")
-                        .HasColumnType("INTEGER");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("States");
                 });
 
             modelBuilder.Entity("ViewModelExtended.Model.Timestamp", b =>

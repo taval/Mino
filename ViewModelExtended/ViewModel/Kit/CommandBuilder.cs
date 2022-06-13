@@ -77,7 +77,11 @@ namespace ViewModelExtended
 
 			target.UpdateTextCommand = new NoteUpdateTextCommand(target);
 
+			target.ChangePriorityCommand = new NoteChangePriorityCommand(target);
+
 			target.CalcCursorPosCommand = new CalcCursorPosCommand(target);
+
+			target.LoadCommand = new NoteTextLoadCommand(target);
 		}
 	}
 }

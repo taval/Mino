@@ -4,7 +4,10 @@ using System.Drawing;
 using System.Text;
 using ViewModelExtended.Model;
 
-
+// TODO: (do search for all references of Model here)
+// exposing the model(s) directly allows opportunities for breaking data integrity. 
+// maybe UpdateGroupObject could call a function on GroupObjectViewModel that performs the update somehow? perhaps UpdateGroupObject's signature should be changed to raw data parameters, OR it belongs elsewhere as a function separate from dbContext, with dbContext as a dependency in its signature
+// OR the model is swapped out for an interface, and the implementation that is sent to GroupObjectViewModel is read-only members
 
 namespace ViewModelExtended.ViewModel
 {
@@ -51,7 +54,7 @@ namespace ViewModelExtended.ViewModel
 		public NoteListObjectViewModel CreateNoteListObjectViewModel (IDbContext dbContext)
 		{
 			// create basic data components
-			Note note = dbContext.CreateNote("", "");
+			Note note = dbContext.CreateNote("", "", 0);
 			Node node = dbContext.CreateNode(null, null);
 			Timestamp timestamp = dbContext.CreateTimestamp();
 			dbContext.Save();

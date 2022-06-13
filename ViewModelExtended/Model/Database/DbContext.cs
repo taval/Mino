@@ -141,22 +141,44 @@ namespace ViewModelExtended.Model
 			Timestamps.Remove(target);
 		}
 
-		public Note CreateNote (string title, string text, bool temporary = false)
+		//public Note CreateNote (string title, string text, bool temporary = false)
+		//{
+		//	Note output = new Note() { Title = title, Text = text };
+
+		//	if (temporary == false) Notes.Add(output);
+
+		//	return output;
+		//}
+
+		//public void UpdateNote (Note target, string? title, string? text, bool temporary = false)
+		//{
+		//	if (title != null) {
+		//		target.Title = title;
+		//	}
+		//	if (text != null) {
+		//		target.Text = text;
+		//	}
+		//	if (temporary == false) Notes.Update(target);
+		//}
+		public Note CreateNote (string title, string text, int priority, bool temporary = false)
 		{
-			Note output = new Note() { Title = title, Text = text };
+			Note output = new Note() { Title = title, Text = text, Priority = priority };
 
 			if (temporary == false) Notes.Add(output);
 
 			return output;
 		}
 
-		public void UpdateNote (Note target, string? title, string? text, bool temporary = false)
+		public void UpdateNote (Note target, string? title, string? text, int? priority, bool temporary = false)
 		{
 			if (title != null) {
 				target.Title = title;
 			}
 			if (text != null) {
 				target.Text = text;
+			}
+			if (priority != null) {
+				target.Priority = (int)priority;
 			}
 			if (temporary == false) Notes.Update(target);
 		}

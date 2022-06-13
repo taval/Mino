@@ -19,12 +19,14 @@ namespace ViewModelExtended.Model
 		public int Id { get; set; }
 		public string Title { get; set; }
 		public string Text { get; set; }
+		public int Priority { get; set; }
 
 		public Note ()
 		{
 			// Id = 0;
 			Title = String.Empty;
 			Text = String.Empty;
+			Priority = 0;
 		}
 	}
 }

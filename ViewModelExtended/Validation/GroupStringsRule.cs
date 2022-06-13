@@ -31,7 +31,8 @@ namespace ViewModelExtended
 
         bool IsValidGroupStrings (string? groupStrings)
         {
-            if (groupStrings == null || groupStrings.Equals(String.Empty)) return false;
+            if (groupStrings == null) return false;
+            if (groupStrings.Equals(String.Empty)) return true;
 
             // if IsNewGroupAllowed == false, fail if any groups in the user string don't match with existing group
             ViewModelContext context = (ViewModelContext)Application.Current.MainWindow.DataContext;

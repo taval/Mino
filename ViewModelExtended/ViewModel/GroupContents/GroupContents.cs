@@ -97,7 +97,7 @@ namespace ViewModelExtended.ViewModel
 		/// <param name="input"></param>
 		public void Add (GroupObjectViewModel input)
 		{
-			Group groop = input.Model.Group;
+			Group groop = input.Group;
 
 			if (Lists.ContainsKey(groop)) {
 				Lists[groop].Add(input);
@@ -111,7 +111,7 @@ namespace ViewModelExtended.ViewModel
 		/// <param name="input"></param>
 		public void Insert (GroupObjectViewModel? target, GroupObjectViewModel input)
 		{
-			Group groop = input.Model.Group;
+			Group groop = input.Group;
 
 			if (Lists.ContainsKey(groop)) {
 				Lists[groop].Insert(target, input);
@@ -125,9 +125,9 @@ namespace ViewModelExtended.ViewModel
 		/// <param name="target"></param>
 		public void Reorder (GroupObjectViewModel source, GroupObjectViewModel target)
 		{
-			Group groop = source.Model.Group;
+			Group groop = source.Group;
 
-			if (source.Model.Group != target.Model.Group) return;
+			if (groop != target.Group) throw new Exception("source and target are not from the same Group");
 
 			if (Lists.ContainsKey(groop)) {
 				Lists[groop].Reorder(source, target);
@@ -140,7 +140,7 @@ namespace ViewModelExtended.ViewModel
 		/// <param name="input"></param>
 		public void Remove (GroupObjectViewModel input)
 		{
-			Group groop = input.Model.Group;
+			Group groop = input.Group;
 
 			if (Lists.ContainsKey(groop)) {
 				Lists[groop].Remove(input);

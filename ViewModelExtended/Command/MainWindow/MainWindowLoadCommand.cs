@@ -32,6 +32,10 @@ namespace ViewModelExtended.Command
 			context.GroupContentsViewModel.Load();
 			context.GroupTabsViewModel.Load();
 			context.PrimeViewModel.Load();
+
+			if (context.NoteTextViewModel.LoadCommand.CanExecute(null)) {
+				context.NoteTextViewModel.LoadCommand.Execute(null);
+			}
 		}
 	}
 }

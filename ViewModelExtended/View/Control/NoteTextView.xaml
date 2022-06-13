@@ -15,8 +15,9 @@
 		<Grid.RowDefinitions>
 			<RowDefinition Height="1*" />
 			<RowDefinition Height="4*" />
+            <RowDefinition Height="0.5*" />
             <RowDefinition Height="1*" />
-            <RowDefinition Height="1*" />
+            <RowDefinition Height="0.5*" />
 		</Grid.RowDefinitions>
 
         <TextBox
@@ -96,14 +97,48 @@
                 <ColumnDefinition Width="*" />
             </Grid.ColumnDefinitions>
 
-            <Label Content="Tags" VerticalAlignment="Center" />
+            <Label FontSize="12" Content="Priority" VerticalAlignment="Center" />
+            <ComboBox
+                Grid.Column="1"
+                VerticalAlignment="Center"
+                ItemsSource="{ Binding PriorityTypes }">
+                <ComboBox.SelectedIndex>
+                    <Binding Path="Priority" UpdateSourceTrigger="PropertyChanged" ValidatesOnExceptions="True" Mode="TwoWay">
+                        <Binding.ValidationRules>
+                            <local:PriorityRule />
+                        </Binding.ValidationRules>
+                    </Binding>
+                </ComboBox.SelectedIndex>
+                <i:Interaction.Triggers>
+
+                    <i:EventTrigger
+					EventName="LostFocus"
+					SourceObject="{ Binding RelativeSource={ RelativeSource AncestorType={ x:Type ComboBox } } }">
+                        <i:InvokeCommandAction
+						PassEventArgsToCommand="True"
+						Command="{ Binding
+							Path=DataContext.ChangePriorityCommand,
+							RelativeSource={ RelativeSource AncestorType={ x:Type local:NoteTextView } } }" />
+                    </i:EventTrigger>
+
+                </i:Interaction.Triggers>
+            </ComboBox>
+        </Grid>
+
+        <Grid Grid.Row="3">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="112" />
+                <ColumnDefinition Width="*" />
+            </Grid.ColumnDefinitions>
+
+            <Label FontSize="12" Content="Tags" VerticalAlignment="Center" />
 
             <TextBox Grid.Column="1"
 				x:Name="TextBox_GroupStrings"
 				Margin="0 16 0 8"
-				Height="32"
+				Height="24"
                 VerticalAlignment="Center"
-				FontSize="24"
+				FontSize="16"
 				Style="{ StaticResource warnHighlightStyle }">
 
                 <TextBox.Text>
@@ -133,13 +168,13 @@
             </TextBox>
         </Grid>
 
-        <Grid Grid.Row="3">
+        <Grid Grid.Row="4">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="112" />
                 <ColumnDefinition Width="*" />
             </Grid.ColumnDefinitions>
 
-            <Label Content="Allow new groups" VerticalAlignment="Center" />
+            <Label FontSize="12" Content="Allow new groups" VerticalAlignment="Center" />
 			<CheckBox
 				Grid.Column="1"
 				IsChecked="{ Binding IsNewGroupAllowed, UpdateSourceTrigger=PropertyChanged }"
@@ -148,5 +183,4 @@
         </Grid>
 
     </Grid>
-
 </UserControl>

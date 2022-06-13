@@ -54,8 +54,10 @@ namespace ViewModelExtended.Model
 			Timestamp target, long? userModified, long? userIndexed, long? autoModified, bool temporary = false);
 		public void DeleteTimestamp (Timestamp target);
 
-		public Note CreateNote (string title, string text, bool temporary = false);
-		public void UpdateNote (Note target, string? title, string? text, bool temporary = false);
+		//public Note CreateNote (string title, string text, bool temporary = false);
+		//public void UpdateNote (Note target, string? title, string? text, bool temporary = false);
+		public Note CreateNote (string title, string text, int priority, bool temporary = false);
+		public void UpdateNote (Note target, string? title, string? text, int? priority, bool temporary = false);
 		public void DeleteNote (Note target);
 
 		public Group CreateGroup (string title, string color, bool temporary = false);

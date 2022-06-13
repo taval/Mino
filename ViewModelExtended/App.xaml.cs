@@ -10,7 +10,7 @@ using ViewModelExtended.ViewModel;
 
 // TODO: make modules for view, vm, db, etc.
 
-// TODO: most exceptions should trigger a rollback to the last known good state and shutdown/commit properly
+// TODO: most exceptions should trigger a rollback to the last known good state and shutdown/commit properly (exception safety)
 
 namespace ViewModelExtended
 {
@@ -47,8 +47,8 @@ namespace ViewModelExtended
 
 			#region Load Test Data
 
-			AddNoteListObjectTestData(viewModelKit, context);
-			AddGroupListObjectTestData(viewModelKit, context);
+			//AddNoteListObjectTestData(viewModelKit, context);
+			//AddGroupListObjectTestData(viewModelKit, context);
 
 			#endregion
 
@@ -119,29 +119,29 @@ $@"
 		{
 			using (IDbContext dbContext = viewModelKit.CreateDbContext()) {
 				context.PrimeViewModel.AddNote(viewModelKit.ViewModelCreator.CreateNoteListObjectViewModel(
-					dbContext, c => { c.Title = "8:00 AM"; c.Text = FlowDocumentWrap("make video"); }));
+					dbContext, c => { c.Title = "8:00 AM"; c.Text = FlowDocumentWrap("make video"); c.Priority = 2; }));
 				context.PrimeViewModel.AddNote(viewModelKit.ViewModelCreator.CreateNoteListObjectViewModel(
-					dbContext, c => { c.Title = "9:00 AM"; c.Text = FlowDocumentWrap("walk the dog"); }));
+					dbContext, c => { c.Title = "9:00 AM"; c.Text = FlowDocumentWrap("walk the dog"); c.Priority = 2; }));
 				context.PrimeViewModel.AddNote(viewModelKit.ViewModelCreator.CreateNoteListObjectViewModel(
-					dbContext, c => { c.Title = "9:30 AM"; c.Text = FlowDocumentWrap("eat dinner"); }));
+					dbContext, c => { c.Title = "9:30 AM"; c.Text = FlowDocumentWrap("eat dinner"); c.Priority = 2; }));
 				context.PrimeViewModel.AddNote(viewModelKit.ViewModelCreator.CreateNoteListObjectViewModel(
-					dbContext, c => { c.Title = "10:15 AM"; c.Text = FlowDocumentWrap("watch tv"); }));
+					dbContext, c => { c.Title = "10:15 AM"; c.Text = FlowDocumentWrap("watch tv"); c.Priority = 0; }));
 				context.PrimeViewModel.AddNote(viewModelKit.ViewModelCreator.CreateNoteListObjectViewModel(
-					dbContext, c => { c.Title = "11:30 AM"; c.Text = FlowDocumentWrap("jog"); }));
+					dbContext, c => { c.Title = "11:30 AM"; c.Text = FlowDocumentWrap("jog"); c.Priority = 2; }));
 				context.PrimeViewModel.AddNote(viewModelKit.ViewModelCreator.CreateNoteListObjectViewModel(
-					dbContext, c => { c.Title = "12:00 PM"; c.Text = FlowDocumentWrap("mop"); }));
+					dbContext, c => { c.Title = "12:00 PM"; c.Text = FlowDocumentWrap("mop"); c.Priority = 1; }));
 				context.PrimeViewModel.AddNote(viewModelKit.ViewModelCreator.CreateNoteListObjectViewModel(
-					dbContext, c => { c.Title = "1:00 PM"; c.Text = FlowDocumentWrap("kick it"); }));
+					dbContext, c => { c.Title = "1:00 PM"; c.Text = FlowDocumentWrap("kick it"); c.Priority = 0; }));
 				context.PrimeViewModel.AddNote(viewModelKit.ViewModelCreator.CreateNoteListObjectViewModel(
-					dbContext, c => { c.Title = "2:45 PM"; c.Text = FlowDocumentWrap("throw things"); }));
+					dbContext, c => { c.Title = "2:45 PM"; c.Text = FlowDocumentWrap("throw things"); c.Priority = 2; }));
 				context.PrimeViewModel.AddNote(viewModelKit.ViewModelCreator.CreateNoteListObjectViewModel(
-					dbContext, c => { c.Title = "7:00 PM"; c.Text = FlowDocumentWrap("sweep"); }));
+					dbContext, c => { c.Title = "7:00 PM"; c.Text = FlowDocumentWrap("sweep"); c.Priority = 1; }));
 				context.PrimeViewModel.AddNote(viewModelKit.ViewModelCreator.CreateNoteListObjectViewModel(
-					dbContext, c => { c.Title = "7:30 PM"; c.Text = FlowDocumentWrap("chill"); }));
+					dbContext, c => { c.Title = "7:30 PM"; c.Text = FlowDocumentWrap("chill"); c.Priority = 0; }));
 				context.PrimeViewModel.AddNote(viewModelKit.ViewModelCreator.CreateNoteListObjectViewModel(
-					dbContext, c => { c.Title = "8:00 PM"; c.Text = FlowDocumentWrap("run"); }));
+					dbContext, c => { c.Title = "8:00 PM"; c.Text = FlowDocumentWrap("run"); c.Priority = 0; }));
 				context.PrimeViewModel.AddNote(viewModelKit.ViewModelCreator.CreateNoteListObjectViewModel(
-					dbContext, c => { c.Title = "9:00 PM"; c.Text = FlowDocumentWrap("also run"); }));
+					dbContext, c => { c.Title = "9:00 PM"; c.Text = FlowDocumentWrap("also run"); c.Priority = 2; }));
 
 				context.NoteListViewModel.SaveListOrder();
 			}

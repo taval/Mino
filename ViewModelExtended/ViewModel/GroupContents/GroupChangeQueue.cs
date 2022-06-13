@@ -99,7 +99,7 @@ namespace ViewModelExtended.ViewModel
 		/// <param name="input"></param>
 		public void QueueOnAdd (GroupObjectViewModel input)
 		{
-			Group groop = input.Model.Group;
+			Group groop = input.Group;
 
 			if (Dictionaries.ContainsKey(groop)) {
 				IListItemDictionary dictionary = Dictionaries[groop];
@@ -115,7 +115,7 @@ namespace ViewModelExtended.ViewModel
 		/// <param name="input"></param>
 		public void QueueOnInsert (GroupObjectViewModel? target, GroupObjectViewModel input)
 		{
-			Group groop = input.Model.Group;
+			Group groop = input.Group;
 
 			if (Dictionaries.ContainsKey(groop)) {
 				IListItemDictionary dictionary = Dictionaries[groop];
@@ -133,9 +133,9 @@ namespace ViewModelExtended.ViewModel
 		/// <param name="target"></param>
 		public void QueueOnReorder (GroupObjectViewModel source, GroupObjectViewModel target)
 		{
-			Group groop = source.Model.Group;
+			Group groop = source.Group;
 
-			if (source.Model.Group != target.Model.Group) return;
+			if (source.Group != target.Group) return;
 
 			if (Dictionaries.ContainsKey(groop)) {
 				IListItemDictionary dictionary = Dictionaries[groop];
@@ -151,7 +151,7 @@ namespace ViewModelExtended.ViewModel
 		/// <param name="input"></param>
 		public void QueueOnRemove (GroupObjectViewModel input)
 		{
-			Group groop = input.Model.Group;
+			Group groop = input.Group;
 
 			if (Dictionaries.ContainsKey(groop)) {
 				IListItemDictionary dictionary = Dictionaries[groop];

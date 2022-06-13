@@ -12,6 +12,9 @@ namespace ViewModelExtended.ViewModel
 	{
 		#region Model
 
+		/// <summary>
+		/// the wrapper for all instantiated data associated with a particular model object
+		/// </summary>
 		public GroupListObject Model {
 			get { return f_Model; }
 		}
@@ -24,10 +27,16 @@ namespace ViewModelExtended.ViewModel
 
 		#region IObject
 
+		/// <summary>
+		/// list location data
+		/// </summary>
 		public Node Node {
 			get { return Model.Node; }
 		}
 
+		/// <summary>
+		/// temporal data related to the model
+		/// </summary>
 		public Timestamp Timestamp {
 			get { return Model.Timestamp; }
 		}
@@ -38,15 +47,28 @@ namespace ViewModelExtended.ViewModel
 
 		#region IListItem
 
+		/// <summary>
+		/// identifier for the data wrapper containing identifiers for the model and all associated data
+		/// </summary>
 		public int ItemId {
 			get { return Model.Item.Id; }
 		}
 
+		/// <summary>
+		/// identifier for the data model the item is based around
+		/// </summary>
 		public int DataId {
 			get { return Model.Data.Id; }
 		}
 
+		/// <summary>
+		/// get the previous node in the list containing this one
+		/// </summary>
 		public IListItem? Previous { get; set; }
+
+		/// <summary>
+		/// get the next node in the list containing this one
+		/// </summary>
 		public IListItem? Next { get; set; }
 
 		#endregion
@@ -55,6 +77,9 @@ namespace ViewModelExtended.ViewModel
 
 		#region ISelectable
 
+		/// <summary>
+		/// this object is the one currently under edit
+		/// </summary>
 		public bool IsSelected {
 			get { return f_IsSelected; }
 			set { Set(ref f_IsSelected, value); }
@@ -68,6 +93,9 @@ namespace ViewModelExtended.ViewModel
 
 		#region Data
 
+		/// <summary>
+		/// represents the title, for organizing, filename, etc
+		/// </summary>
 		public string Title {
 			get { return Model.Data.Title; }
 			set {
