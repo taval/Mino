@@ -118,12 +118,14 @@
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="*" />
                             <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="*" />
                         </Grid.ColumnDefinitions>
 
+                        
+                        
                         <Button
 							Template="{ StaticResource closeButtonTemplate }"
 							Style="{ StaticResource closeButtonStyle }"
-							Grid.Column="0"
 							Margin="0 0 10 0"
 							Padding="10 0"
 							x:Name="RemoveItemButton"
@@ -133,11 +135,19 @@
 								(local:ListAction.RemoveCommand),
 								RelativeSource={ RelativeSource AncestorType={ x:Type local:NoteListView } } }" />
 
-                        <StackPanel Grid.Column="1" Background="Transparent">
+                        <StackPanel Grid.Column="1" Background="Transparent" MinWidth="96">
                             <TextBlock Text="{ Binding ItemId, StringFormat='Id: {0}', UpdateSourceTrigger=PropertyChanged }" />
                             <TextBlock FontWeight="Bold" Text="{ Binding Title }" />
                             <TextBlock Text="{ Binding Text, Converter={ local:FlowDocumentStringToStubConverter } }" />
                         </StackPanel>
+
+                        <Ellipse
+                            Grid.Column="2"
+							Width="18"
+							Height="18"
+							Stroke="#999"
+							StrokeThickness="0.5"
+							Fill="{ Binding Priority, Converter={ local:PriorityToColorConverter } }" />
 
                         <i:Interaction.Triggers>
 

@@ -397,17 +397,29 @@ namespace ViewModelExtended.ViewModel
 		/// <param name="input"></param>
 		public void Remove (GroupObjectViewModel input)
 		{
-			UnsetNoteObserver(input);
-
-			f_Changes.QueueOnRemove(input);
-
-			f_Contents.Remove(input);
-
-			AlertSizeChanged();
-
 			using (IDbContext dbContext = f_ViewModelKit.CreateDbContext()) {
-				f_ViewModelKit.ViewModelCreator.DestroyGroupObjectViewModel(dbContext, input);
+				RemoveGroupObjectViewModel(dbContext, input, true);
 			}
+		}
+
+		/// <summary>
+		/// remove the object from list (list data source inferred from target):
+		/// - remove event handlers
+		/// - remove from dirty list - the appropriate group's dictionary is found via item's Group
+		/// - remove from list
+		/// - notify the view the size has changed
+		/// - destroy the database record
+		/// </summary>
+		/// <param name="dbContext"></param>
+		/// <param name="target"></param>
+		/// <param name="isVisibleList"></param>
+		private void RemoveGroupObjectViewModel (IDbContext dbContext, GroupObjectViewModel target, bool isVisibleList)
+		{
+			UnsetNoteObserver(target);
+			f_Changes.QueueOnRemove(target);
+			f_Contents.Remove(target);
+			if (isVisibleList) AlertSizeChanged();
+			f_ViewModelKit.ViewModelCreator.DestroyGroupObjectViewModel(dbContext, target);
 		}
 
 		/// <summary>
@@ -479,27 +491,6 @@ namespace ViewModelExtended.ViewModel
 			}
 		}
 
-		// TODO: this is sort of a hack, should go back to normal assignment and notify and not depend on getter to always be called when changes are made
-		//public void SetNoteObserver (NoteListObjectViewModel subject, GroupObjectViewModel observer)
-		//{
-		//	int observerId = observer.ItemId;
-
-		//	if (f_Delegates.ContainsKey(observerId)) return;
-
-		//	PropertyChangedEventHandler handler = (sender, e) =>
-		//	{
-		//		if (e.PropertyName == "Title") {
-		//			string _ = observer.Title;
-		//		}
-		//		else if (e.PropertyName == "Text") {
-		//			string _ = observer.Text;
-		//		}
-		//	};
-
-		//	subject.PropertyChanged += handler;
-
-		//	f_Delegates.Add(observerId, f_Delegates.Create(subject, handler));
-		//}
 		public void SetNoteObserver (NoteListObjectViewModel subject, GroupObjectViewModel observer)
 		{
 			int observerId = observer.ItemId;
@@ -677,6 +668,63 @@ namespace ViewModelExtended.ViewModel
 		#region Methods: Lists
 
 		/// <summary>
+		/// internal function for setting up a populated list, given a Group key
+		/// </summary>
+		/// <param name="dbContext"></param>
+		/// <param name="groop"></param>
+		/// <returns></returns>
+		private IObservableList<GroupObjectViewModel> GetGroupObjectsByGroup (IDbContext dbContext, Group groop)
+		{
+			// select the list of the particular group or the display group
+			IObservableList<GroupObjectViewModel> list = f_Contents.GetListByGroupKey(groop);
+
+			// populate the viewmodel list of that group
+			if (!list.Any()) {
+				IList<GroupObjectViewModel> tempList = new List<GroupObjectViewModel>();
+
+				PopulateGroup(dbContext, tempList, groop);
+
+				IEnumerable<GroupObjectViewModel> sortedObjects =
+					f_ViewModelKit.DbListHelper.SortListObjects(tempList);
+
+				list.Clear();
+				list.AddSortedRange(sortedObjects);
+			}
+
+			return list;
+		}
+
+		/// <summary>
+		/// Remove a single note object from a group:
+		/// - get a populated GroupObject list for the given Group
+		/// - select bound group object matching the unbound group object in the original query
+		/// - remove the bound group object from the output list
+		/// </summary>
+		/// <param name="note"></param>
+		/// <param name="groop"></param>
+		public void RemoveGroupObjectByGroup (Note note, Group groop)
+		{
+			using (IDbContext dbContext = f_ViewModelKit.CreateDbContext()) {
+				RemoveGroupNoteByGroup(dbContext, note, groop);
+			}
+		}
+
+		/// <summary>
+		/// internal implementation of RemoveGroupObjectByGroup
+		/// </summary>
+		/// <param name="dbContext"></param>
+		/// <param name="note"></param>
+		/// <param name="groop"></param>
+		private void RemoveGroupNoteByGroup (IDbContext dbContext, Note note, Group groop)
+		{
+			IObservableList<GroupObjectViewModel>? list = GetGroupObjectsByGroup(dbContext, groop);
+			IEnumerable<GroupObjectViewModel> match =
+				list.Where((n) => n.DataId == note.Id);
+
+			if (match.Any()) RemoveGroupObjectViewModel(dbContext, match.Single(), list == f_Contents.List);
+		}
+
+		/// <summary>
 		/// removes all dependent GroupObjects (notes) associated with a given NoteListObject
 		/// </summary>
 		/// <param name="note"></param>
@@ -688,49 +736,10 @@ namespace ViewModelExtended.ViewModel
 				IQueryable<GroupObjectViewModel> groupObjectsByNote =
 					f_ViewModelKit.DbQueryHelper.GetGroupObjectsByNote(dbContext, note);
 
-				// for each group represented in original query (can just iterate over the query since one group exists per group object)
+				// remove note for each group represented in original query
+				// (can just iterate over the query since one group exists per group object)
 				foreach (GroupObjectViewModel obj in groupObjectsByNote) {
-					IObservableList<GroupObjectViewModel>? list = null;
-
-					// select the list of the particular group or the display group
-					list = f_Contents.GetListByGroupKey(obj.Group);
-
-					// populate the viewmodel list of that group
-					if (!list.Any()) {
-						IList<GroupObjectViewModel> tempList = new List<GroupObjectViewModel>();
-
-						PopulateGroup(dbContext, tempList, obj.Group);
-
-						IEnumerable<GroupObjectViewModel> sortedObjects =
-							f_ViewModelKit.DbListHelper.SortListObjects(tempList);
-
-						list.Clear();
-						list.AddSortedRange(sortedObjects);
-					}
-					
-					// select bound group object matching the unbound group object in the original query
-					IEnumerable<GroupObjectViewModel> match =
-						list.Items.Where((n) => n.DataId == note.Id);
-
-					// remove the bound group object from the output list
-					if (match.Any()) {
-						GroupObjectViewModel item = match.Single();
-
-						// remove event handlers
-						UnsetNoteObserver(item);
-
-						// remove from dirty list - the appropriate group's dictionary is found via item's Group
-						f_Changes.QueueOnRemove(item);
-
-						// remove from list
-						list.Remove(item);
-
-						// notify the view the size has changed
-						if (list == f_Contents.List) AlertSizeChanged();
-
-						// destroy the database record
-						f_ViewModelKit.ViewModelCreator.DestroyGroupObjectViewModel(dbContext, item);
-					}
+					RemoveGroupNoteByGroup(dbContext, note, obj.Group);
 				}
 			}
 		}

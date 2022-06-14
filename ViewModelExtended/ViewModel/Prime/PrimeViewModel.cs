@@ -291,14 +291,27 @@ namespace ViewModelExtended.ViewModel
 				return;
 			}
 
-			foreach (GroupListObjectViewModel groop in groups) {
-				// create a GroupObjectViewModel (a 'GroupNote') for each group, if one does not already exist
+			// find groups which are no longer associated with a note
+			//List<GroupListObjectViewModel> groupsToRemoveNote = new List<GroupListObjectViewModel>();
+				//GroupTabsViewModel.GroupListViewModel.Items.Except(groups, new GroupListObjectDataEqualityComparer());
+
+			foreach (GroupListObjectViewModel groop in GroupTabsViewModel.GroupListViewModel.Items) {
 				Group groopData = groop.Model.Data;
 				Note noteData = target.Model.Data;
 
+				// remove a GroupObject if no longer associated with a note
+				IEnumerable<GroupListObjectViewModel> match =
+					groups.Where((gn) => gn.DataId == groop.DataId);
+
+				if (!match.Any()) {
+					GroupTabsViewModel.GroupContentsViewModel.RemoveGroupObjectByGroup(noteData, groopData);
+					continue;
+				}
+
+				// if GroupObjectViewModel already exists in GroupContentsViewModel, skip this iteration
 				if (GroupTabsViewModel.GroupContentsViewModel.HasNoteInGroup(groopData, noteData)) continue;
 
-				// associate a newly created GroupObject with the given temporary GroupObject
+				// associate a GroupObjectViewModel (aka 'GroupNote') newly created for a group with given GroupObject
 				GroupObjectViewModel groupNote = GroupTabsViewModel.GroupContentsViewModel.Create(groopData, noteData);
 
 				// add the GroupObject to the contents list

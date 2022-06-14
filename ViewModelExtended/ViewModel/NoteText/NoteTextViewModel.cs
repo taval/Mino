@@ -6,10 +6,7 @@ using System.Threading.Tasks;
 using System.Windows.Input;
 using ViewModelExtended.Model;
 
-// TODO: convert the list of group names associated with a particular note and populate the tags form with a string containing those names. The form should always represent the existing state
-// TODO: there should be no error on the tags list if no tags are present in the form or attached to the note
-
-// TODO: selected priority is not displayed on load, but shows up when an item is selected.
+// TODO: there should be a PropertyChangedEventHandler for NoteTextViewModel for when GroupContentsViewModel is dropped onto so the GroupStrings is updated in the view
 
 namespace ViewModelExtended.ViewModel
 {
@@ -32,6 +29,7 @@ namespace ViewModelExtended.ViewModel
 				NotifyPropertyChanged(nameof(Title));
 				NotifyPropertyChanged(nameof(Text));
 				NotifyPropertyChanged(nameof(Priority));
+				GroupStrings = NoteGroupsToString(ContentData?.Model.Data);
 			}
 		}
 
@@ -88,9 +86,6 @@ namespace ViewModelExtended.ViewModel
 				}
 			}
 		}
-
-		// TODO: integer is set on model, not string. make sure when the model is loaded, integers are set and read by view as strings (Priority), and when saving, all priority strings convert to int correctly
-		// alternatively, populate the PriorityTypes and ItemsSource at the same time, to ensure the ItemsSource index is equivalent to the priority type id on PriorityTypes. then just pass the id around and bind to SelectedIndex rather than SelectedValue.
 
 		public int LineNumber {
 			get { return f_LineNumber; }
@@ -218,6 +213,7 @@ namespace ViewModelExtended.ViewModel
 			NotifyPropertyChanged(nameof(Title));
 			NotifyPropertyChanged(nameof(Text));
 			NotifyPropertyChanged(nameof(Priority));
+			NotifyPropertyChanged(nameof(GroupStrings));
 		}
 
 		#endregion
@@ -289,6 +285,20 @@ namespace ViewModelExtended.ViewModel
 				if (hasTitleGroup.Any()) {
 					yield return hasTitleGroup.Single();
 				}
+			}
+		}
+
+		public string NoteGroupsToString (Note? note)
+		{
+			if (note == null) return String.Empty;
+
+			using (IDbContext dbContext = f_ViewModelKit.CreateDbContext()) {
+				// get the unbound data objects
+				IQueryable<GroupObjectViewModel> notesInGroup =
+					f_ViewModelKit.DbQueryHelper.GetGroupObjectsByNote(dbContext, note);
+
+				// create a string by joining group titles separated by space
+				return String.Join(" ", notesInGroup.Select((groupNote) => groupNote.Group.Title));
 			}
 		}
 
