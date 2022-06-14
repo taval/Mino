@@ -6,8 +6,7 @@ using System.Threading.Tasks;
 using System.Windows.Input;
 using ViewModelExtended.Model;
 
-// TODO: there should be a PropertyChangedEventHandler for NoteTextViewModel for when GroupContentsViewModel is dropped onto so the GroupStrings is updated in the view
-
+// TODO: methods here in NoteTextViewModel associated with anything other than NoteListObjectViewModel belong in PrimeViewModel. This entails setting GroupStrings externally when ContentData is changed
 namespace ViewModelExtended.ViewModel
 {
 	public class NoteTextViewModel : ViewModelBase
@@ -29,7 +28,13 @@ namespace ViewModelExtended.ViewModel
 				NotifyPropertyChanged(nameof(Title));
 				NotifyPropertyChanged(nameof(Text));
 				NotifyPropertyChanged(nameof(Priority));
-				GroupStrings = NoteGroupsToString(ContentData?.Model.Data);
+				if (f_ContentData != null) {
+					Note note = f_ContentData.Model.Data;
+					GroupStrings = NoteGroupsToString(note);
+				}
+				else {
+					GroupStrings = String.Empty;
+				}
 			}
 		}
 
@@ -208,7 +213,6 @@ namespace ViewModelExtended.ViewModel
 		public void Load ()
 		{
 			// TODO: datamodel load stuff here
-			// TODO: this is a hack: the PriorityTypes of NoteListObjectViewModel are set in the wrapper command of this function. This should actually operate the same as any other property: PrimeViewModel should set a PropertyChangedEventHandler on the static PriorityTypes property somehow which bubbles up to NoteTextViewModel and repeats it
 			NotifyPropertyChanged(nameof(PriorityTypes));
 			NotifyPropertyChanged(nameof(Title));
 			NotifyPropertyChanged(nameof(Text));
@@ -288,10 +292,8 @@ namespace ViewModelExtended.ViewModel
 			}
 		}
 
-		public string NoteGroupsToString (Note? note)
+		public string NoteGroupsToString (Note note)
 		{
-			if (note == null) return String.Empty;
-
 			using (IDbContext dbContext = f_ViewModelKit.CreateDbContext()) {
 				// get the unbound data objects
 				IQueryable<GroupObjectViewModel> notesInGroup =

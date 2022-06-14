@@ -19,9 +19,6 @@ namespace ViewModelExtended.Command
 		public override void Execute (object parameter)
 		{
 			// set Priority ComboBox to list of strings defined in NoteListObjectViewModel class
-			//NoteTextView noteTextView = UIHelper.GetChildOfType<NoteTextView>(Application.Current.MainWindow);
-			//ComboBox comboBox = UIHelper.GetChildOfType<ComboBox>(noteTextView);
-
 			NoteListObjectViewModel.PriorityTypes.Add("Low");
 			NoteListObjectViewModel.PriorityTypes.Add("Medium");
 			NoteListObjectViewModel.PriorityTypes.Add("High");

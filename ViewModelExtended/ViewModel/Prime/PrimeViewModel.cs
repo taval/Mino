@@ -9,6 +9,9 @@ using System.Windows;
 using System.Windows.Input;
 using ViewModelExtended.Model;
 
+// TODO: factor out 'controllers' from each section of PrimeViewModel (NoteList, GroupTabs) and sub-GroupTabs (GroupList, GroupContents)
+//       (GroupTabs is not an arbitrary distinction but its own target. It should be equivalent in the call hierarchy to a GroupList or GroupContents though how it is organized file-wise may be different)
+
 // TODO: incomplete/invalid Notes should be disallowed from GroupContentsViewModel addition/insertion
 
 namespace ViewModelExtended.ViewModel
@@ -153,6 +156,7 @@ namespace ViewModelExtended.ViewModel
 			SetGroupCountChangedEventHandler();
 			SetGroupNoteCountChangedEventHandler();
 			SetCursorPosChangedEventHandler();
+			SetGroupStringsChangedEventHandler();
 		}
 
 		public void SetSelectedChangedEventHandler ()
@@ -223,6 +227,25 @@ namespace ViewModelExtended.ViewModel
 			};
 
 			NoteTextViewModel.PropertyChanged += handler;
+		}
+
+		private void SetGroupStringsChangedEventHandler ()
+		{
+			PropertyChangedEventHandler handler = (sender, e) =>
+			{
+				if (e.PropertyName == "Incoming") {
+					NoteListObjectViewModel? incoming = GroupTabsViewModel.GroupContentsViewModel.Incoming;
+
+					if (incoming != null &&
+						SelectedNoteViewModel != null &&
+						incoming.DataId == SelectedNoteViewModel.DataId)
+					{
+						NoteTextViewModel.GroupStrings = NoteTextViewModel.NoteGroupsToString(incoming.Model.Data);
+					}
+				}
+			};
+
+			GroupTabsViewModel.GroupContentsViewModel.PropertyChanged += handler;
 		}
 
 		#endregion

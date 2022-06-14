@@ -200,7 +200,7 @@ namespace ViewModelExtended.ViewModel
 		/// the drag-drop data object to be the basis for the GroupObjectViewModel
 		/// </summary>
 		public NoteListObjectViewModel? Incoming {
-			private get { return f_Incoming; }
+			get { return f_Incoming; }
 			set {
 				if (value == null) {
 					f_Incoming = null;
@@ -621,6 +621,8 @@ namespace ViewModelExtended.ViewModel
 
 			// clear incoming for next transfer
 			f_TempGroupObjectViewModel = null;
+			// explicitly call NotifyPropertyChanged for any responses to this requiring Incoming value prior to clear
+			NotifyPropertyChanged(nameof(Incoming));
 			Incoming = null;
 		}
 
