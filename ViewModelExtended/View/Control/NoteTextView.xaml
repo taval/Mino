@@ -23,9 +23,9 @@
         <TextBox
             x:Name="TextBox_Title"
 			Margin="0 16 0 8"
-			Height="32"
+			Height="24"
 			Grid.Row="0"
-			FontSize="24"
+			FontSize="16"
 			Style="{ StaticResource warnHighlightStyle }">
             <TextBox.Text>
                 <Binding Path="Title" UpdateSourceTrigger="PropertyChanged" ValidatesOnExceptions="True">

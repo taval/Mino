@@ -22,6 +22,12 @@ namespace ViewModelExtended
 		public static object GetSelected (DependencyObject o) => (object)o.GetValue(Selected);
 		public static void SetSelected (DependencyObject o, object val) => o.SetValue(Selected, val);
 
+		public static readonly DependencyProperty SelectedTitle = DependencyProperty.RegisterAttached(
+		nameof(SelectedTitle), typeof(string), typeof(ListState), new FrameworkPropertyMetadata(
+		defaultValue: String.Empty, flags: FrameworkPropertyMetadataOptions.BindsTwoWayByDefault));
+		public static string GetSelectedTitle (DependencyObject o) => (string)o.GetValue(SelectedTitle);
+		public static void SetSelectedTitle (DependencyObject o, string val) => o.SetValue(SelectedTitle, val);
+
 		/// <summary>
 		/// a newly inserted item
 		/// </summary>

@@ -20,6 +20,7 @@ namespace ViewModelExtended.Command
 
 		public override void Execute (object parameter)
 		{
+
 			f_PrimeViewModel.CreateNoteAt((NoteListObjectViewModel)parameter);
 		}
 	}

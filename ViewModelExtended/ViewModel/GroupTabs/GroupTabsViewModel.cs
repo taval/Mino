@@ -239,9 +239,7 @@ namespace ViewModelExtended.ViewModel
 			GroupListObjectViewModel? highlightedGroup = GroupListViewModel.Highlighted;
 
 			if (highlightedGroup != null) {
-				if (GroupSelectCommand.CanExecute(highlightedGroup)) {
-					GroupSelectCommand.Execute(highlightedGroup);
-				}
+				SelectGroup(highlightedGroup);
 			}
 
 			// if no notes exist in the group, do nothing
@@ -252,9 +250,7 @@ namespace ViewModelExtended.ViewModel
 			GroupObjectViewModel highlightedGroupNote = GroupContentsViewModel.Highlighted;
 
 			if (highlightedGroupNote != null) {
-				if (GroupNoteSelectCommand.CanExecute(highlightedGroupNote)) {
-					GroupNoteSelectCommand.Execute(highlightedGroupNote);
-				}
+				SelectGroupNote(highlightedGroupNote);
 			}
 		}
 

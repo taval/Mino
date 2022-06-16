@@ -23,10 +23,16 @@
                 <RowDefinition MinHeight="360" Height="*" />
             </Grid.RowDefinitions>
 
+            <!--Path=DataContext.SelectedNoteTitle,-->
             <local:NoteListView
 				Margin="8 0 4 0"
 				DataContext="{ Binding NoteListViewModel, diag:PresentationTraceSources.TraceLevel=High }"
 
+                local:ListState.SelectedTitle="{ Binding
+					RelativeSource={ RelativeSource AncestorType={ x:Type local:PrimeView } },
+					Path=DataContext.SelectedNoteViewModel.Title,
+					diag:PresentationTraceSources.TraceLevel=High }"
+                
 				local:ListAction.CreateAtCommand="{ Binding
 					RelativeSource={ RelativeSource AncestorType={ x:Type local:PrimeView } },
 					Path=DataContext.NoteCreateAtCommand,

@@ -26,11 +26,22 @@ namespace ViewModelExtended.ViewModel
 		/// </summary>
 		public NoteListObjectViewModel? SelectedNoteViewModel {
 			get { return f_SelectedNoteViewModel; }
-			set { Set(ref f_SelectedNoteViewModel, value); }
+			set {
+				Set(ref f_SelectedNoteViewModel, value);
+				NotifyPropertyChanged(nameof(SelectedNoteTitle));
+			}
 		}
 
 		private NoteListObjectViewModel? f_SelectedNoteViewModel;
 
+		public string SelectedNoteTitle {
+			get {
+				if (f_SelectedNoteViewModel != null) {
+					return f_SelectedNoteViewModel.Title;
+				}
+				return String.Empty;
+			}
+		}
 		#endregion
 
 

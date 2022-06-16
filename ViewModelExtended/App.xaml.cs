@@ -8,6 +8,10 @@ using System.Windows;
 using ViewModelExtended.Model;
 using ViewModelExtended.ViewModel;
 
+// TODO: remember the 'Allow new groups' setting
+
+// TODO: Allow groups, selected tab, selected NoteList/GroupList/GroupContents object are configuration state which should be preserved in db
+
 // TODO: make modules for view, vm, db, etc.
 
 // TODO: most exceptions should trigger a rollback to the last known good state and shutdown/commit properly (exception safety)
@@ -47,8 +51,8 @@ namespace ViewModelExtended
 
 			#region Load Test Data
 
-			AddNoteListObjectTestData(viewModelKit, context);
-			AddGroupListObjectTestData(viewModelKit, context);
+			//AddNoteListObjectTestData(viewModelKit, context);
+			//AddGroupListObjectTestData(viewModelKit, context);
 
 			#endregion
 

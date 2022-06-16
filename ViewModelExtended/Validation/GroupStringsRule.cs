@@ -31,6 +31,7 @@ namespace ViewModelExtended
 
         bool IsValidGroupStrings (string? groupStrings)
         {
+            // invalid on null, empty string is ok
             if (groupStrings == null) return false;
             if (groupStrings.Equals(String.Empty)) return true;
 

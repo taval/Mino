@@ -6,8 +6,6 @@ using System.Text;
 using System.Windows.Input;
 using ViewModelExtended.Model;
 
-// TODO: each note should be assigned a priority (important, urgent, etc). from a dropdown on NoteTextView. this priority value will be displayed in the form of a color on each note/groupnote
-
 // TODO: Group should be renamed Tag, as in 'this entry is tagged with x, y, and z.'
 
 namespace ViewModelExtended.ViewModel

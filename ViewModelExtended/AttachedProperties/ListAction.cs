@@ -10,7 +10,7 @@ using System.Windows.Input;
  * local:ListAction.InsertCommand
  * local:ListAction.SelectCommand
  * local:ListAction.RemoveCommand
- * 
+ * local:ListState.SelectedTitle
  * remove all others
  */
 

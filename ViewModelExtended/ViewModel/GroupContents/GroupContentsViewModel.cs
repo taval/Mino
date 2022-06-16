@@ -6,6 +6,9 @@ using System.Text;
 using System.Windows.Input;
 using ViewModelExtended.Model;
 
+// TODO: create an option for sorting by priority
+// TODO: create an option for filtering by priority or tag
+
 // TODO: review this and all other classes for single-use event handlers which may outlive the source object and assign them to a container which can be cleared on delete
 
 namespace ViewModelExtended.ViewModel

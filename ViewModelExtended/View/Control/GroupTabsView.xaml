@@ -52,7 +52,7 @@
 				Style="{ StaticResource buttonStyle }"
 				Name="AddButton"
 				Content="+"
-                DataContext="{ Binding GroupListViewModel.Highlighted }"
+                CommandParameter="{ Binding GroupListViewModel.Highlighted }"
                 Command="{ Binding
 					Path=DataContext.GroupCreateAtCommand,
 					RelativeSource={ RelativeSource AncestorType={ x:Type local:GroupTabsView } } }" />

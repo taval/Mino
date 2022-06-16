@@ -51,6 +51,7 @@
                 <RowDefinition Height="*" />
             </Grid.RowDefinitions>
 
+            <!--Text="{ Binding Highlighted.Title }"-->
             <TextBlock
 				FontWeight="Bold"
 				FontSize="12"
@@ -58,7 +59,9 @@
             <TextBlock
 				Grid.Row="1"
 				FontSize="9"
-				Text="{ Binding Highlighted.Title }" />
+				Text="{ Binding
+					(local:ListState.SelectedTitle),
+					RelativeSource={ RelativeSource AncestorType={ x:Type local:NoteListView } } }" />
 
             <Button
 				Grid.Column="1"
@@ -67,7 +70,7 @@
 				Style="{ StaticResource buttonStyle }"
 				Name="AddButton"
 				Content="+"
-                DataContext="{ Binding Highlighted }"
+                CommandParameter="{ Binding Highlighted }"
                 Command="{ Binding
 					(local:ListAction.CreateAtCommand),
 					RelativeSource={ RelativeSource AncestorType={ x:Type local:NoteListView } } }" />

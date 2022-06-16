@@ -6,6 +6,8 @@ using System.Threading.Tasks;
 using System.Windows.Input;
 using ViewModelExtended.Model;
 
+// TODO/NOTE: the GroupStrings textbox will always be invalid as long as a newly-created note's title is invalid. As soon as a valid title is entered, even if it is invalidated afterward, GroupStrings will validate normally. This is because a new object is not created until it validates for the first time: commands are blocked before then. This is logical behavior, but not very intuitive for the user. A user message might be helpful or supress the error for that particular case to the user (not in implementation - still must create a valid object or block creation based on that)
+
 // TODO: methods here in NoteTextViewModel associated with anything other than NoteListObjectViewModel belong in PrimeViewModel. This entails setting GroupStrings externally when ContentData is changed
 namespace ViewModelExtended.ViewModel
 {
