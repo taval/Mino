@@ -31,6 +31,8 @@ namespace ViewModelExtended.Model
 		public DbSet<NoteListItem> NoteListItems { get; set; }
 		public DbSet<GroupListItem> GroupListItems { get; set; }
 		public DbSet<GroupItem> GroupItems { get; set; }
+		public DbSet<State> States { get; set; }
+
 
 		#endregion
 
@@ -40,10 +42,15 @@ namespace ViewModelExtended.Model
 		public IQueryable<GroupListItem> GetAllGroupListItems ();
 		public IQueryable<GroupItem> GetAllGroupItems ();
 		public IQueryable<GroupItem> GetGroupItemsInGroup (Group groop);
+		public IQueryable<State> GetState (string key);
 
 		#endregion
 
 		#region Simple Table Objects
+
+		public State CreateState (string key, int value);
+		public void UpdateState (State state, int value);
+		public void DeleteState (State state);
 
 		public Node CreateNode (Node? previous, Node? next, bool temporary = false);
 		public void UpdateNode (Node target, Node? previous, Node? next, bool temporary = false);

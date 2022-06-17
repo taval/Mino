@@ -122,6 +122,7 @@ namespace ViewModelExtended.ViewModel
 
 		#region ViewModel Contexts
 
+		public StateViewModel StateViewModel { get; private set; }
 		public StatusBarViewModel StatusBarViewModel { get; private set; }
 		public NoteTextViewModel NoteTextViewModel { get; private set; }
 		public GroupTabsViewModel GroupTabsViewModel { get; private set; }
@@ -141,6 +142,7 @@ namespace ViewModelExtended.ViewModel
 		//	NoteListViewModel noteListViewModel)
 		//{
 		public PrimeViewModel (
+			StateViewModel stateViewModel,
 			StatusBarViewModel statusBarViewModel,
 			NoteTextViewModel noteTextViewModel,
 			GroupTabsViewModel groupTabsViewModel,
@@ -150,6 +152,7 @@ namespace ViewModelExtended.ViewModel
 			//f_ViewModelKit = viewModelKit;
 
 			// set ViewModel context dependencies
+			StateViewModel = stateViewModel;
 			NoteListViewModel = noteListViewModel;
 			GroupTabsViewModel = groupTabsViewModel;
 			NoteTextViewModel = noteTextViewModel;
@@ -166,7 +169,7 @@ namespace ViewModelExtended.ViewModel
 			SetNoteCountChangedEventHandler();
 			SetGroupCountChangedEventHandler();
 			SetGroupNoteCountChangedEventHandler();
-			SetCursorPosChangedEventHandler();
+			SetNoteTextChangedEventHandler();
 			SetGroupStringsChangedEventHandler();
 		}
 
@@ -225,7 +228,7 @@ namespace ViewModelExtended.ViewModel
 			GroupTabsViewModel.PropertyChanged += handler;
 		}
 
-		private void SetCursorPosChangedEventHandler ()
+		private void SetNoteTextChangedEventHandler ()
 		{
 			PropertyChangedEventHandler handler = (sender, e) =>
 			{
@@ -234,6 +237,9 @@ namespace ViewModelExtended.ViewModel
 				}
 				else if (e.PropertyName == "ColumnNumber") {
 					StatusBarViewModel.NoteTextCursorColumnPos = NoteTextViewModel.ColumnNumber;
+				}
+				else if (e.PropertyName == "IsNewGroupAllowed") {
+					StateViewModel.IsNewGroupAllowed = NoteTextViewModel.IsNewGroupAllowed;
 				}
 			};
 
@@ -275,9 +281,17 @@ namespace ViewModelExtended.ViewModel
 				AddNote(NoteListViewModel.Create());
 			}
 
-			// select the first note
-			NoteListViewModel.Highlighted = NoteListViewModel.Items.First();
-			NoteListObjectViewModel highlighted = NoteListViewModel.Highlighted;
+			// select the most recently selected or first note
+			IEnumerable<NoteListObjectViewModel> match =
+				NoteListViewModel.Items.Where((item) => StateViewModel.SelectedNoteListItemId == item.ItemId);
+
+			if (match.Any()) {
+				NoteListViewModel.Highlighted = match.First();
+			}
+			else {
+				NoteListViewModel.Highlighted = NoteListViewModel.Items.First();
+			}
+			NoteListObjectViewModel? highlighted = NoteListViewModel.Highlighted;
 
 			if (highlighted != null) {
 				if (NoteSelectCommand.CanExecute(highlighted)) {
@@ -422,6 +436,7 @@ namespace ViewModelExtended.ViewModel
 			SelectedNoteViewModel = note;
 			NoteTextViewModel.ContentData = note;
 			NoteTextViewModel.ContentData.IsSelected = true;
+			StateViewModel.SelectedNoteListItemId = note.ItemId;
 		}
 
 		/// <summary>
@@ -524,6 +539,7 @@ namespace ViewModelExtended.ViewModel
 			//f_GroupListViewModel.Shutdown();
 			GroupTabsViewModel.Shutdown();
 			NoteListViewModel.Shutdown();
+			StateViewModel.Shutdown();
 		}
 
 		#endregion

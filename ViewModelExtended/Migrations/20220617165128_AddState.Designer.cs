@@ -2,15 +2,17 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using ViewModelExtended.Model;
 
 namespace ViewModelExtended.Migrations
 {
     [DbContext(typeof(ViewModelExtended.Model.DbContext))]
-    partial class DbContextModelSnapshot : ModelSnapshot
+    [Migration("20220617165128_AddState")]
+    partial class AddState
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder

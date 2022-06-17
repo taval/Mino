@@ -6,6 +6,7 @@ namespace ViewModelExtended.ViewModel
 {
 	public class ViewModelContext : IViewModelContext
 	{
+		public StateViewModel StateViewModel { get; private set; }
 		public NoteListViewModel NoteListViewModel { get; private set; }
 		public GroupListViewModel GroupListViewModel { get; private set; }
 		public NoteTextViewModel NoteTextViewModel { get; private set; }
@@ -17,18 +18,21 @@ namespace ViewModelExtended.ViewModel
 
 		public ViewModelContext (IViewModelCreator viewModelCreator)
 		{
+			StateViewModel = viewModelCreator.CreateStateViewModel();
+
 			NoteListViewModel = viewModelCreator.CreateNoteListViewModel();
 			GroupListViewModel = viewModelCreator.CreateGroupListViewModel();
 
-			NoteTextViewModel = viewModelCreator.CreateNoteTextViewModel();
+			NoteTextViewModel = viewModelCreator.CreateNoteTextViewModel(StateViewModel);
 			GroupContentsViewModel = viewModelCreator.CreateGroupContentsViewModel(NoteListViewModel);
 
 			StatusBarViewModel = viewModelCreator.CreateStatusBarViewModel();
 
-			GroupTabsViewModel = viewModelCreator.CreateGroupTabsViewModel(GroupListViewModel, GroupContentsViewModel);
+			GroupTabsViewModel = viewModelCreator.CreateGroupTabsViewModel(
+				StateViewModel, GroupListViewModel, GroupContentsViewModel);
 
 			PrimeViewModel = viewModelCreator.CreatePrimeViewModel(
-				StatusBarViewModel, NoteTextViewModel, GroupTabsViewModel, NoteListViewModel);
+				StateViewModel, StatusBarViewModel, NoteTextViewModel, GroupTabsViewModel, NoteListViewModel);
 
 			MainWindowViewModel = viewModelCreator.CreateMainWindowViewModel();
 		}

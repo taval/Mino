@@ -2,10 +2,14 @@
 using System.Collections.Generic;
 using System.Text;
 
+
+
 namespace ViewModelExtended.ViewModel
 {
 	public interface IViewModelContext
 	{
+		public StateViewModel StateViewModel { get; }
+
 		public NoteListViewModel NoteListViewModel { get; }
 		public GroupListViewModel GroupListViewModel { get; }
 

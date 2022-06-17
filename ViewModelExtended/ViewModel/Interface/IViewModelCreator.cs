@@ -9,6 +9,12 @@ namespace ViewModelExtended.ViewModel
 {
 	public interface IViewModelCreator
 	{
+		#region State
+
+		public StateViewModel CreateStateViewModel ();
+
+		#endregion
+
 		// ListObjects have two input methods: new data and existing data
 
 		#region NoteList
@@ -83,7 +89,7 @@ namespace ViewModelExtended.ViewModel
 
 		#region NoteText
 
-		public NoteTextViewModel CreateNoteTextViewModel ();
+		public NoteTextViewModel CreateNoteTextViewModel (StateViewModel stateViewModel);
 		public void DestroyNoteTextViewModel (NoteTextViewModel target);
 
 		#endregion
@@ -93,7 +99,10 @@ namespace ViewModelExtended.ViewModel
 		#region GroupTabs
 
 		public GroupTabsViewModel CreateGroupTabsViewModel (
-			GroupListViewModel groupListViewModel, GroupContentsViewModel groupContentsViewModel);
+			StateViewModel stateViewModel,
+			GroupListViewModel groupListViewModel,
+			GroupContentsViewModel groupContentsViewModel);
+
 		public void DestroyGroupTabsViewModel (GroupTabsViewModel target);
 
 		#endregion
@@ -112,6 +121,7 @@ namespace ViewModelExtended.ViewModel
 		#region Prime
 
 		public PrimeViewModel CreatePrimeViewModel (
+			StateViewModel stateViewModel,
 			StatusBarViewModel statusBarViewModel,
 			NoteTextViewModel noteTextViewModel,
 			GroupTabsViewModel groupTabsViewModel,

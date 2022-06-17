@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.Diagnostics.CodeAnalysis;
 using System.Drawing;
 
@@ -11,6 +12,7 @@ namespace ViewModelExtended.Model
 	{
 		public int Id { get; set; }
 
+		[Required]
 		public string Title { get; set; }
 
 		public string Color {
@@ -33,7 +35,6 @@ namespace ViewModelExtended.Model
 
 		public Group ()
 		{
-			//Id = 0;
 			f_Color = "#000";
 			Title = String.Empty;
 		}

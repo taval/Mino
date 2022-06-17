@@ -101,6 +101,7 @@ namespace ViewModelExtended.ViewModel
 
 		#region Context
 
+		private StateViewModel f_StateViewModel;
 		public GroupListViewModel GroupListViewModel { get; private set; }
 		public GroupContentsViewModel GroupContentsViewModel { get; private set; }
 
@@ -166,6 +167,7 @@ namespace ViewModelExtended.ViewModel
 
 		public GroupTabsViewModel (
 			IViewModelKit viewModelKit,
+			StateViewModel stateViewModel,
 			GroupListViewModel groupListViewModel,
 			GroupContentsViewModel groupContentsViewModel)
 		{
@@ -173,6 +175,7 @@ namespace ViewModelExtended.ViewModel
 			f_ViewModelKit = viewModelKit;
 
 			// set viewmodel context dependencies
+			f_StateViewModel = stateViewModel;
 			GroupListViewModel = groupListViewModel;
 			GroupContentsViewModel = groupContentsViewModel;
 
@@ -234,8 +237,17 @@ namespace ViewModelExtended.ViewModel
 			// NOTE: NOT creating a new group if none exist - must be done manually by design
 			if (GroupListViewModel.Items.Count() == 0) return;
 
-			// select the first group
-			GroupListViewModel.Highlighted = GroupListViewModel.Items.First();
+			// select the most recently selected or first group
+			IEnumerable<GroupListObjectViewModel> groupMatch =
+				GroupListViewModel.Items.Where((item) => f_StateViewModel.SelectedGroupListItemId == item.ItemId);
+
+			if (groupMatch.Any()) {
+				GroupListViewModel.Highlighted = groupMatch.First();
+			}
+			else {
+				GroupListViewModel.Highlighted = GroupListViewModel.Items.First();
+			}
+
 			GroupListObjectViewModel? highlightedGroup = GroupListViewModel.Highlighted;
 
 			if (highlightedGroup != null) {
@@ -246,7 +258,16 @@ namespace ViewModelExtended.ViewModel
 			if (GroupContentsViewModel.Items.Count() == 0) return;
 
 			// select the first note in the selected group
-			GroupContentsViewModel.Highlighted = GroupContentsViewModel.Items.First();
+			IEnumerable<GroupObjectViewModel> groupNoteMatch =
+				GroupContentsViewModel.Items.Where((item) => f_StateViewModel.SelectedGroupItemId == item.ItemId);
+
+			if (groupNoteMatch.Any()) {
+				GroupContentsViewModel.Highlighted = groupNoteMatch.First();
+			}
+			else {
+				GroupContentsViewModel.Highlighted = GroupContentsViewModel.Items.First();
+			}
+
 			GroupObjectViewModel highlightedGroupNote = GroupContentsViewModel.Highlighted;
 
 			if (highlightedGroupNote != null) {
@@ -273,24 +294,6 @@ namespace ViewModelExtended.ViewModel
 		/// inserts a new group into the group list; selects the newly created group
 		/// </summary>
 		/// <param name="target">the location at where the item will be inserted</param>
-		/// <param name="input">the item to insert</param>
-		//public void CreateGroup (GroupListObjectViewModel? target, GroupListObjectViewModel input)
-		//{
-		//	// if target is null, try to use the selected item
-		//	if (target == null) {
-		//		target = SelectedGroupViewModel;
-		//	}
-
-		//	// de-select the target
-		//	if (target != null) {
-		//		target.IsSelected = false;
-		//	}
-
-		//	f_GroupListViewModel.Insert(target, input);
-
-		//	// set selected group to display
-		//	SelectGroup(input);
-		//}
 		public GroupListObjectViewModel CreateGroupAt (GroupListObjectViewModel? target)
 		{
 			GroupListObjectViewModel output = GroupListViewModel.Create();
@@ -320,7 +323,13 @@ namespace ViewModelExtended.ViewModel
 		public void SelectGroup (GroupListObjectViewModel? groop)
 		{
 			SelectedGroupViewModel = groop;
-			if (SelectedGroupViewModel != null) SelectedGroupViewModel.IsSelected = true;
+			if (SelectedGroupViewModel != null) {
+				SelectedGroupViewModel.IsSelected = true;
+				f_StateViewModel.SelectedGroupListItemId = SelectedGroupViewModel.ItemId;
+			}
+			else {
+				f_StateViewModel.SelectedGroupListItemId = null;
+			}
 
 			GroupContentsViewModel.ContentData = groop;
 		}
@@ -414,7 +423,14 @@ namespace ViewModelExtended.ViewModel
 		public void SelectGroupNote (GroupObjectViewModel note)
 		{
 			SelectedGroupNoteViewModel = note;
-			SelectedGroupNoteViewModel.IsSelected = true;
+
+			if (SelectedGroupNoteViewModel != null) {
+				SelectedGroupNoteViewModel.IsSelected = true;
+				f_StateViewModel.SelectedGroupItemId = SelectedGroupNoteViewModel.ItemId;
+			}
+			else {
+				f_StateViewModel.SelectedGroupItemId = null;
+			}
 		}
 
 		/// <summary>

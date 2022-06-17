@@ -16,6 +16,7 @@ namespace ViewModelExtended.ViewModel
 		#region Kit
 
 		private IViewModelKit f_ViewModelKit;
+		private StateViewModel f_StateViewModel;
 
 		#endregion
 
@@ -200,9 +201,10 @@ namespace ViewModelExtended.ViewModel
 
 		#region Constructor
 
-		public NoteTextViewModel (IViewModelKit viewModelKit)
+		public NoteTextViewModel (IViewModelKit viewModelKit, StateViewModel stateViewModel)
 		{
 			f_ViewModelKit = viewModelKit;
+			f_StateViewModel = stateViewModel;
 			ContentData = null;
 		}
 
@@ -215,6 +217,8 @@ namespace ViewModelExtended.ViewModel
 		public void Load ()
 		{
 			// TODO: datamodel load stuff here
+			IsNewGroupAllowed = f_StateViewModel.IsNewGroupAllowed;
+
 			NotifyPropertyChanged(nameof(PriorityTypes));
 			NotifyPropertyChanged(nameof(Title));
 			NotifyPropertyChanged(nameof(Text));

@@ -42,6 +42,19 @@ namespace ViewModelExtended.ViewModel
 
 
 
+		#region State
+
+		public StateViewModel CreateStateViewModel ()
+		{
+			StateViewModel output = new StateViewModel(f_ViewModelKit);
+			// TODO: any commands on StateViewModel are assigned here
+			return output;
+		}
+
+		#endregion
+
+
+
 		#region NoteList
 
 		public NoteListViewModel CreateNoteListViewModel ()
@@ -260,9 +273,9 @@ namespace ViewModelExtended.ViewModel
 
 		#region NoteText
 
-		public NoteTextViewModel CreateNoteTextViewModel ()
+		public NoteTextViewModel CreateNoteTextViewModel (StateViewModel stateViewModel)
 		{
-			NoteTextViewModel output = new NoteTextViewModel(f_ViewModelKit);
+			NoteTextViewModel output = new NoteTextViewModel(f_ViewModelKit, stateViewModel);
 			f_ViewModelKit.CommandBuilder.MakeNoteText(output);
 			return output;
 		}
@@ -274,10 +287,15 @@ namespace ViewModelExtended.ViewModel
 		#region GroupTabs
 
 		public GroupTabsViewModel CreateGroupTabsViewModel (
-			GroupListViewModel groupListViewModel, GroupContentsViewModel groupContentsViewModel)
+			StateViewModel stateViewModel,
+			GroupListViewModel groupListViewModel,
+			GroupContentsViewModel groupContentsViewModel)
 		{
-			GroupTabsViewModel output = new GroupTabsViewModel(f_ViewModelKit, groupListViewModel, groupContentsViewModel);
+			GroupTabsViewModel output =
+				new GroupTabsViewModel(f_ViewModelKit, stateViewModel, groupListViewModel, groupContentsViewModel);
+
 			f_ViewModelKit.CommandBuilder.MakeGroupTabs(output);
+
 			return output;
 		}
 
@@ -299,6 +317,7 @@ namespace ViewModelExtended.ViewModel
 		#region PrimeViewModel
 
 		public PrimeViewModel CreatePrimeViewModel (
+			StateViewModel stateViewModel,
 			StatusBarViewModel statusBarViewModel,
 			NoteTextViewModel noteTextViewModel,
 			GroupTabsViewModel groupTabsViewModel,
@@ -307,7 +326,7 @@ namespace ViewModelExtended.ViewModel
 			//PrimeViewModel output = new PrimeViewModel(
 			//	f_ViewModelKit, statusBarViewModel, noteTextViewModel, groupTabsViewModel, noteListViewModel);
 			PrimeViewModel output = new PrimeViewModel(
-				statusBarViewModel, noteTextViewModel, groupTabsViewModel, noteListViewModel);
+				stateViewModel, statusBarViewModel, noteTextViewModel, groupTabsViewModel, noteListViewModel);
 			f_ViewModelKit.CommandBuilder.MakePrime(output);
 			return output;
 		}

@@ -27,6 +27,7 @@ namespace ViewModelExtended.Command
 		{
 			ViewModelContext context = (ViewModelContext)parameter;
 
+			context.StateViewModel.Load();
 			context.NoteListViewModel.Load();
 			context.GroupListViewModel.Load();
 			context.GroupContentsViewModel.Load();

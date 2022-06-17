@@ -28,6 +28,7 @@ namespace ViewModelExtended.Model
 		public DbSet<NoteListItem> NoteListItems { get; set; }
 		public DbSet<GroupListItem> GroupListItems { get; set; }
 		public DbSet<GroupItem> GroupItems { get; set; }
+		public DbSet<State> States { get; set; }
 
 		#endregion
 
@@ -50,6 +51,7 @@ namespace ViewModelExtended.Model
 			NoteListItems = Set<NoteListItem>();
 			GroupListItems = Set<GroupListItem>();
 			GroupItems = Set<GroupItem>();
+			States = Set<State>();
 		}
 
 		#endregion
@@ -57,6 +59,11 @@ namespace ViewModelExtended.Model
 
 
 		#region Queries
+
+		public IQueryable<State> GetState (string key)
+		{
+			return States.Where(row => row.Key.Equals(key));
+		}
 
 		public IQueryable<NoteListItem> GetAllNoteListItems ()
 		{
@@ -76,6 +83,33 @@ namespace ViewModelExtended.Model
 		public IQueryable<GroupItem> GetGroupItemsInGroup (Group groop)
 		{
 			return GroupItems.Where(row => row.GroupId == groop.Id);
+		}
+
+		#endregion
+
+
+
+		#region Data Objects - State
+
+		public State CreateState (string key, int value)
+		{
+			State output = new State() { Key = key, Value = value };
+
+			States.Add(output);
+
+			return output;
+		}
+
+		public void UpdateState (State target, int value)
+		{
+			target.Value = value;
+
+			States.Update(target);
+		}
+
+		public void DeleteState (State state)
+		{
+			States.Remove(state);
 		}
 
 		#endregion
@@ -466,6 +500,7 @@ namespace ViewModelExtended.Model
 			sqlSequence("Nodes");
 			sqlSequence("NoteListItems");
 			sqlSequence("Timestamps");
+			sqlSequence("States");
 
 			//GroupItems.RemoveRange(GroupItems);
 			//GroupListItems.RemoveRange(GroupListItems);

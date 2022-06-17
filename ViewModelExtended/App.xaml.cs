@@ -8,9 +8,8 @@ using System.Windows;
 using ViewModelExtended.Model;
 using ViewModelExtended.ViewModel;
 
-// TODO: remember the 'Allow new groups' setting
-
 // TODO: Allow groups, selected tab, selected NoteList/GroupList/GroupContents object are configuration state which should be preserved in db
+//  UPDATE: save implemented for all but NoteTextViewModel's state; load not yet implemented
 
 // TODO: make modules for view, vm, db, etc.
 
