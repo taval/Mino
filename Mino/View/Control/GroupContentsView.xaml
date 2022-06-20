@@ -92,7 +92,7 @@
 								(local:ListAction.RemoveCommand),
 								RelativeSource={ RelativeSource AncestorType={ x:Type local:GroupContentsView } } }" />
                         <StackPanel Grid.Column="1" MinWidth="96">
-                            <TextBlock FontWeight="Bold" Text="{ Binding Title, UpdateSourceTrigger=PropertyChanged }" />
+                            <TextBlock FontWeight="Bold" Text="{ Binding Title, Converter={ local:StringToStubConverter }, UpdateSourceTrigger=PropertyChanged }" />
                             <TextBlock Text="{ Binding Text, Converter={ local:FlowDocumentStringToStubConverter } }" />
                         </StackPanel>
 

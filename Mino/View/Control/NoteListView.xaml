@@ -140,7 +140,7 @@
 
                         <StackPanel Grid.Column="1" Background="Transparent" MinWidth="96">
                             <TextBlock Text="{ Binding ItemId, StringFormat='Id: {0}', UpdateSourceTrigger=PropertyChanged }" />
-                            <TextBlock FontWeight="Bold" Text="{ Binding Title }" />
+                            <TextBlock FontWeight="Bold" Text="{ Binding Title, Converter={ local:StringToStubConverter } }" />
                             <TextBlock Text="{ Binding Text, Converter={ local:FlowDocumentStringToStubConverter } }" />
                         </StackPanel>
 

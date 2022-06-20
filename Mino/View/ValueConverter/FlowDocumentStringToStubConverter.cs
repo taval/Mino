@@ -19,14 +19,13 @@ namespace Mino
             Block? firstBlock = flowDocument.Blocks.FirstBlock;
             if (firstBlock == null) return string.Empty;
             Paragraph p = (Paragraph)firstBlock;
-            //string text = ((Run)p.Inlines.FirstInline).Text;
             string text = String.Empty;
             foreach (Run run in p.Inlines) {
                 text += run.Text;
 			}
 
             if (text.Length >= 16) {
-                return text.Substring(0, 16);
+                return text.Substring(0, 13) + "...";
             }
             else {
                 return text;

@@ -107,7 +107,7 @@
                 <TabItem.Header>
                     <StackPanel Orientation="Horizontal">
                         <Ellipse Width="10" Height="8" Fill="DarkGray" />
-                        <TextBlock Text="{ Binding SelectedGroupViewModel.Title, StringFormat='Tagged with {0}' }" FontSize="10" />
+                        <TextBlock Text="{ Binding SelectedGroupViewModel.Title, StringFormat='Tag: {0}' }" FontSize="10" />
                     </StackPanel>
                 </TabItem.Header>
 
