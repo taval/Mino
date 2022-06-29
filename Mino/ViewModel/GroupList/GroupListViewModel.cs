@@ -65,10 +65,6 @@ namespace Mino.ViewModel
 			get { return f_List.Items.Count(); }
 		}
 
-		public bool HasGroup {
-			get { return f_List.Any(); }
-		}
-
 		#endregion
 
 
@@ -79,6 +75,14 @@ namespace Mino.ViewModel
 		/// save the dirty state for storing at shutdown, autosave intervals, etc.
 		/// </summary>
 		private IChangeQueue<GroupListObjectViewModel> f_Changes;
+
+		#endregion
+
+
+
+		#region Color Generator
+
+		private readonly ColorGenerator f_ColorGenerator;
 
 		#endregion
 
@@ -107,26 +111,6 @@ namespace Mino.ViewModel
 		private ICommand? f_PickupCommand;
 
 		/// <summary>
-		/// change the title
-		/// </summary>
-		public ICommand ChangeTitleCommand {
-			get { return f_ChangeTitleCommand ?? throw new MissingCommandException(); }
-			set { if (f_ChangeTitleCommand == null) f_ChangeTitleCommand = value; }
-		}
-
-		private ICommand? f_ChangeTitleCommand;
-
-		/// <summary>
-		/// change the color
-		/// </summary>
-		public ICommand ChangeColorCommand {
-			get { return f_ChangeColorCommand ?? throw new MissingCommandException(); }
-			set { if (f_ChangeColorCommand == null) f_ChangeColorCommand = value; }
-		}
-
-		private ICommand? f_ChangeColorCommand;
-
-		/// <summary>
 		/// perform operations based on highlighting an item
 		/// </summary>
 		public ICommand HighlightCommand {
@@ -144,6 +128,8 @@ namespace Mino.ViewModel
 
 		public GroupListViewModel (IViewModelKit viewModelKit)
 		{
+			f_ColorGenerator = new ColorGenerator();
+
 			f_ComponentCreator = new ComponentCreator();
 
 			// set reference to viewmodelkit
@@ -162,8 +148,8 @@ namespace Mino.ViewModel
 
 		#endregion
 
-		
-		
+
+
 		#region Load
 
 		/// <summary>
@@ -203,7 +189,6 @@ namespace Mino.ViewModel
 		private void NotifySizeChanged ()
 		{
 			NotifyPropertyChanged(nameof(ItemCount));
-			NotifyPropertyChanged(nameof(HasGroup));
 		}
 
 		/// <summary>
@@ -312,14 +297,24 @@ namespace Mino.ViewModel
 		public GroupListObjectViewModel Create ()
 		{
 			using (IDbContext dbContext = f_ViewModelKit.CreateDbContext()) {
-				return f_ViewModelKit.ViewModelCreator.CreateGroupListObjectViewModel(dbContext);
+				GroupListObjectViewModel output =
+					f_ViewModelKit.ViewModelCreator.CreateGroupListObjectViewModel(dbContext);
+
+				output.Color = f_ColorGenerator.GenerateHtml();
+
+				return output;
 			}
 		}
 
 		public GroupListObjectViewModel Create (Action<GroupListObjectViewModel> action)
 		{
 			using (IDbContext dbContext = f_ViewModelKit.CreateDbContext()) {
-				return f_ViewModelKit.ViewModelCreator.CreateGroupListObjectViewModel(dbContext, action);
+				GroupListObjectViewModel output =
+					f_ViewModelKit.ViewModelCreator.CreateGroupListObjectViewModel(dbContext, action);
+
+				output.Color = f_ColorGenerator.GenerateHtml();
+
+				return output;
 			}
 		}
 
@@ -329,15 +324,18 @@ namespace Mino.ViewModel
 
 		#region Update
 
+		// while it is known that the highlighted/selected group is to be updated, the caller needs to be aware of it so it can be determined whether or not NoteText should be updated
+
 		/// <summary>
 		/// update the group's title in the database
 		/// </summary>
-		public void UpdateTitle ()
+		public void UpdateTitle (GroupListObjectViewModel target)
 		{
 			if (f_Highlighted == null) return;
 
 			using (IDbContext dbContext = f_ViewModelKit.CreateDbContext()) {
-				dbContext.UpdateGroup(f_Highlighted.Model.Data, f_Highlighted.Title, null);
+				//dbContext.UpdateGroup(f_Highlighted.Model.Data, f_Highlighted.Title, null);
+				dbContext.UpdateGroup(target.Model.Data, target.Title, null);
 				dbContext.Save();
 			}
 		}
@@ -345,12 +343,13 @@ namespace Mino.ViewModel
 		/// <summary>
 		/// update the group's color in the database
 		/// </summary>
-		public void UpdateColor ()
+		public void UpdateColor (GroupListObjectViewModel target)
 		{
 			if (f_Highlighted == null) return;
 
 			using (IDbContext dbContext = f_ViewModelKit.CreateDbContext()) {
-				dbContext.UpdateGroup(f_Highlighted.Model.Data, f_Highlighted.Color, null);
+				//dbContext.UpdateGroup(f_Highlighted.Model.Data, f_Highlighted.Color, null);
+				dbContext.UpdateGroup(target.Model.Data, target.Color, null);
 				dbContext.Save();
 			}
 		}
@@ -396,9 +395,7 @@ namespace Mino.ViewModel
 	}
 }
 
-// TODO: zero groups should gray out the Contents tab. An existing group should ungray/activate it.
-
 // TODO: double-clicking the group's title should only select an item upon the first double-click. Subsequent double-clicks should cause it to edit the text.
 // UPDATE: implemented single/double click choice behavior - review and determine if this is sufficient
 
-// TODO: each group is assigned a random color (for cosmetic purposes only).
+

@@ -1,10 +1,11 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Text;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Documents;
 using Mino.ViewModel;
+
+
 
 namespace Mino.Command
 {
@@ -22,7 +23,9 @@ namespace Mino.Command
 			if (parameter == null || !(parameter is RoutedEventArgs)) return;
 			RoutedEventArgs e = (RoutedEventArgs)parameter;
 
-			if (!(e.Source is RichTextBox)) return;
+			if (e.Handled || !(e.Source is RichTextBox)) return;
+
+			e.Handled = true;
 
 			RichTextBox textBox = (RichTextBox)e.Source;
 			TextPointer ptr1 = textBox.Selection.Start.GetLineStartPosition(0);

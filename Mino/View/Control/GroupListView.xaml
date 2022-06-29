@@ -40,7 +40,7 @@
 						<Grid.ColumnDefinitions>
 							<ColumnDefinition Width="*" />
 							<ColumnDefinition Width="*" />
-							<ColumnDefinition Width="*" />
+							<!--<ColumnDefinition Width="*" />-->
 						</Grid.ColumnDefinitions>
 
 						<Button
@@ -57,11 +57,16 @@
 
 						<TextBox
 							Grid.Column="1"
-							MinWidth="16pt"
+                            MinWidth="16pt"
 							Background="Transparent"
 							BorderBrush="Transparent"
-							FontWeight="Bold"
-							Text="{ Binding Title, UpdateSourceTrigger=PropertyChanged }">
+							FontWeight="Bold">
+
+							<Binding Path="Title" UpdateSourceTrigger="PropertyChanged" ValidatesOnExceptions="True">
+								<Binding.ValidationRules>
+									<local:GroupTitleRule />
+								</Binding.ValidationRules>
+							</Binding>
 
 							<i:Interaction.Triggers>
 								<!-- NOTE: in addition to the ListViewItem, the TextBox must *also* trigger highlighting
@@ -82,23 +87,21 @@
 									<i:InvokeCommandAction
 										PassEventArgsToCommand="True"
 										Command="{ Binding
-											Path=DataContext.ChangeTitleCommand,
-											RelativeSource={ RelativeSource AncestorType={ x:Type local:GroupListView } } }" />
-								</i:EventTrigger>
-
-								<i:EventTrigger
-									EventName="LostFocus"
-									SourceObject="{ Binding RelativeSource={ RelativeSource AncestorType={ x:Type TextBox } } }">
-									<i:InvokeCommandAction
-										PassEventArgsToCommand="True"
-										Command="{ Binding
-											Path=DataContext.ChangeTitleCommand,
+											Path=(local:GroupAction.UpdateTitleCommand),
 											RelativeSource={ RelativeSource AncestorType={ x:Type local:GroupListView } } }" />
 								</i:EventTrigger>
 
 							</i:Interaction.Triggers>
 
 						</TextBox>
+
+						<!--<Ellipse
+							Grid.Column="2"
+							Width="18"
+							Height="18"
+							Stroke="#999"
+							StrokeThickness="0.5"
+							Fill="{ Binding Color }" />-->
 
 						<i:Interaction.Triggers>
 
@@ -126,9 +129,7 @@
 								EventName="MouseDoubleClick"
 								SourceObject="{ Binding RelativeSource={ RelativeSource AncestorType={ x:Type ListViewItem } } }">
 								<i:InvokeCommandAction
-									CommandParameter="{ Binding
-										Path=DataContext.Highlighted,
-										RelativeSource={ RelativeSource AncestorType={ x:Type local:GroupListView } } }"
+									PassEventArgsToCommand="True"
 									Command="{ Binding
 										Path=(local:ListAction.SelectCommand),
 										RelativeSource={ RelativeSource AncestorType={ x:Type local:GroupListView } } }" />

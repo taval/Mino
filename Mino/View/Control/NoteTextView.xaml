@@ -6,7 +6,7 @@
 	xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
 	xmlns:local="clr-namespace:Mino"
 	mc:Ignorable="d" 
-    xmlns:i="http://schemas.microsoft.com/xaml/behaviors"
+	xmlns:i="http://schemas.microsoft.com/xaml/behaviors"
 	d:DesignHeight="450" d:DesignWidth="800">
 	<Grid
 		Height="{ Binding Parent.ActualHeight, Mode=OneWay, RelativeSource={ RelativeSource Self } }"
@@ -15,172 +15,173 @@
 		<Grid.RowDefinitions>
 			<RowDefinition Height="1*" />
 			<RowDefinition Height="4*" />
-            <RowDefinition Height="0.5*" />
-            <RowDefinition Height="1*" />
-            <RowDefinition Height="0.5*" />
+			<RowDefinition Height="0.5*" />
+			<RowDefinition Height="1*" />
+			<RowDefinition Height="0.5*" />
 		</Grid.RowDefinitions>
 
-        <TextBox
-            x:Name="TextBox_Title"
+		<TextBox
+			x:Name="TextBox_Title"
 			Margin="0 16 0 8"
 			Height="24"
 			Grid.Row="0"
 			FontSize="16"
 			Style="{ StaticResource warnHighlightStyle }">
-            <TextBox.Text>
-                <Binding Path="Title" UpdateSourceTrigger="PropertyChanged" ValidatesOnExceptions="True">
-                    <Binding.ValidationRules>
-                        <local:NoteTitleRule MaxChars="127" />
-                    </Binding.ValidationRules>
-                </Binding>
-            </TextBox.Text>
+			<TextBox.Text>
+				<Binding Path="Title" UpdateSourceTrigger="PropertyChanged" ValidatesOnExceptions="True">
+					<Binding.ValidationRules>
+						<local:NoteTitleRule MaxChars="127" />
+					</Binding.ValidationRules>
+				</Binding>
+			</TextBox.Text>
 
-            <i:Interaction.Triggers>
+			<i:Interaction.Triggers>
 
-                <i:EventTrigger
+				<i:EventTrigger
 					EventName="LostFocus"
 					SourceObject="{ Binding RelativeSource={ RelativeSource AncestorType={ x:Type TextBox } } }">
-                    <i:InvokeCommandAction
+					<i:InvokeCommandAction
 						PassEventArgsToCommand="True"
 						Command="{ Binding
-							Path=DataContext.ChangeTitleCommand,
+							Path=DataContext.UpdateTitleCommand,
 							RelativeSource={ RelativeSource AncestorType={ x:Type local:NoteTextView } } }" />
-                </i:EventTrigger>
+				</i:EventTrigger>
 
-            </i:Interaction.Triggers>
+			</i:Interaction.Triggers>
 
-        </TextBox>
+		</TextBox>
 
-        <RichTextBox
-            x:Name="RichTextBox_Text"
-            Grid.Row="1">
-            
-            <i:Interaction.Triggers>
+		<RichTextBox
+			x:Name="RichTextBox_Text"
+			Grid.Row="1"
+            VerticalScrollBarVisibility="Visible">
+			
+			<i:Interaction.Triggers>
 
-                <i:EventTrigger
+				<i:EventTrigger
 					EventName="TextChanged"
 					SourceObject="{ Binding RelativeSource={ RelativeSource AncestorType={ x:Type RichTextBox } } }">
-                    <i:InvokeCommandAction
+					<i:InvokeCommandAction
 						PassEventArgsToCommand="True"
 						Command="{ Binding
 							Path=DataContext.ChangeTextCommand,
 							RelativeSource={ RelativeSource AncestorType={ x:Type local:NoteTextView } } }" />
-                </i:EventTrigger>
-                
-                <i:EventTrigger
+				</i:EventTrigger>
+				
+				<i:EventTrigger
 					EventName="LostFocus"
 					SourceObject="{ Binding RelativeSource={ RelativeSource AncestorType={ x:Type RichTextBox } } }">
-                    <i:InvokeCommandAction
+					<i:InvokeCommandAction
 						PassEventArgsToCommand="True"
 						Command="{ Binding
 							Path=DataContext.UpdateTextCommand,
 							RelativeSource={ RelativeSource AncestorType={ x:Type local:NoteTextView } } }" />
-                </i:EventTrigger>
+				</i:EventTrigger>
 
-                <i:EventTrigger
+				<i:EventTrigger
 					EventName="SelectionChanged"
 					SourceObject="{ Binding RelativeSource={ RelativeSource AncestorType={ x:Type RichTextBox } } }">
-                    <i:InvokeCommandAction
+					<i:InvokeCommandAction
 						PassEventArgsToCommand="True"
 						Command="{ Binding
 							Path=DataContext.CalcCursorPosCommand,
 							RelativeSource={ RelativeSource AncestorType={ x:Type local:NoteTextView } } }" />
-                </i:EventTrigger>
+				</i:EventTrigger>
 
-            </i:Interaction.Triggers>
+			</i:Interaction.Triggers>
 
-        </RichTextBox>
+		</RichTextBox>
 
-        <Grid Grid.Row="2">
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="112" />
-                <ColumnDefinition Width="*" />
-            </Grid.ColumnDefinitions>
+		<Grid Grid.Row="2">
+			<Grid.ColumnDefinitions>
+				<ColumnDefinition Width="112" />
+				<ColumnDefinition Width="*" />
+			</Grid.ColumnDefinitions>
 
-            <Label FontSize="12" Content="Priority" VerticalAlignment="Center" />
-            <ComboBox
-                Grid.Column="1"
-                VerticalAlignment="Center"
-                ItemsSource="{ Binding PriorityTypes }">
-                <ComboBox.SelectedIndex>
-                    <Binding Path="Priority" UpdateSourceTrigger="PropertyChanged" ValidatesOnExceptions="True" Mode="TwoWay">
-                        <Binding.ValidationRules>
-                            <local:PriorityRule />
-                        </Binding.ValidationRules>
-                    </Binding>
-                </ComboBox.SelectedIndex>
-                <i:Interaction.Triggers>
+			<Label FontSize="12" Content="Priority" VerticalAlignment="Center" />
+			<ComboBox
+				Grid.Column="1"
+				VerticalAlignment="Center"
+				ItemsSource="{ Binding PriorityTypes }">
+				<ComboBox.SelectedIndex>
+					<Binding Path="Priority" UpdateSourceTrigger="PropertyChanged" ValidatesOnExceptions="True" Mode="TwoWay">
+						<Binding.ValidationRules>
+							<local:PriorityRule />
+						</Binding.ValidationRules>
+					</Binding>
+				</ComboBox.SelectedIndex>
+				<i:Interaction.Triggers>
 
-                    <i:EventTrigger
+					<i:EventTrigger
 					EventName="LostFocus"
 					SourceObject="{ Binding RelativeSource={ RelativeSource AncestorType={ x:Type ComboBox } } }">
-                        <i:InvokeCommandAction
+						<i:InvokeCommandAction
 						PassEventArgsToCommand="True"
 						Command="{ Binding
-							Path=DataContext.ChangePriorityCommand,
+							Path=DataContext.UpdatePriorityCommand,
 							RelativeSource={ RelativeSource AncestorType={ x:Type local:NoteTextView } } }" />
-                    </i:EventTrigger>
+					</i:EventTrigger>
 
-                </i:Interaction.Triggers>
-            </ComboBox>
-        </Grid>
+				</i:Interaction.Triggers>
+			</ComboBox>
+		</Grid>
 
-        <Grid Grid.Row="3">
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="112" />
-                <ColumnDefinition Width="*" />
-            </Grid.ColumnDefinitions>
+		<Grid Grid.Row="3">
+			<Grid.ColumnDefinitions>
+				<ColumnDefinition Width="112" />
+				<ColumnDefinition Width="*" />
+			</Grid.ColumnDefinitions>
 
-            <Label FontSize="12" Content="Tags" VerticalAlignment="Center" />
+			<Label FontSize="12" Content="Tags" VerticalAlignment="Center" />
 
-            <TextBox Grid.Column="1"
+			<TextBox Grid.Column="1"
 				x:Name="TextBox_GroupStrings"
 				Margin="0 16 0 8"
 				Height="24"
-                VerticalAlignment="Center"
+				VerticalAlignment="Center"
 				FontSize="16"
 				Style="{ StaticResource warnHighlightStyle }">
 
-                <TextBox.Text>
-                    <Binding Path="GroupStrings" UpdateSourceTrigger="PropertyChanged" ValidatesOnExceptions="True">
-                        <Binding.ValidationRules>
-                            <local:GroupStringsRule />
-                        </Binding.ValidationRules>
-                    </Binding>
-                </TextBox.Text>
-                
-                <i:Interaction.Triggers>
+				<TextBox.Text>
+					<Binding Path="GroupStrings" UpdateSourceTrigger="PropertyChanged" ValidatesOnExceptions="True">
+						<Binding.ValidationRules>
+							<local:GroupStringsRule />
+						</Binding.ValidationRules>
+					</Binding>
+				</TextBox.Text>
+				
+				<i:Interaction.Triggers>
 
-                    <i:EventTrigger
+					<i:EventTrigger
 							EventName="LostFocus"
 							SourceObject="{ Binding RelativeSource={ RelativeSource AncestorType={ x:Type TextBox } } }">
-                        <i:InvokeCommandAction
+						<i:InvokeCommandAction
 								CommandParameter="{ Binding
 									Path=DataContext.ContentData,
 									RelativeSource={ RelativeSource AncestorType={ x:Type local:NoteTextView } } }"
 								Command="{ Binding
 									Path=(local:TextAction.ChangeGroupsCommand),
 									RelativeSource={ RelativeSource AncestorType={ x:Type local:NoteTextView } } }" />
-                    </i:EventTrigger>
+					</i:EventTrigger>
 
-                </i:Interaction.Triggers>
+				</i:Interaction.Triggers>
 
-            </TextBox>
-        </Grid>
+			</TextBox>
+		</Grid>
 
-        <Grid Grid.Row="4">
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="112" />
-                <ColumnDefinition Width="*" />
-            </Grid.ColumnDefinitions>
+		<Grid Grid.Row="4">
+			<Grid.ColumnDefinitions>
+				<ColumnDefinition Width="112" />
+				<ColumnDefinition Width="*" />
+			</Grid.ColumnDefinitions>
 
-            <Label FontSize="12" Content="Allow new groups" VerticalAlignment="Center" />
+			<Label FontSize="12" Content="Allow new groups" VerticalAlignment="Center" />
 			<CheckBox
 				Grid.Column="1"
 				IsChecked="{ Binding IsNewGroupAllowed, UpdateSourceTrigger=PropertyChanged }"
-                VerticalAlignment="Center">
+				VerticalAlignment="Center">
 			</CheckBox>
-        </Grid>
+		</Grid>
 
-    </Grid>
+	</Grid>
 </UserControl>

@@ -100,21 +100,17 @@ namespace Mino.ViewModel
 			get { return Model.Data.Title; }
 			set {
 				Model.Data.Title = value;
-				Set(ref f_Title, value);
+				NotifyPropertyChanged(nameof(Title));
 			}
 		}
-
-		private string f_Title;
 
 		public string Color {
 			get { return Model.Data.Color; }
 			set {
 				Model.Data.Color = value;
-				Set(ref f_Color, value);
+				NotifyPropertyChanged(nameof(Color));
 			}
 		}
-
-		private string f_Color;
 
 		#endregion
 
@@ -128,10 +124,8 @@ namespace Mino.ViewModel
 			Previous = null;
 			Next = null;
 			f_IsSelected = false;
-			f_Title = Model.Data.Title;
-			Title = f_Title;
-			f_Color = Model.Data.Color;
-			Color = f_Color;
+			NotifyPropertyChanged(nameof(Title));
+			NotifyPropertyChanged(nameof(Color));
 		}
 
 		#endregion

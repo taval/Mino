@@ -8,49 +8,43 @@ using System.Windows.Controls;
 
 namespace Mino
 {
-    public class NoteTitleRule : ValidationRule
-    {
-        public int MaxChars { get; set; }
+	public class NoteTitleRule : ValidationRule
+	{
+		public int MaxChars {
+			get { return MaxCharacters; }
+			set { MaxCharacters = value; }
+		}
 
-        public NoteTitleRule ()
-        {
-            MaxChars = 255;
-        }
+		public static int MaxCharacters { get; private set; }
 
-        public override ValidationResult Validate (object value, CultureInfo cultureInfo)
-        {
-            string title = String.Empty;
+		static NoteTitleRule ()
+		{
+			MaxCharacters = 255; // default max; overridden by MaxChars
+		}
 
-            try {
-                if (((string)value).Length > 0)
-                    title = (String)value;
-            }
-            catch (Exception e) {
-                return new ValidationResult(false, $"Illegal characters or {e.Message}");
-            }
+		public override ValidationResult Validate (object value, CultureInfo cultureInfo)
+		{
+			string title = String.Empty;
 
-            if (!IsValidFileNameOrPath(title)) {
-                return new ValidationResult(false,
-                  $"Please enter a valid filename.");
-            }
-            return ValidationResult.ValidResult;
-        }
+			try {
+				if (((string)value).Length > 0) title = (String)value;
+			}
+			catch (Exception e) {
+				return new ValidationResult(false, $"Illegal characters or { e.Message }.");
+			}
 
-        bool IsValidFileNameOrPath (string? name)
-        {
-            if (name == null || name.Equals(String.Empty)) return false;
+			if (!IsValidNoteTitle(title)) {
+				return new ValidationResult(false, $"Please enter a valid filename.");
+			}
 
-            // determine if invalid characters in filename
-            foreach (char invalidChar in System.IO.Path.GetInvalidPathChars()) {
-                if (name.Contains(invalidChar)) return false;
-            }
+			return ValidationResult.ValidResult;
+		}
 
-            // if longer than non-system specific length, fail
-            if (name.Length > MaxChars) return false;
-
-            return true;
-        }
-    }
+		public static bool IsValidNoteTitle (string? title)
+		{
+			return Utility.IsValidFileNameOrPath(title, MaxCharacters);
+		}
+	}
 }
 
 

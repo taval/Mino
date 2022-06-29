@@ -14,11 +14,11 @@ namespace Mino.Command
 	/// </summary>
 	public class GroupHighlightCommand : CommandBase
 	{
-		private readonly GroupListViewModel f_GroupListViewModel;
+		private readonly GroupListViewModel f_Context;
 
-		public GroupHighlightCommand (GroupListViewModel groupListViewModel)
+		public GroupHighlightCommand (GroupListViewModel context)
 		{
-			f_GroupListViewModel = groupListViewModel;
+			f_Context = context;
 		}
 
 		public override void Execute (object parameter)
@@ -34,7 +34,7 @@ namespace Mino.Command
 			textBox.Focus();
 			GroupListObjectViewModel dataContext = (GroupListObjectViewModel)textBox.DataContext;
 
-			f_GroupListViewModel.Highlighted = dataContext;
+			f_Context.Highlighted = dataContext;
 
 			// if single-clicking, clear text edit selection
 			if (e.ClickCount == 1) {

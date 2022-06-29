@@ -1,11 +1,13 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Text;
 
 
 
 namespace Mino.Model
 {
+	/// <summary>
+	/// container for ids of Group plus list item model components
+	/// </summary>
 	public class GroupListItem : IIdentifiable
 	{
 		public int Id { get; set; }

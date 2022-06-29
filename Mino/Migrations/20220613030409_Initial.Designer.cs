@@ -8,7 +8,7 @@ using Mino.Model;
 
 namespace Mino.Migrations
 {
-    [DbContext(typeof(Mino.Model.DbContext))]
+    [DbContext(typeof(Mino.Model.MinoDbContext))]
     [Migration("20220613030409_Initial")]
     partial class Initial
     {

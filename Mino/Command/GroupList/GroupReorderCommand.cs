@@ -1,8 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using Mino.ViewModel;
@@ -26,7 +23,9 @@ namespace Mino.Command
 			DragEventArgs e = (DragEventArgs)parameter;
 
 			// prevent close button from performing operation
-			Button? closeButton = UIHelper.FindChild<Button>(((FrameworkElement)e.Source).Parent, "RemoveItemButton");
+			Button? closeButton =
+				(Button?)UIHelper.FindChildOrNull<Button>(((FrameworkElement)e.Source).Parent, "RemoveItemButton");
+
 			if (e == null || e.Handled || !(e.Source is FrameworkElement) || closeButton?.IsMouseOver == true) return;
 
 			e.Handled = true;
@@ -46,6 +45,9 @@ namespace Mino.Command
 			ListView listView = (ListView)ItemsControl.ItemsControlFromItemContainer(item);
 
 			if (!itemListName.Equals(listView.Name)) return;
+
+			// do scroll
+			UIHelper.ScrollListView(e, listView);
 
 			// get target
 			GroupListObjectViewModel? target = element.DataContext as GroupListObjectViewModel;

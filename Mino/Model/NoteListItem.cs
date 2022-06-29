@@ -1,23 +1,18 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
 using System.Text;
 
 
 
 namespace Mino.Model
 {
+	/// <summary>
+	/// container for ids of Note plus list item model components
+	/// </summary>
 	public class NoteListItem : IIdentifiable
 	{
 		public int Id { get; set; }
-
-		[Required]
 		public int ObjectId { get; set; }
-
-		[Required]
 		public int NodeId { get; set; }
-
-		[Required]
 		public int TimestampId { get; set; }
 
 		public NoteListItem ()

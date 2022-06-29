@@ -1,19 +1,20 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Configuration;
-using System.Data;
-using System.Linq;
-using System.Threading.Tasks;
+using System.IO;
 using System.Windows;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
 using Mino.Model;
 using Mino.ViewModel;
-
-// TODO: Allow groups, selected tab, selected NoteList/GroupList/GroupContents object are configuration state which should be preserved in db
-//  UPDATE: save implemented for all but NoteTextViewModel's state; load not yet implemented
 
 // TODO: make modules for view, vm, db, etc.
 
 // TODO: most exceptions should trigger a rollback to the last known good state and shutdown/commit properly (exception safety)
+
+/** TODO: RichTextBox data entry character rate feels sluggish.
+ * Testing revealed bound commands had little visible impact.
+ * Possibly related to https://github.com/dotnet/wpf/issues/3350
+ * but adding configuration/post-InitializeComponent fix did not alleviate the problem
+ */
 
 namespace Mino
 {
@@ -24,6 +25,31 @@ namespace Mino
 	{
 		protected override void OnStartup (StartupEventArgs e)
 		{
+			#region Configuration
+
+			// load configuration
+			// NOTE: GetCurrentDirectory encompasses the build directory when we just want the project root for now
+			string configFolder = Directory.GetCurrentDirectory().Split("\\bin")[0];
+
+			var builder = new ConfigurationBuilder()
+				.SetBasePath(configFolder)
+				.AddJsonFile("appsettings.json", optional: false, reloadOnChange: true);
+
+			IConfiguration config = builder.Build();
+
+			// set database options
+			var dbFolder = Environment.SpecialFolder.LocalApplicationData;
+			var dbPath = Environment.GetFolderPath(dbFolder);
+			string dbFilePath = System.IO.Path.Join(dbPath, config.GetValue<string>("DbFileName"));
+
+			DbContextOptionsBuilder<MinoDbContext> optionsBuilder = new DbContextOptionsBuilder<MinoDbContext>();
+
+			optionsBuilder.UseSqlite($"Data Source={ dbFilePath }");
+
+			#endregion
+
+
+
 			#region Load Resources
 
 			AddResource("CloseButton");
@@ -34,7 +60,7 @@ namespace Mino
 			AddResource("ListViewItem");
 
 			AddResource("TextBoxError");
-			IViewModelKit viewModelKit = new ViewModelKit();
+			IViewModelKit viewModelKit = new ViewModelKit(optionsBuilder.Options);
 
 			#endregion
 
@@ -50,16 +76,8 @@ namespace Mino
 
 			#region Load Test Data
 
-			//AddNoteListObjectTestData(viewModelKit, context);
-			//AddGroupListObjectTestData(viewModelKit, context);
-
-			#endregion
-
-
-
-			#region Setup ViewModel
-
-			//context.Load();
+			AppTestData.AddNoteListObjects(viewModelKit, context);
+			AppTestData.AddGroupListObjects(viewModelKit, context);
 
 			#endregion
 
@@ -68,6 +86,7 @@ namespace Mino
 			#region Load Main Window
 
 			MainWindow = new MainWindow() { DataContext = context };
+
 			MainWindow.Show();
 
 			#endregion
@@ -96,86 +115,6 @@ namespace Mino
 			Resources.MergedDictionaries.Add((ResourceDictionary)Application.LoadComponent(uri));
 		}
 
-		private string FlowDocumentWrap (string text)
-		{
-			return
-$@"
-<FlowDocument
-	PagePadding=""5,0,5,0""
-	AllowDrop=""True""
-	NumberSubstitution.CultureSource=""User""
-	xmlns=""http://schemas.microsoft.com/winfx/2006/xaml/presentation"">
-
-	<Paragraph>
-		{ text }
-	</Paragraph>
-
-</FlowDocument>
-";
-		}
-
-		/// <summary>
-		/// adds NoteListObject test data
-		/// </summary>
-		/// <param name="viewModelKit"></param>
-		private void AddNoteListObjectTestData (IViewModelKit viewModelKit, IViewModelContext context)
-		{
-			using (IDbContext dbContext = viewModelKit.CreateDbContext()) {
-				context.PrimeViewModel.AddNote(viewModelKit.ViewModelCreator.CreateNoteListObjectViewModel(
-					dbContext, c => { c.Title = "8:00 AM"; c.Text = FlowDocumentWrap("make video"); c.Priority = 2; }));
-				context.PrimeViewModel.AddNote(viewModelKit.ViewModelCreator.CreateNoteListObjectViewModel(
-					dbContext, c => { c.Title = "9:00 AM"; c.Text = FlowDocumentWrap("walk the dog"); c.Priority = 2; }));
-				context.PrimeViewModel.AddNote(viewModelKit.ViewModelCreator.CreateNoteListObjectViewModel(
-					dbContext, c => { c.Title = "9:30 AM"; c.Text = FlowDocumentWrap("eat dinner"); c.Priority = 2; }));
-				context.PrimeViewModel.AddNote(viewModelKit.ViewModelCreator.CreateNoteListObjectViewModel(
-					dbContext, c => { c.Title = "10:15 AM"; c.Text = FlowDocumentWrap("watch tv"); c.Priority = 0; }));
-				context.PrimeViewModel.AddNote(viewModelKit.ViewModelCreator.CreateNoteListObjectViewModel(
-					dbContext, c => { c.Title = "11:30 AM"; c.Text = FlowDocumentWrap("jog"); c.Priority = 2; }));
-				context.PrimeViewModel.AddNote(viewModelKit.ViewModelCreator.CreateNoteListObjectViewModel(
-					dbContext, c => { c.Title = "12:00 PM"; c.Text = FlowDocumentWrap("mop"); c.Priority = 1; }));
-				context.PrimeViewModel.AddNote(viewModelKit.ViewModelCreator.CreateNoteListObjectViewModel(
-					dbContext, c => { c.Title = "1:00 PM"; c.Text = FlowDocumentWrap("kick it"); c.Priority = 0; }));
-				context.PrimeViewModel.AddNote(viewModelKit.ViewModelCreator.CreateNoteListObjectViewModel(
-					dbContext, c => { c.Title = "2:45 PM"; c.Text = FlowDocumentWrap("throw things"); c.Priority = 2; }));
-				context.PrimeViewModel.AddNote(viewModelKit.ViewModelCreator.CreateNoteListObjectViewModel(
-					dbContext, c => { c.Title = "7:00 PM"; c.Text = FlowDocumentWrap("sweep"); c.Priority = 1; }));
-				context.PrimeViewModel.AddNote(viewModelKit.ViewModelCreator.CreateNoteListObjectViewModel(
-					dbContext, c => { c.Title = "7:30 PM"; c.Text = FlowDocumentWrap("chill"); c.Priority = 0; }));
-				context.PrimeViewModel.AddNote(viewModelKit.ViewModelCreator.CreateNoteListObjectViewModel(
-					dbContext, c => { c.Title = "8:00 PM"; c.Text = FlowDocumentWrap("run"); c.Priority = 0; }));
-				context.PrimeViewModel.AddNote(viewModelKit.ViewModelCreator.CreateNoteListObjectViewModel(
-					dbContext, c => { c.Title = "9:00 PM"; c.Text = FlowDocumentWrap("also run"); c.Priority = 2; }));
-
-				context.NoteListViewModel.SaveListOrder();
-			}
-		}
-
-		/// <summary>
-		/// adds GroupListObject test data
-		/// </summary>
-		/// <param name="viewModelKit"></param>
-		private void AddGroupListObjectTestData (IViewModelKit viewModelKit, IViewModelContext context)
-		{
-			using (IDbContext dbContext = viewModelKit.CreateDbContext()) {
-				context.GroupTabsViewModel.AddGroup(viewModelKit.ViewModelCreator.CreateGroupListObjectViewModel(
-					dbContext, c => { c.Title = "Chores"; }));
-				context.GroupTabsViewModel.AddGroup(viewModelKit.ViewModelCreator.CreateGroupListObjectViewModel(
-					dbContext, c => { c.Title = "Exercises"; }));
-				context.GroupTabsViewModel.AddGroup(viewModelKit.ViewModelCreator.CreateGroupListObjectViewModel(
-					dbContext, c => { c.Title = "Leisure"; }));
-
-				context.GroupListViewModel.SaveListOrder();
-			}
-		}
-
 		#endregion
 	}
 }
-
-
-
-
-
-
-
-// NOTE: the test data for GroupViewModel can stay

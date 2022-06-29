@@ -23,7 +23,9 @@ namespace Mino.Command
 		public override void Execute (object parameter)
 		{
 			// focus on the GroupList tab
-			TabControl? tabControl = UIHelper.FindChild<TabControl>(Application.Current.MainWindow, "GroupTabControl");
+			TabControl? tabControl =
+				(TabControl?)UIHelper.FindChildOrNull<TabControl>(Application.Current.MainWindow, "GroupTabControl");
+
 			if (tabControl == null) {
 				return;
 			}

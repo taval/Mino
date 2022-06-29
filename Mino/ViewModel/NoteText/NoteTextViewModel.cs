@@ -153,12 +153,12 @@ namespace Mino.ViewModel
 
 		#region Commands
 
-		public ICommand ChangeTitleCommand {
-			get { return f_ChangeTitleCommand ?? throw new MissingCommandException(); }
-			set { if (f_ChangeTitleCommand == null) f_ChangeTitleCommand = value; }
+		public ICommand UpdateTitleCommand {
+			get { return f_UpdateTitleCommand ?? throw new MissingCommandException(); }
+			set { if (f_UpdateTitleCommand == null) f_UpdateTitleCommand = value; }
 		}
 
-		private ICommand? f_ChangeTitleCommand;
+		private ICommand? f_UpdateTitleCommand;
 
 		public ICommand ChangeTextCommand {
 			get { return f_ChangeTextCommand ?? throw new MissingCommandException(); }
@@ -174,12 +174,12 @@ namespace Mino.ViewModel
 
 		private ICommand? f_UpdateTextCommand;
 
-		public ICommand ChangePriorityCommand {
-			get { return f_ChangePriorityCommand ?? throw new MissingCommandException(); }
-			set { if (f_ChangePriorityCommand == null) f_ChangePriorityCommand = value; }
+		public ICommand UpdatePriorityCommand {
+			get { return f_UpdatePriorityCommand ?? throw new MissingCommandException(); }
+			set { if (f_UpdatePriorityCommand == null) f_UpdatePriorityCommand = value; }
 		}
 
-		private ICommand? f_ChangePriorityCommand;
+		private ICommand? f_UpdatePriorityCommand;
 
 		public ICommand CalcCursorPosCommand {
 			get { return f_CalcCursorPosCommand ?? throw new MissingCommandException(); }

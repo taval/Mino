@@ -11,8 +11,17 @@ using Mino.Model;
 
 // TODO: factor out 'controllers' from each section of PrimeViewModel (NoteList, GroupTabs) and sub-GroupTabs (GroupList, GroupContents)
 //       (GroupTabs is not an arbitrary distinction but its own target. It should be equivalent in the call hierarchy to a GroupList or GroupContents though how it is organized file-wise may be different)
+// UPDATE: the controller pattern may look something like the controller being the place where commands are set, and the viewmodels just expose the actions that the controllers call. if taken in absolute terms then CommandBuilder is essentially ControllerBuilder
 
-// TODO: incomplete/invalid Notes should be disallowed from GroupContentsViewModel addition/insertion
+// UPDATE 2: the mid-tier 'viewmodels' like NoteListViewModel and GroupListViewModel and GroupContentsViewModel would be considered services which handle the business logic, while Prime and GroupTabs would be closer to representing the ViewModel counterparts to the view. In this vein, components of those mid-tier objects not directly related to the view should be moved up and out of those classes and into objects closer to 'ViewModel'. Also consider that Prime spans multiple services but do not encompass the full functionality of the mid-tier objects, and while the mid-tier handles stuff closer to their specific view, they should also be broken down, so it might go something like PrimeViewModel -> NoteSectionViewModel -> NoteListViewModel -> NoteListService -> (data layer). PrimeViewModel is more or less just a facade for the app-level viewmodels at that point. NoteSectionViewModel would represent the note-adjacent (NoteList, NoteText) parts of the original Prime, NoteListViewModel would represent the view-facing elements of original NoteListViewModel, and NoteListService would represent the business logic. Likewise: PrimeViewModel -> GroupSectionViewModel -> GroupTabsVM/GroupListVM->GroupListService/GroupContentsVM -> GroupContentsService
+
+// UPDATE 3: split vm factory functions into individual classes mirroring their products. split up the 'builder' command attachment class along the same lines. Actual builder pattern would be like builder.SetTitle("sometitle").SetPriority(1).Build() but unclear if this is really necessary, the separation/merging into individual factory classes is the key point here. These can be queued up in App whether using the existing methodology or implementing .NET DI features.
+
+// TODO: incomplete/invalid Notes should be disallowed from saving in db
+
+// TODO: incomplete/invalid Groups should be disallowed from saving in db
+
+// TODO: tooltips not displaying on error
 
 namespace Mino.ViewModel
 {
@@ -27,6 +36,21 @@ namespace Mino.ViewModel
 		public NoteListObjectViewModel? SelectedNoteViewModel {
 			get { return f_SelectedNoteViewModel; }
 			set {
+				if (SelectedNoteViewModel != null) {
+					SelectedNoteViewModel.IsSelected = false;
+				}
+				if (value != null) {
+					value.IsSelected = true;
+					StateViewModel.SelectedNoteListItemId = value.ItemId;
+					StatusBarViewModel.SelectedItemId = value.ItemId;
+					StatusBarViewModel.SelectedDateCreated = value.DateCreated;
+				}
+				else {
+					StatusBarViewModel.SelectedItemId = -1;
+					StatusBarViewModel.SelectedDateCreated = DateTime.MinValue;
+				}
+				NoteTextViewModel.ContentData = value;
+
 				Set(ref f_SelectedNoteViewModel, value);
 				NotifyPropertyChanged(nameof(SelectedNoteTitle));
 			}
@@ -46,27 +70,7 @@ namespace Mino.ViewModel
 
 
 
-		#region Commands
-
-		/// <summary>
-		/// witholds/cancels dragdrop on dragleave operation
-		/// </summary>
-		public ICommand GroupNoteHoldCommand {
-			get { return f_GroupNoteHoldCommand ?? throw new MissingCommandException(); }
-			set { if (f_GroupNoteHoldCommand == null) f_GroupNoteHoldCommand = value; }
-		}
-
-		private ICommand? f_GroupNoteHoldCommand;
-
-		/// <summary>
-		/// adds note to group on dragdrop release
-		/// </summary>
-		public ICommand GroupNoteDropCommand {
-			get { return f_GroupNoteDropCommand ?? throw new MissingCommandException(); }
-			set { if (f_GroupNoteDropCommand == null) f_GroupNoteDropCommand = value; }
-		}
-
-		private ICommand? f_GroupNoteDropCommand;
+		#region Commands: Note
 
 		/// <summary>
 		/// selects a Note in the NoteList
@@ -112,9 +116,47 @@ namespace Mino.ViewModel
 
 
 
-		#region Kit
+		#region Commands: Group
 
-		//private IViewModelKit f_ViewModelKit;
+		/// <summary>
+		/// witholds/cancels dragdrop on dragleave operation
+		/// </summary>
+		public ICommand GroupNoteHoldCommand {
+			get { return f_GroupNoteHoldCommand ?? throw new MissingCommandException(); }
+			set { if (f_GroupNoteHoldCommand == null) f_GroupNoteHoldCommand = value; }
+		}
+
+		private ICommand? f_GroupNoteHoldCommand;
+
+		/// <summary>
+		/// adds note to group on dragdrop release
+		/// </summary>
+		public ICommand GroupNoteDropCommand {
+			get { return f_GroupNoteDropCommand ?? throw new MissingCommandException(); }
+			set { if (f_GroupNoteDropCommand == null) f_GroupNoteDropCommand = value; }
+		}
+
+		private ICommand? f_GroupNoteDropCommand;
+
+		/// <summary>
+		/// change the title
+		/// </summary>
+		public ICommand GroupUpdateTitleCommand {
+			get { return f_GroupUpdateTitleCommand ?? throw new MissingCommandException(); }
+			set { if (f_GroupUpdateTitleCommand == null) f_GroupUpdateTitleCommand = value; }
+		}
+
+		private ICommand? f_GroupUpdateTitleCommand;
+
+		/// <summary>
+		/// change the color
+		/// </summary>
+		public ICommand GroupUpdateColorCommand {
+			get { return f_GroupUpdateColorCommand ?? throw new MissingCommandException(); }
+			set { if (f_GroupUpdateColorCommand == null) f_GroupUpdateColorCommand = value; }
+		}
+
+		private ICommand? f_GroupUpdateColorCommand;
 
 		#endregion
 
@@ -134,13 +176,6 @@ namespace Mino.ViewModel
 
 		#region Constructor
 
-		//public PrimeViewModel (
-		//	IViewModelKit viewModelKit,
-		//	StatusBarViewModel statusBarViewModel,
-		//	NoteTextViewModel noteTextViewModel,
-		//	GroupTabsViewModel groupTabsViewModel,
-		//	NoteListViewModel noteListViewModel)
-		//{
 		public PrimeViewModel (
 			StateViewModel stateViewModel,
 			StatusBarViewModel statusBarViewModel,
@@ -148,9 +183,6 @@ namespace Mino.ViewModel
 			GroupTabsViewModel groupTabsViewModel,
 			NoteListViewModel noteListViewModel)
 		{
-			// set ViewModel kit
-			//f_ViewModelKit = viewModelKit;
-
 			// set ViewModel context dependencies
 			StateViewModel = stateViewModel;
 			NoteListViewModel = noteListViewModel;
@@ -161,11 +193,7 @@ namespace Mino.ViewModel
 			// default to no selected item
 			f_SelectedNoteViewModel = null;
 
-			// attach commands
-			//f_ViewModelKit.CommandBuilder.MakePrime(this);
-
 			// attach handlers
-			SetSelectedChangedEventHandler();
 			SetNoteCountChangedEventHandler();
 			SetGroupCountChangedEventHandler();
 			SetGroupNoteCountChangedEventHandler();
@@ -173,31 +201,12 @@ namespace Mino.ViewModel
 			SetGroupStringsChangedEventHandler();
 		}
 
-		public void SetSelectedChangedEventHandler ()
-		{
-			PropertyChangedEventHandler handler = (sender, e) =>
-			{
-				if (e.PropertyName == "SelectedNoteViewModel") {
-					if (SelectedNoteViewModel != null) {
-						StatusBarViewModel.SelectedItemId = SelectedNoteViewModel.ItemId;
-						StatusBarViewModel.SelectedDateCreated = SelectedNoteViewModel.DateCreated;
-					}
-					else {
-						StatusBarViewModel.SelectedItemId = -1;
-						StatusBarViewModel.SelectedDateCreated = DateTime.MinValue;
-					}
-				}
-			};
-
-			PropertyChanged += handler;
-		}
-
 		private void SetNoteCountChangedEventHandler ()
 		{
 			PropertyChangedEventHandler handler = (sender, e) =>
 			{
 				if (e.PropertyName == "ItemCount") {
-					StatusBarViewModel.NoteCount = NoteListViewModel.ItemCount;
+					StatusBarViewModel.NoteCount = ((NoteListViewModel)sender).ItemCount;
 				}
 			};
 
@@ -209,7 +218,7 @@ namespace Mino.ViewModel
 			PropertyChangedEventHandler handler = (sender, e) =>
 			{
 				if (e.PropertyName == "GroupCount") {
-					StatusBarViewModel.GroupCount = GroupTabsViewModel.GroupCount;
+					StatusBarViewModel.GroupCount = ((GroupTabsViewModel)sender).GroupCount;
 				}
 			};
 
@@ -221,7 +230,7 @@ namespace Mino.ViewModel
 			PropertyChangedEventHandler handler = (sender, e) =>
 			{
 				if (e.PropertyName == "GroupNoteCount") {
-					StatusBarViewModel.GroupNoteCount = GroupTabsViewModel.GroupNoteCount;
+					StatusBarViewModel.GroupNoteCount = ((GroupTabsViewModel)sender).GroupNoteCount;
 				}
 			};
 
@@ -233,13 +242,13 @@ namespace Mino.ViewModel
 			PropertyChangedEventHandler handler = (sender, e) =>
 			{
 				if (e.PropertyName == "LineNumber") {
-					StatusBarViewModel.NoteTextCursorLinePos = NoteTextViewModel.LineNumber;
+					StatusBarViewModel.NoteTextCursorLinePos = ((NoteTextViewModel)sender).LineNumber;
 				}
 				else if (e.PropertyName == "ColumnNumber") {
-					StatusBarViewModel.NoteTextCursorColumnPos = NoteTextViewModel.ColumnNumber;
+					StatusBarViewModel.NoteTextCursorColumnPos = ((NoteTextViewModel)sender).ColumnNumber;
 				}
 				else if (e.PropertyName == "IsNewGroupAllowed") {
-					StateViewModel.IsNewGroupAllowed = NoteTextViewModel.IsNewGroupAllowed;
+					StateViewModel.IsNewGroupAllowed = ((NoteTextViewModel)sender).IsNewGroupAllowed;
 				}
 			};
 
@@ -251,12 +260,11 @@ namespace Mino.ViewModel
 			PropertyChangedEventHandler handler = (sender, e) =>
 			{
 				if (e.PropertyName == "Incoming") {
-					NoteListObjectViewModel? incoming = GroupTabsViewModel.GroupContentsViewModel.Incoming;
+					NoteListObjectViewModel? incoming = ((GroupContentsViewModel)sender).Incoming;
 
 					if (incoming != null &&
 						SelectedNoteViewModel != null &&
-						incoming.DataId == SelectedNoteViewModel.DataId)
-					{
+						incoming.DataId == SelectedNoteViewModel.DataId) {
 						NoteTextViewModel.GroupStrings = NoteTextViewModel.NoteGroupsToString(incoming.Model.Data);
 					}
 				}
@@ -306,8 +314,6 @@ namespace Mino.ViewModel
 
 		#region Events
 
-		
-
 		public void SetGroupsOnNote (NoteListObjectViewModel target)
 		{
 			// get data sources
@@ -340,9 +346,6 @@ namespace Mino.ViewModel
 			}
 
 			// find groups which are no longer associated with a note
-			//List<GroupListObjectViewModel> groupsToRemoveNote = new List<GroupListObjectViewModel>();
-				//GroupTabsViewModel.GroupListViewModel.Items.Except(groups, new GroupListObjectDataEqualityComparer());
-
 			foreach (GroupListObjectViewModel groop in GroupTabsViewModel.GroupListViewModel.Items) {
 				Group groopData = groop.Model.Data;
 				Note noteData = target.Model.Data;
@@ -384,25 +387,6 @@ namespace Mino.ViewModel
 		/// inserts a new note into the note list; selects the newly created note
 		/// </summary>
 		/// <param name="target">the location at where the item will be inserted</param>
-		/// <param name="input">the item to insert</param>
-		//public void CreateNote (NoteListObjectViewModel? target, NoteListObjectViewModel input)
-		//{
-		//	// if target is null, try to use the selected item
-		//	if (target == null) {
-		//		target = SelectedNoteViewModel;
-		//	}
-
-		//	// de-select the target
-		//	if (target != null) {
-		//		target.IsSelected = false;
-		//	}
-
-		//	f_NoteListViewModel.Insert(target, input);
-
-		//	// set text viewer
-		//	SelectNote(input);
-		//}
-
 		public NoteListObjectViewModel CreateNoteAt (NoteListObjectViewModel? target)
 		{
 			NoteListObjectViewModel output = NoteListViewModel.Create();
@@ -419,24 +403,11 @@ namespace Mino.ViewModel
 			NoteListViewModel.Insert(target, output);
 
 			// set text viewer
-			//SelectNote(output);
 			if (NoteSelectCommand.CanExecute(output)) {
 				NoteSelectCommand.Execute(output);
 			}
 
 			return output;
-		}
-
-		/// <summary>
-		/// // set the Text viewer to the selected note (this is generally the SelectedNote passed in from NoteList to Prime)
-		/// </summary>
-		/// <param name="note"></param>
-		public void SelectNote (NoteListObjectViewModel note)
-		{
-			SelectedNoteViewModel = note;
-			NoteTextViewModel.ContentData = note;
-			NoteTextViewModel.ContentData.IsSelected = true;
-			StateViewModel.SelectedNoteListItemId = note.ItemId;
 		}
 
 		/// <summary>
@@ -450,10 +421,7 @@ namespace Mino.ViewModel
 
 			// add a list item if none remain
 			if (NoteListViewModel.Items.Count() == 1) {
-				//NoteListObjectViewModel newNote = f_NoteListViewModel.Create();
-				//CreateNote(null, newNote);
 				NoteListObjectViewModel newNote = CreateNoteAt(null);
-				//SelectNote(newNote);
 				if (NoteSelectCommand.CanExecute(newNote)) {
 					NoteSelectCommand.Execute(newNote);
 				}
@@ -467,6 +435,28 @@ namespace Mino.ViewModel
 			NoteListViewModel.Remove(input);
 		}
 
+		public void UpdateGroupTitle (GroupListObjectViewModel target)
+		{
+			GroupTabsViewModel.UpdateGroupTitle(target);
+
+			if (SelectedNoteViewModel != null) {
+				Group groop = target.Model.Data;
+				Note note = SelectedNoteViewModel.Model.Data;
+
+				bool hasSelectedNoteInGroup =
+					GroupTabsViewModel.GroupContentsViewModel.HasNoteInGroup(groop, note);
+
+				if (hasSelectedNoteInGroup) {
+					NoteTextViewModel.GroupStrings = NoteTextViewModel.NoteGroupsToString(note);
+				}
+			}
+
+		}
+
+		public void UpdateGroupColor (GroupListObjectViewModel target)
+		{
+			GroupTabsViewModel.UpdateGroupColor(target);
+		}
 
 		/// <summary>
 		/// take temporary GroupObject and make it a permanent addition to the group
@@ -496,13 +486,11 @@ namespace Mino.ViewModel
 			if (SelectedNoteViewModel == input) {
 				if (NoteListViewModel.Highlighted == input) {
 					if (input.Next != null) {
-						//SelectNote((NoteListObjectViewModel)input.Next);
 						if (NoteSelectCommand.CanExecute((NoteListObjectViewModel)input.Next)) {
 							NoteSelectCommand.Execute((NoteListObjectViewModel)input.Next);
 						}
 					}
 					else if (input.Previous != null) {
-						//SelectNote((NoteListObjectViewModel)input.Previous);
 						if (NoteSelectCommand.CanExecute((NoteListObjectViewModel)input.Previous)) {
 							NoteSelectCommand.Execute((NoteListObjectViewModel)input.Previous);
 						}
@@ -510,7 +498,6 @@ namespace Mino.ViewModel
 					NoteListViewModel.Highlighted = SelectedNoteViewModel;
 				}
 				else if (NoteListViewModel.Highlighted != null) {
-					//SelectNote(NoteListViewModel.Highlighted);
 					if (NoteSelectCommand.CanExecute(NoteListViewModel.Highlighted)) {
 						NoteSelectCommand.Execute(NoteListViewModel.Highlighted);
 					}
@@ -535,8 +522,6 @@ namespace Mino.ViewModel
 		{
 			RemoveAllEventHandlers();
 
-			//f_GroupContentsViewModel.Shutdown();
-			//f_GroupListViewModel.Shutdown();
 			GroupTabsViewModel.Shutdown();
 			NoteListViewModel.Shutdown();
 			StateViewModel.Shutdown();

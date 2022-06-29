@@ -1,9 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Documents;
@@ -27,10 +23,11 @@ namespace Mino.Command
 		{
 			// use the highlighted object as the one to select
 			NoteListObjectViewModel highlighted = (NoteListObjectViewModel)parameter;
-			f_PrimeViewModel.SelectNote(highlighted);
+
+			f_PrimeViewModel.SelectedNoteViewModel = highlighted;
 
 			// find the RichTextBox
-			RichTextBox rtb = UIHelper.GetChildOfType<RichTextBox>(Application.Current.MainWindow);
+			RichTextBox? rtb = UIHelper.FindChildOfType<RichTextBox>(Application.Current.MainWindow);
 			if (rtb == null) return;
 
 			// deserialize the Text string into a FlowDocument and set the RichTextBox's document to it

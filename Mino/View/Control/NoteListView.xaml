@@ -2,8 +2,8 @@
 	x:Class="Mino.NoteListView"
 	xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
 	xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-	xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
-	xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+	xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+	xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
 	xmlns:local="clr-namespace:Mino"
 	xmlns:i="http://schemas.microsoft.com/xaml/behaviors"
 	mc:Ignorable="d"
@@ -26,58 +26,58 @@
 
 	<!-- NOTE: in contrast with other bindings outside interaction triggers, 'Path' property must be explicit within one -->
 
-    <Grid
+	<Grid
 		Height="{ Binding Parent.ActualHeight, Mode=OneWay, RelativeSource={ RelativeSource Self } }"
 		Width="{ Binding Parent.ActualWidth, Mode=OneWay, RelativeSource={ RelativeSource Self } }">
 
-        <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="*" />
-        </Grid.ColumnDefinitions>
-        <Grid.RowDefinitions>
-            <RowDefinition Height="auto" />
-            <RowDefinition Height="*" />
-        </Grid.RowDefinitions>
+		<Grid.ColumnDefinitions>
+			<ColumnDefinition Width="*" />
+		</Grid.ColumnDefinitions>
+		
+		<Grid.RowDefinitions>
+			<RowDefinition Height="auto" />
+			<RowDefinition Height="*" />
+		</Grid.RowDefinitions>
 
-        <!-- the Add Note button -->
+		<Grid Height="32" Margin="0 16 0 8" Background="Transparent">
 
-        <Grid Height="32" Margin="0 16 0 8" Background="Transparent">
+			<Grid.ColumnDefinitions>
+				<ColumnDefinition Width="*" />
+				<ColumnDefinition Width="*" />
+			</Grid.ColumnDefinitions>
+			<Grid.RowDefinitions>
+				<RowDefinition Height="*" />
+				<RowDefinition Height="*" />
+			</Grid.RowDefinitions>
 
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="*" />
-                <ColumnDefinition Width="*" />
-            </Grid.ColumnDefinitions>
-            <Grid.RowDefinitions>
-                <RowDefinition Height="*" />
-                <RowDefinition Height="*" />
-            </Grid.RowDefinitions>
-
-            <!--Text="{ Binding Highlighted.Title }"-->
-            <TextBlock
+			<TextBlock
 				FontWeight="Bold"
 				FontSize="12"
 				Text="Notes" />
-            <TextBlock
+			<TextBlock
 				Grid.Row="1"
 				FontSize="9"
 				Text="{ Binding
 					(local:ListState.SelectedTitle),
 					RelativeSource={ RelativeSource AncestorType={ x:Type local:NoteListView } } }" />
 
-            <Button
+			<!-- the Add Note button -->
+			
+			<Button
 				Grid.Column="1"
 				Grid.RowSpan="2"
 				Template="{ StaticResource buttonTemplate }"
 				Style="{ StaticResource buttonStyle }"
 				Name="AddButton"
 				Content="+"
-                CommandParameter="{ Binding Highlighted }"
-                Command="{ Binding
+				CommandParameter="{ Binding Highlighted }"
+				Command="{ Binding
 					(local:ListAction.CreateAtCommand),
 					RelativeSource={ RelativeSource AncestorType={ x:Type local:NoteListView } } }" />
 
-        </Grid>
+		</Grid>
 
-        <ListView
+		<ListView
 			Background="Transparent"
 			FontSize="9"
 			Grid.Row="1"
@@ -86,47 +86,23 @@
 			SelectedItem="{ Binding Highlighted }"
 			ItemsSource="{ Binding Items, UpdateSourceTrigger=PropertyChanged }">
 
-            <ListView.ItemContainerStyle>
-                <Style TargetType="{ x:Type ListViewItem }" BasedOn="{ StaticResource listViewItemStyle }">
-                    <Setter Property="IsSelected" Value="{ Binding IsSelected }" />
-                </Style>
-            </ListView.ItemContainerStyle>
+			<ListView.ItemContainerStyle>
+				<Style TargetType="{ x:Type ListViewItem }" BasedOn="{ StaticResource listViewItemStyle }">
+					<Setter Property="IsSelected" Value="{ Binding IsSelected }" />
+				</Style>
+			</ListView.ItemContainerStyle>
 
-            <!--<i:Interaction.Triggers>
-				<i:EventTrigger
-					EventName="Drop"
-					SourceObject="{ Binding RelativeSource={ RelativeSource AncestorType={ x:Type ListView } } }">
-					<i:InvokeCommandAction
-						PassEventArgsToCommand="True"
-						Command="{ Binding
-							Path=DataContext.DropCommand,
-							RelativeSource={ RelativeSource AncestorType={ x:Type local:NoteListView } } }" />
-				</i:EventTrigger>
+			<ListView.ItemTemplate>
+				<DataTemplate>
+					<Grid Background="Transparent">
 
-				<i:EventTrigger
-					EventName="DragLeave"
-					SourceObject="{ Binding RelativeSource={ RelativeSource AncestorType={ x:Type ListView } } }">
-					<i:InvokeCommandAction
-						PassEventArgsToCommand="True"
-						Command="{ Binding
-							Path=DataContext.CancelDropCommand,
-							RelativeSource={ RelativeSource AncestorType={ x:Type local:NoteListView } } }" />
-				</i:EventTrigger>
-			</i:Interaction.Triggers>-->
+						<Grid.ColumnDefinitions>
+							<ColumnDefinition Width="*" />
+							<ColumnDefinition Width="*" />
+							<ColumnDefinition Width="*" />
+						</Grid.ColumnDefinitions>
 
-            <ListView.ItemTemplate>
-                <DataTemplate>
-                    <Grid Background="Transparent">
-
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="*" />
-                            <ColumnDefinition Width="*" />
-                            <ColumnDefinition Width="*" />
-                        </Grid.ColumnDefinitions>
-
-                        
-                        
-                        <Button
+						<Button
 							Template="{ StaticResource closeButtonTemplate }"
 							Style="{ StaticResource closeButtonStyle }"
 							Margin="0 0 10 0"
@@ -138,67 +114,61 @@
 								(local:ListAction.RemoveCommand),
 								RelativeSource={ RelativeSource AncestorType={ x:Type local:NoteListView } } }" />
 
-                        <StackPanel Grid.Column="1" Background="Transparent" MinWidth="96">
-                            <TextBlock Text="{ Binding ItemId, StringFormat='Id: {0}', UpdateSourceTrigger=PropertyChanged }" />
-                            <TextBlock FontWeight="Bold" Text="{ Binding Title, Converter={ local:StringToStubConverter } }" />
-                            <TextBlock Text="{ Binding Text, Converter={ local:FlowDocumentStringToStubConverter } }" />
-                        </StackPanel>
+						<StackPanel Grid.Column="1" Background="Transparent" MinWidth="72pt">
+							<TextBlock Text="{ Binding ItemId, StringFormat='Id: {0}', UpdateSourceTrigger=PropertyChanged }" />
+							<TextBlock FontWeight="Bold" Text="{ Binding Title, Converter={ local:StringToStubConverter } }" />
+							<TextBlock Text="{ Binding Text, Converter={ local:FlowDocumentStringToStubConverter } }" />
+						</StackPanel>
 
-                        <Ellipse
-                            Grid.Column="2"
+						<Ellipse
+							Grid.Column="2"
 							Width="18"
 							Height="18"
 							Stroke="#999"
 							StrokeThickness="0.5"
 							Fill="{ Binding Priority, Converter={ local:PriorityToColorConverter } }" />
 
-                        <i:Interaction.Triggers>
+						<i:Interaction.Triggers>
 
-                            <i:EventTrigger
+							<i:EventTrigger
 								EventName="MouseMove"
 								SourceObject="{ Binding RelativeSource={ RelativeSource AncestorType={ x:Type ListViewItem } } }">
-                                <i:InvokeCommandAction
+								<i:InvokeCommandAction
 									PassEventArgsToCommand="True"
 									Command="{ Binding
 										Path=DataContext.PickupCommand,
 										RelativeSource={ RelativeSource AncestorType={ x:Type local:NoteListView } } }" />
-                            </i:EventTrigger>
+							</i:EventTrigger>
 
-                            <i:EventTrigger
+							<i:EventTrigger
 								EventName="DragOver"
 								SourceObject="{ Binding RelativeSource={ RelativeSource AncestorType={ x:Type ListViewItem } } }">
-                                <i:InvokeCommandAction
+								<i:InvokeCommandAction
 									PassEventArgsToCommand="True"
 									Command="{ Binding
 										Path=DataContext.ReorderCommand,
 										RelativeSource={ RelativeSource AncestorType={ x:Type local:NoteListView } } }" />
-                            </i:EventTrigger>
+							</i:EventTrigger>
 
-                            <i:EventTrigger
+							<i:EventTrigger
 								EventName="MouseDoubleClick"
 								SourceObject="{ Binding RelativeSource={ RelativeSource AncestorType={ x:Type ListViewItem } } }">
-                                <!--<i:InvokeCommandAction
-									CommandParameter="{ Binding
-										Path=DataContext.Highlighted,
-										RelativeSource={ RelativeSource AncestorType={ x:Type local:NoteListView } } }"
-									Command="{ Binding
-										Path=(local:ListAction.SelectCommand),
-										RelativeSource={ RelativeSource AncestorType={ x:Type local:NoteListView } } }" />-->
-                                <i:InvokeCommandAction
+
+								<i:InvokeCommandAction
 									CommandParameter="{ Binding
 										Path=DataContext.Highlighted,
 										RelativeSource={ RelativeSource AncestorType={ x:Type local:NoteListView } } }"
 									Command="{ Binding
 										Path=(local:ListAction.SelectCommand),
 										RelativeSource={ RelativeSource AncestorType={ x:Type local:NoteListView } } }" />
-                            </i:EventTrigger>
+							</i:EventTrigger>
 
-                        </i:Interaction.Triggers>
-                    </Grid>
-                </DataTemplate>
-            </ListView.ItemTemplate>
-        </ListView>
+						</i:Interaction.Triggers>
+					</Grid>
+				</DataTemplate>
+			</ListView.ItemTemplate>
+		</ListView>
 
-    </Grid>
+	</Grid>
 
 </UserControl>

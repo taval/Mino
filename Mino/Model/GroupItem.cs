@@ -1,34 +1,27 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
 using System.Text;
 
 
 
 namespace Mino.Model
 {
+	/// <summary>
+	/// container for ids of Note-in-Group plus list item model components
+	/// </summary>
 	public class GroupItem : IIdentifiable
 	{
 		public int Id { get; set; }
-
-		[Required]
-		public int GroupId { get; set; }
-
-		[Required]
 		public int ObjectId { get; set; }
-		
-		[Required]
 		public int NodeId { get; set; }
-
-		[Required]
 		public int TimestampId { get; set; }
+		public int GroupId { get; set; }
 
 		public GroupItem ()
 		{
-			GroupId = 0;
 			ObjectId = 0;
 			NodeId = 0;
 			TimestampId = 0;
+			GroupId = 0;
 		}
 	}
 }

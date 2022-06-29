@@ -94,11 +94,9 @@ namespace Mino.ViewModel
 				if (value == null) {
 					f_Contents.List = f_Contents.GetListByGroupKey(null);
 					f_Changes.Items = f_Changes.GetListByGroupKey(null);
-					IsGroupSelected = false;
+
 					return;
 				}
-
-				IsGroupSelected = true;
 
 				Group groop = value.Model.Data;
 
@@ -125,61 +123,49 @@ namespace Mino.ViewModel
 				}
 
 				Set(ref f_ContentData, value);
-				NotifyPropertyChanged(nameof(Title));
-				NotifyPropertyChanged(nameof(Color));
+				//NotifyPropertyChanged(nameof(Title));
+				//NotifyPropertyChanged(nameof(Color));
 				NotifyPropertyChanged(nameof(Items));
-				
-				AlertSizeChanged();
+
+				NotifySizeChanged();
 			}
 		}
 
 		private GroupListObjectViewModel? f_ContentData;
 
+		///// <summary>
+		///// the group's title
+		///// </summary>
+		//public string Title {
+		//	get {
+		//		if (f_ContentData != null) return f_ContentData.Title;
+		//		return string.Empty;
+		//	}
+		//	set {
+		//		if (f_ContentData != null) {
+		//			if (Equals(f_ContentData.Title, value)) return;
+		//			f_ContentData.Title = value;
+		//			NotifyPropertyChanged(nameof(Title));
+		//		}
+		//	}
+		//}
 
-
-		/// <summary>
-		/// if any group is selected, return true, otherwise return false
-		/// </summary>
-		public bool IsGroupSelected {
-			get { return f_IsGroupSelected; }
-			private set { Set(ref f_IsGroupSelected, value); }
-		}
-
-		private bool f_IsGroupSelected;
-
-		/// <summary>
-		/// the group's title
-		/// </summary>
-		public string Title {
-			get {
-				if (f_ContentData != null) return f_ContentData.Title;
-				return string.Empty;
-			}
-			set {
-				if (f_ContentData != null) {
-					if (Equals(f_ContentData.Title, value)) return;
-					f_ContentData.Title = value;
-					NotifyPropertyChanged(nameof(Title));
-				}
-			}
-		}
-
-		/// <summary>
-		/// the group's associated color
-		/// </summary>
-		public string Color {
-			get {
-				if (f_ContentData != null) return f_ContentData.Color;
-				return string.Empty;
-			}
-			set {
-				if (f_ContentData != null) {
-					if (Equals(f_ContentData.Color, value)) return;
-					f_ContentData.Color = value;
-					NotifyPropertyChanged(nameof(Color));
-				}
-			}
-		}
+		///// <summary>
+		///// the group's associated color
+		///// </summary>
+		//public string Color {
+		//	get {
+		//		if (f_ContentData != null) return f_ContentData.Color;
+		//		return string.Empty;
+		//	}
+		//	set {
+		//		if (f_ContentData != null) {
+		//			if (Equals(f_ContentData.Color, value)) return;
+		//			f_ContentData.Color = value;
+		//			NotifyPropertyChanged(nameof(Color));
+		//		}
+		//	}
+		//}
 
 		#endregion
 
@@ -307,7 +293,7 @@ namespace Mino.ViewModel
 			f_Contents = f_GroupContentsComponentCreator.CreateGroupContents(
 				() => f_ComponentCreator.CreateObservableList<GroupObjectViewModel>());
 
-			AlertSizeChanged();
+			NotifySizeChanged();
 
 			// init change 'queue'
 			f_Changes = f_GroupContentsComponentCreator.CreateGroupChangeQueue(
@@ -340,10 +326,9 @@ namespace Mino.ViewModel
 
 		#region List Access
 
-		private void AlertSizeChanged ()
+		private void NotifySizeChanged ()
 		{
 			NotifyPropertyChanged(nameof(ItemCount));
-			NotifyPropertyChanged(nameof(IsGroupSelected));
 		}
 
 		/// <summary>
@@ -358,7 +343,7 @@ namespace Mino.ViewModel
 
 			f_Contents.Add(input);
 
-			AlertSizeChanged();
+			NotifySizeChanged();
 
 			f_Changes.QueueOnAdd(input);
 		}
@@ -376,7 +361,7 @@ namespace Mino.ViewModel
 
 			f_Contents.Insert(target, input);
 
-			AlertSizeChanged();
+			NotifySizeChanged();
 
 			f_Changes.QueueOnInsert(target, input);
 		}
@@ -421,7 +406,7 @@ namespace Mino.ViewModel
 			UnsetNoteObserver(target);
 			f_Changes.QueueOnRemove(target);
 			f_Contents.Remove(target);
-			if (isVisibleList) AlertSizeChanged();
+			if (isVisibleList) NotifySizeChanged();
 			f_ViewModelKit.ViewModelCreator.DestroyGroupObjectViewModel(dbContext, target);
 		}
 
@@ -454,6 +439,22 @@ namespace Mino.ViewModel
 		public bool HasNoteInGroup (Group groop, Note note)
 		{
 			return f_Contents.HasNoteInGroup(groop, note);
+		}
+
+		public IEnumerable<GroupObjectViewModel> GetGroupObjectsByNote (Note note)
+		{
+			using (IDbContext dbContext = f_ViewModelKit.CreateDbContext()) {
+				IList<GroupObjectViewModel> output = new List<GroupObjectViewModel>();
+
+				IQueryable<GroupObjectViewModel> groupObjects =
+					f_ViewModelKit.DbQueryHelper.GetGroupObjectsByNote(dbContext, note);
+
+				foreach (GroupObjectViewModel groupObj in groupObjects) {
+					output.Add(f_Contents.Lists[groupObj.Group].Find((obj) => obj.ItemId == groupObj.ItemId));
+				}
+
+				return output;
+			}
 		}
 
 		#endregion
@@ -549,7 +550,7 @@ namespace Mino.ViewModel
 
 			// queue all items in the list for removal
 			Queue<GroupObjectViewModel> queue = new Queue<GroupObjectViewModel>(groupObjs.Items);
-			
+
 			// iterate through each item in the queue and remove it from the database
 			while (queue.Any()) Remove(queue.Dequeue());
 
@@ -579,7 +580,7 @@ namespace Mino.ViewModel
 				ClearList(list.Value);
 			}
 
-			AlertSizeChanged();
+			NotifySizeChanged();
 		}
 
 		#endregion
@@ -642,7 +643,7 @@ namespace Mino.ViewModel
 		/// <param name="groop">the group from which the items are sourced</param>
 		private void PopulateGroup (IDbContext dbContext, IList<GroupObjectViewModel> list, Group groop)
 		{
-			
+
 			IQueryable<Tuple<GroupItem, ObjectRoot>> unsortedObjects =
 				f_ViewModelKit.DbQueryHelper.GetGroupItemsInGroup(dbContext, groop);
 			IList<Tuple<GroupItem, ObjectRoot>> groupItemsInGroup = unsortedObjects.ToList();

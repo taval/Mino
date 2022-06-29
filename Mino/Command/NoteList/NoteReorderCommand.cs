@@ -1,8 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using Mino.ViewModel;
@@ -26,7 +23,9 @@ namespace Mino.Command
 			DragEventArgs e = (DragEventArgs)parameter;
 
 			// prevent close button from performing operation
-			Button? closeButton = UIHelper.FindChild<Button>(((FrameworkElement)e.Source).Parent, "RemoveItemButton");
+			Button? closeButton =
+				(Button?)UIHelper.FindChildOrNull<Button>(((FrameworkElement)e.Source).Parent, "RemoveItemButton");
+
 			if (e == null || e.Handled || !(e.Source is FrameworkElement) || closeButton?.IsMouseOver == true) return;
 
 			e.Handled = true;
@@ -48,7 +47,7 @@ namespace Mino.Command
 			if (!itemListName.Equals(listView.Name)) return;
 
 			// do scroll
-			//ScrollListView(e, listView); // TODO: uncomment and test when dragleave is stable, then incorporate into the other listviews
+			UIHelper.ScrollListView(e, listView);
 
 			// get target
 			NoteListObjectViewModel? target = element.DataContext as NoteListObjectViewModel;
@@ -62,46 +61,5 @@ namespace Mino.Command
 			// reorder
 			f_ListViewModel.Reorder(source, target);
 		}
-
-		private void ScrollListView (DragEventArgs e, ListView listView)
-		{
-			ScrollViewer? scrollViewer = UIHelper.GetChildOfType<ScrollViewer>(listView);
-			
-			if (scrollViewer != null) {
-				double tolerance = 60;
-				double verticalPos = e.GetPosition(listView).Y;
-				double offset = 1;
-
-				if (verticalPos < tolerance) { // if top of visible list, scroll up
-					scrollViewer.ScrollToVerticalOffset(scrollViewer.VerticalOffset - offset);
-				}
-				else if (verticalPos > listView.ActualHeight - tolerance) { // if bottom of visible list, scroll down
-					scrollViewer.ScrollToVerticalOffset(scrollViewer.VerticalOffset + offset);
-				}
-			}
-		}
 	}
 }
-
-//FrameworkElement container = sender as FrameworkElement;
-
-//if (container == null) { return; }
-
-//ScrollViewer scrollViewer = GetFirstVisualChild<ScrollViewer>(container);
-
-//if (scrollViewer == null) { return; }
-
-//double tolerance = 60;
-//double verticalPos = e.GetPosition(container).Y;
-//double offset = 20;
-
-//if (verticalPos < tolerance) // Top of visible list? 
-//{
-//	//Scroll up
-//	scrollViewer.ScrollToVerticalOffset(scrollViewer.VerticalOffset - offset);
-//}
-//else if (verticalPos > container.ActualHeight - tolerance) //Bottom of visible list? 
-//{
-//	//Scroll down
-//	scrollViewer.ScrollToVerticalOffset(scrollViewer.VerticalOffset + offset);
-//}

@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Text;
 using System.Windows;
 using System.Windows.Controls;
@@ -12,11 +11,11 @@ namespace Mino.Command
 {
 	public class NotePickupCommand : CommandBase
 	{
-		private readonly NoteListViewModel f_ListViewModel;
+		private readonly NoteListViewModel f_Context;
 
-		public NotePickupCommand (NoteListViewModel listViewModel)
+		public NotePickupCommand (NoteListViewModel context)
 		{
-			f_ListViewModel = listViewModel;
+			f_Context = context;
 		}
 
 		public override void Execute (object parameter)
@@ -25,7 +24,8 @@ namespace Mino.Command
 			MouseEventArgs e = (MouseEventArgs)parameter;
 
 			// if button not pressed, invalid event source, or close button is under mouse, bail out
-			Button? closeButton = UIHelper.FindChild<Button>(((FrameworkElement)e.Source).Parent, "RemoveItemButton");
+			Button? closeButton =
+				(Button?)UIHelper.FindChildOrNull<Button>(((FrameworkElement)e.Source).Parent, "RemoveItemButton");
 
 			if (e == null ||
 				e.Handled ||
@@ -44,9 +44,9 @@ namespace Mino.Command
 			ListView listView = (ListView)ItemsControl.ItemsControlFromItemContainer(item);
 			string listName = listView.Name;
 
-			// get data to pick up
+			// get data to pick up - check if its an object, leave validation up to receiver
 			object? dataContext = source.DataContext;
-			if (dataContext == null) return;
+			if (dataContext == null || !(dataContext is NoteListObjectViewModel)) return;
 
 			// pick up data
 			DragDropEffects _ = DragDrop.DoDragDrop(

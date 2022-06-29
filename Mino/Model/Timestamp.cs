@@ -1,6 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
 using System.Text;
 
 
@@ -11,7 +9,6 @@ namespace Mino.Model
 	{
 		public int Id { get; set; }
 
-		[Required]
 		public long UserCreated { get; set; }
 		
 		public long? UserModified { get; set; }

@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Text;
 using Mino.ViewModel;
 
@@ -7,11 +6,11 @@ using Mino.ViewModel;
 
 namespace Mino.Command
 {
-	public class NoteChangeTitleCommand : CommandBase
+	public class NoteUpdateTitleCommand : CommandBase
 	{
 		private readonly NoteTextViewModel f_NoteTextViewModel;
 
-		public NoteChangeTitleCommand (NoteTextViewModel noteTextViewModel)
+		public NoteUpdateTitleCommand (NoteTextViewModel noteTextViewModel)
 		{
 			f_NoteTextViewModel = noteTextViewModel;
 		}

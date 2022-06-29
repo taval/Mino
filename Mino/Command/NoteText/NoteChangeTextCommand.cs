@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.IO;
 using System.Text;
 using System.Windows;
@@ -27,7 +26,9 @@ namespace Mino.Command
 
 			RoutedEventArgs e = (RoutedEventArgs)parameter;
 
-			if (!(e.Source is RichTextBox)) return;
+			if (e.Handled || !(e.Source is RichTextBox)) return;
+
+			e.Handled = true;
 
 			// get the FlowDocument from the RichTextBox
 			RichTextBox rtb = (RichTextBox)e.Source;
@@ -40,14 +41,7 @@ namespace Mino.Command
 
 			string xamlToString = Encoding.UTF8.GetString(stream.ToArray());
 
-
-			
-
-			//MessageBox.Show(xamlToString);
-
 			f_NoteTextViewModel.Text = xamlToString;
-
-			//f_NoteTextViewModel.UpdateText();
 		}
 	}
 }

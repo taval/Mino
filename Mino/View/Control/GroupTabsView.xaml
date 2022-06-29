@@ -1,166 +1,138 @@
 ﻿<UserControl
 	x:Class="Mino.GroupTabsView"
-    x:Name="TabControl_GroupTabsView"
+	x:Name="TabControl_GroupTabsView"
 	xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
 	xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-	xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
-	xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+	xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+	xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
 	xmlns:local="clr-namespace:Mino"
-	xmlns:diag="clr-namespace:System.Diagnostics;assembly=WindowsBase"
-	mc:Ignorable="d" 
+	mc:Ignorable="d"
 	xmlns:i="http://schemas.microsoft.com/xaml/behaviors"
 	d:DesignHeight="450" d:DesignWidth="800">
 
-    <Grid
+	<Grid
 		Height="{ Binding Parent.ActualHeight, Mode=OneWay, RelativeSource={ RelativeSource Self } }"
 		Width="{ Binding Parent.ActualWidth, Mode=OneWay, RelativeSource={ RelativeSource Self } }">
 
-        <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="*" />
-        </Grid.ColumnDefinitions>
-        <Grid.RowDefinitions>
-            <RowDefinition Height="auto" />
-            <RowDefinition Height="*" />
-        </Grid.RowDefinitions>
+		<Grid.ColumnDefinitions>
+			<ColumnDefinition Width="*" />
+		</Grid.ColumnDefinitions>
 
-        <!-- Add Group button -->
+		<Grid.RowDefinitions>
+			<RowDefinition Height="auto" />
+			<RowDefinition Height="*" />
+		</Grid.RowDefinitions>
 
-        <Grid Height="32" Margin="0 16 0 8">
+		<Grid Height="32" Margin="0 16 0 8">
 
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="*" />
-                <ColumnDefinition Width="*" />
-            </Grid.ColumnDefinitions>
-            <Grid.RowDefinitions>
-                <RowDefinition Height="*" />
-                <RowDefinition Height="*" />
-            </Grid.RowDefinitions>
+			<Grid.ColumnDefinitions>
+				<ColumnDefinition Width="*" />
+				<ColumnDefinition Width="*" />
+			</Grid.ColumnDefinitions>
+			<Grid.RowDefinitions>
+				<RowDefinition Height="*" />
+				<RowDefinition Height="*" />
+			</Grid.RowDefinitions>
 
-            <TextBlock
-                FontWeight="Bold"
+			<TextBlock
+				FontWeight="Bold"
 				FontSize="12"
 				Text="Tags" />
-            <TextBlock
-                Grid.Row="1"
-                FontSize="9"
-                Text="{ Binding GroupTitle }" />
+			<TextBlock
+				Grid.Row="1"
+				FontSize="9"
+				Text="{ Binding SelectedGroupTitle }" />
 
-            <Button
+			<!-- Add Group button -->
+
+			<Button
 				Grid.Column="1"
-                Grid.RowSpan="2"
+				Grid.RowSpan="2"
 				Template="{ StaticResource buttonTemplate }"
 				Style="{ StaticResource buttonStyle }"
 				Name="AddButton"
 				Content="+"
-                CommandParameter="{ Binding GroupListViewModel.Highlighted }"
-                Command="{ Binding
+				CommandParameter="{ Binding GroupListViewModel.Highlighted }"
+				Command="{ Binding
 					Path=DataContext.GroupCreateAtCommand,
 					RelativeSource={ RelativeSource AncestorType={ x:Type local:GroupTabsView } } }" />
 
-        </Grid>
+		</Grid>
 
-        <TabControl x:Name="GroupTabControl" Grid.Row="1">
+		<TabControl x:Name="GroupTabControl" Grid.Row="1">
 
-            <i:Interaction.Triggers>
+			<!-- GroupList -->
 
-                <i:EventTrigger
-					EventName="SelectionChanged"
-					SourceObject="{ Binding RelativeSource={ RelativeSource AncestorType={ x:Type TabControl } } }">
-                    <i:InvokeCommandAction
-						PassEventArgsToCommand="True"
-						Command="{ Binding
-							Path=DataContext.SwitchTabsCommand,
-							RelativeSource={ RelativeSource AncestorType={ x:Type local:GroupTabsView } } }" />
-                </i:EventTrigger>
-            </i:Interaction.Triggers>
+			<TabItem x:Name="GroupListTab">
 
-            <!-- GroupList -->
+				<TabItem.Header>
+					<StackPanel Orientation="Horizontal">
+						<Ellipse Width="10" Height="10" Fill="DarkGray" />
+						<TextBlock Text="Tags" FontSize="10" />
+					</StackPanel>
+				</TabItem.Header>
 
-            <TabItem x:Name="GroupListTab">
-
-                <TabItem.Header>
-                    <StackPanel Orientation="Horizontal">
-                        <Ellipse Width="10" Height="10" Fill="DarkGray" />
-                        <TextBlock Text="Tags" FontSize="10" />
-                    </StackPanel>
-                </TabItem.Header>
-
-                <local:GroupListView
+				<local:GroupListView
 					x:Name="GroupListView"
 					DataContext="{ Binding GroupListViewModel }"
 
 					local:ListAction.SelectCommand="{ Binding
 						RelativeSource={ RelativeSource AncestorType={ x:Type local:GroupTabsView } },
-						Path=DataContext.GroupSelectCommand,
-						diag:PresentationTraceSources.TraceLevel=High }"
+						Path=DataContext.GroupSelectCommand }"
 
 					local:ListAction.RemoveCommand="{ Binding
 						RelativeSource={ RelativeSource AncestorType={ x:Type local:GroupTabsView } },
-						Path=DataContext.GroupDestroyCommand,
-						diag:PresentationTraceSources.TraceLevel=High }" />
+						Path=DataContext.GroupDestroyCommand }"
 
-            </TabItem>
-
-            <!-- Group -->
-
-            <TabItem x:Name="GroupContentsTab">
-                <TabItem.Header>
-                    <StackPanel Orientation="Horizontal">
-                        <Ellipse Width="10" Height="8" Fill="DarkGray" />
-                        <TextBlock Text="{ Binding SelectedGroupViewModel.Title, StringFormat='Tag: {0}' }" FontSize="10" />
-                    </StackPanel>
-                </TabItem.Header>
-
-                <!--local:ListState.Incoming="{ Binding
+					local:GroupAction.UpdateTitleCommand="{ Binding
 						RelativeSource={ RelativeSource AncestorType={ x:Type local:GroupTabsView } },
-						Path=(local:ListState.Incoming),
-						diag:PresentationTraceSources.TraceLevel=High }"
-					
-					local:ListAction.ReceiveCommand="{ Binding
+						Path=(local:GroupAction.UpdateTitleCommand) }"
+
+                    local:GroupAction.UpdateColorCommand="{ Binding
 						RelativeSource={ RelativeSource AncestorType={ x:Type local:GroupTabsView } },
-						Path=(local:ListAction.ReceiveCommand),
-						diag:PresentationTraceSources.TraceLevel=High }"-->
-                <local:GroupContentsView
+						Path=(local:GroupAction.UpdateColorCommand) }" />
+
+			</TabItem>
+
+			<!-- Group -->
+
+			<TabItem x:Name="GroupContentsTab" Background="{ Binding ContentsTabColor }" Focusable="{ Binding IsGroupSelectable }">
+				<TabItem.Header>
+					<StackPanel Orientation="Horizontal">
+						<Ellipse Width="10" Height="8" Fill="DarkGray" />
+						<TextBlock Text="{ Binding SelectedGroupTitle, StringFormat='Tag: {0}' }" FontSize="10" />
+					</StackPanel>
+				</TabItem.Header>
+
+				<local:GroupContentsView
 					x:Name="GroupContentsView"
 					DataContext="{ Binding GroupContentsViewModel }"
 
-                    local:ListAction.HoldCommand="{ Binding
+					local:ListState.IsDropReady="{ Binding
+						Mode=OneWay,
 						RelativeSource={ RelativeSource AncestorType={ x:Type local:GroupTabsView } },
-						Path=(local:ListAction.HoldCommand),
-						diag:PresentationTraceSources.TraceLevel=High }"
+						Path=(local:ListState.IsDropReady) }"
+					
+					local:ListAction.HoldCommand="{ Binding
+						RelativeSource={ RelativeSource AncestorType={ x:Type local:GroupTabsView } },
+						Path=(local:ListAction.HoldCommand) }"
 
 					local:ListAction.DropCommand="{ Binding
 						RelativeSource={ RelativeSource AncestorType={ x:Type local:GroupTabsView } },
-						Path=(local:ListAction.DropCommand),
-						diag:PresentationTraceSources.TraceLevel=High }"
+						Path=(local:ListAction.DropCommand) }"
 
 					local:ListAction.SelectCommand="{ Binding
 						RelativeSource={ RelativeSource AncestorType={ x:Type local:GroupTabsView } },
-						Path=DataContext.GroupNoteSelectCommand,
-						diag:PresentationTraceSources.TraceLevel=High }"
+						Path=DataContext.GroupNoteSelectCommand }"
 
 					local:ListAction.RemoveCommand="{ Binding
 						RelativeSource={ RelativeSource AncestorType={ x:Type local:GroupTabsView } },
-						Path=DataContext.GroupNoteDestroyCommand,
-						diag:PresentationTraceSources.TraceLevel=High }" />
+						Path=DataContext.GroupNoteDestroyCommand }" />
 
-            </TabItem>
-        </TabControl>
+			</TabItem>
+		</TabControl>
 
-        <!--<i:Interaction.Triggers>
-
-			<i:EventTrigger
-				SourceObject="{ Binding ElementName=AddButton }"
-				EventName="PreviewMouseLeftButtonDown">
-				<i:InvokeCommandAction
-					PassEventArgsToCommand="True"
-					Command="{ Binding
-						Path=DataContext.GroupCreateCommand,
-						RelativeSource={ RelativeSource AncestorType={ x:Type local:GroupTabsView } } }" />
-			</i:EventTrigger>
-
-		</i:Interaction.Triggers>-->
-    </Grid>
+	</Grid>
 
 </UserControl>
 

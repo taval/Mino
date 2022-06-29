@@ -1,9 +1,8 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Text;
-using System.Windows;
-using System.Windows.Controls;
 using Mino.ViewModel;
+
+
 
 namespace Mino.Command
 {
@@ -22,8 +21,6 @@ namespace Mino.Command
 			NoteListObjectViewModel.PriorityTypes.Add("Low");
 			NoteListObjectViewModel.PriorityTypes.Add("Medium");
 			NoteListObjectViewModel.PriorityTypes.Add("High");
-
-			//comboBox.ItemsSource = NoteListObjectViewModel.PriorityTypes;
 
 			// do viewmodel load
 			f_Context.Load();

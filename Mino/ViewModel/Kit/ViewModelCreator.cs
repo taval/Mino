@@ -292,7 +292,7 @@ namespace Mino.ViewModel
 			GroupContentsViewModel groupContentsViewModel)
 		{
 			GroupTabsViewModel output =
-				new GroupTabsViewModel(f_ViewModelKit, stateViewModel, groupListViewModel, groupContentsViewModel);
+				new GroupTabsViewModel(stateViewModel, groupListViewModel, groupContentsViewModel);
 
 			f_ViewModelKit.CommandBuilder.MakeGroupTabs(output);
 

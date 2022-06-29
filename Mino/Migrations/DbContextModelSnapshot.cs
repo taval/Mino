@@ -7,7 +7,7 @@ using Mino.Model;
 
 namespace Mino.Migrations
 {
-    [DbContext(typeof(Mino.Model.DbContext))]
+    [DbContext(typeof(Mino.Model.MinoDbContext))]
     partial class DbContextModelSnapshot : ModelSnapshot
     {
         protected override void BuildModel(ModelBuilder modelBuilder)

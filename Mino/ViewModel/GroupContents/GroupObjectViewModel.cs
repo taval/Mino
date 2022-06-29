@@ -4,7 +4,7 @@ using System.Diagnostics.CodeAnalysis;
 using System.Text;
 using Mino.Model;
 
-// TODO: replace the redundant setters in the getters in an attempt to trigger propertychanged handlers with a NotifyNoteChanged function to be called by NoteListObjectViewModel's propertychanged event handler. Getters here in GroupObjectViewModel should look just like the ones for Node and Timestamp
+
 
 namespace Mino.ViewModel
 {

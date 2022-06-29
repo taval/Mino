@@ -5,80 +5,84 @@
 	xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
 	xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
 	xmlns:local="clr-namespace:Mino"
-	xmlns:diag="clr-namespace:System.Diagnostics;assembly=WindowsBase"
 	mc:Ignorable="d"
 	xmlns:i="http://schemas.microsoft.com/xaml/behaviors"
 	d:DesignHeight="480" d:DesignWidth="800">
 
 	<StackPanel>
 		<!-- Viewing window -->
-        <Grid>
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="1*" />
-                <ColumnDefinition Width="2*" />
-                <ColumnDefinition Width="1*" />
-            </Grid.ColumnDefinitions>
+		<Grid>
+			<Grid.ColumnDefinitions>
+				<ColumnDefinition Width="1*" />
+				<ColumnDefinition Width="2*" />
+				<ColumnDefinition Width="1*" />
+			</Grid.ColumnDefinitions>
 
-            <Grid.RowDefinitions>
-                <RowDefinition MinHeight="360" Height="*" />
-            </Grid.RowDefinitions>
+			<Grid.RowDefinitions>
+				<RowDefinition MinHeight="360" Height="*" />
+			</Grid.RowDefinitions>
 
-            <!--Path=DataContext.SelectedNoteTitle,-->
-            <local:NoteListView
+			<local:NoteListView
 				Margin="8 0 4 0"
-				DataContext="{ Binding NoteListViewModel, diag:PresentationTraceSources.TraceLevel=High }"
+				DataContext="{ Binding NoteListViewModel }"
 
-                local:ListState.SelectedTitle="{ Binding
+				local:ListState.SelectedTitle="{ Binding
 					RelativeSource={ RelativeSource AncestorType={ x:Type local:PrimeView } },
-					Path=DataContext.SelectedNoteViewModel.Title,
-					diag:PresentationTraceSources.TraceLevel=High }"
-                
+					Path=DataContext.SelectedNoteViewModel.Title }"
+				
 				local:ListAction.CreateAtCommand="{ Binding
 					RelativeSource={ RelativeSource AncestorType={ x:Type local:PrimeView } },
-					Path=DataContext.NoteCreateAtCommand,
-					diag:PresentationTraceSources.TraceLevel=High }"
+					Path=DataContext.NoteCreateAtCommand }"
 
 				local:ListAction.SelectCommand="{ Binding
 					RelativeSource={ RelativeSource AncestorType={ x:Type local:PrimeView } },
-					Path=DataContext.NoteSelectCommand,
-					diag:PresentationTraceSources.TraceLevel=High }"
+					Path=DataContext.NoteSelectCommand }"
 
 				local:ListAction.RemoveCommand="{ Binding
 					RelativeSource={ RelativeSource AncestorType={ x:Type local:PrimeView } },
-					Path=DataContext.NoteDestroyCommand,
-					diag:PresentationTraceSources.TraceLevel=High }" />
+					Path=DataContext.NoteDestroyCommand }" />
 
-            <local:NoteTextView
+			<local:NoteTextView
 				Margin="4 0 4 0"
 				Grid.Column="1"
 				DataContext="{ Binding NoteTextViewModel }"
-                
-                local:TextAction.ChangeGroupsCommand="{ Binding
+				
+				local:TextAction.ChangeGroupsCommand="{ Binding
 					RelativeSource={ RelativeSource AncestorType={ x:Type local:PrimeView } },
-					Path=DataContext.NoteChangeGroupsCommand,
-					diag:PresentationTraceSources.TraceLevel=High }" />
+					Path=DataContext.NoteChangeGroupsCommand }" />
 
-            <local:GroupTabsView
+			<local:GroupTabsView
 				Margin="4 0 8 0"
 				Grid.Column="2"
 				DataContext="{ Binding GroupTabsViewModel }"
 
-                local:ListAction.HoldCommand="{ Binding
+				local:ListState.IsDropReady="{ Binding
+					Mode=OneWay,
 					RelativeSource={ RelativeSource AncestorType={ x:Type local:PrimeView } },
-					Path=DataContext.GroupNoteHoldCommand,
-					diag:PresentationTraceSources.TraceLevel=High }"
+					Path=DataContext.NoteListViewModel.IsDropReady }"
+				
+				local:ListAction.HoldCommand="{ Binding
+					RelativeSource={ RelativeSource AncestorType={ x:Type local:PrimeView } },
+					Path=DataContext.GroupNoteHoldCommand }"
 
 				local:ListAction.DropCommand="{ Binding
 					RelativeSource={ RelativeSource AncestorType={ x:Type local:PrimeView } },
-					Path=DataContext.GroupNoteDropCommand,
-					diag:PresentationTraceSources.TraceLevel=High }" />
+					Path=DataContext.GroupNoteDropCommand }"
+                
+                local:GroupAction.UpdateTitleCommand="{ Binding
+					RelativeSource={ RelativeSource AncestorType={ x:Type local:PrimeView } },
+					Path=DataContext.GroupUpdateTitleCommand }"
 
-        </Grid>
+                local:GroupAction.UpdateColorCommand="{ Binding
+					RelativeSource={ RelativeSource AncestorType={ x:Type local:PrimeView } },
+					Path=DataContext.GroupUpdateColorCommand }" />
 
-        <!-- footer -->
-        <local:StatusBarView
-            DataContext="{ Binding StatusBarViewModel }" />
+		</Grid>
 
-    </StackPanel>
+		<!-- footer -->
+		<local:StatusBarView
+			DataContext="{ Binding StatusBarViewModel }" />
+
+	</StackPanel>
 
 </UserControl>

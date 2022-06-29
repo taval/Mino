@@ -34,7 +34,9 @@ namespace Mino.Command
 			if (e.OriginalSource is TextBox) return;
 
 			// if button not pressed, invalid event source, or close button is under mouse, bail out
-			Button? closeButton = UIHelper.FindChild<Button>(((FrameworkElement)e.Source).Parent, "RemoveItemButton");
+			Button? closeButton =
+				(Button?)UIHelper.FindChildOrNull<Button>(((FrameworkElement)e.Source).Parent, "RemoveItemButton");
+
 			if (closeButton?.IsMouseOver == true) return;
 
 			// get event source

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using Microsoft.EntityFrameworkCore;
 using Mino.Model;
 
 
@@ -14,11 +15,15 @@ namespace Mino.ViewModel
 		public IViewModelCreator ViewModelCreator { get; private set; }
 		public ICommandBuilder CommandBuilder { get; private set; }
 
-		public ViewModelKit ()
+		private readonly DbContextOptions<MinoDbContext> f_Options;
+
+		public ViewModelKit (DbContextOptions<MinoDbContext> options)
 		{
+			f_Options = options;
+
 			// TODO: Testing only: truncating the table and resetting id auto-increment - remove this in production
 			using (IDbContext dbContext = CreateDbContext()) {
-				//dbContext.Reset();
+				dbContext.Reset();
 			}
 
 			DbListHelper = new DbListHelper();
@@ -29,7 +34,7 @@ namespace Mino.ViewModel
 
 		public IDbContext CreateDbContext ()
 		{
-			return new DbContext();
+			return new MinoDbContext(f_Options);
 		}
 	}
 }

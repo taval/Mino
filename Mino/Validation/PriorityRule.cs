@@ -18,11 +18,16 @@ namespace Mino
 
 		public override ValidationResult Validate (object value, CultureInfo cultureInfo)
 		{
-            if ((int)value >= NoteListObjectViewModel.PriorityTypes.Count) {
-                return new ValidationResult(false, $"Please enter a valid priority level.");
-            }
+			if (!IsValidPriority((int)value)) {
+				return new ValidationResult(false, $"Please enter a valid priority level.");
+			}
 
-            return ValidationResult.ValidResult;
-        }
+			return ValidationResult.ValidResult;
+		}
+
+		public static bool IsValidPriority (int priority)
+		{
+			return priority < NoteListObjectViewModel.PriorityTypes.Count;
+		}
 	}
 }

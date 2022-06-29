@@ -28,14 +28,21 @@ namespace Mino
 			if (color.Equals(LastColor)) {
 				string colorString = ColorTranslator.ToHtml(color);
 				string rawColor = colorString.Substring(1, colorString.Length - 1);
-				char[] rawColorchars = rawColor.ToCharArray();
-				Array.Reverse(rawColorchars);
-				color = ColorTranslator.FromHtml("#" + new string(rawColorchars));
+				char[] rawColorChars = rawColor.ToCharArray();
+				Array.Reverse(rawColorChars);
+				color = ColorTranslator.FromHtml("#" + new string(rawColorChars));
 			}
 
 			LastColor = color;
 
 			return LastColor;
+		}
+
+		public string GenerateHtml ()
+		{
+			Color color = Generate();
+
+			return ColorTranslator.ToHtml(color);
 		}
 
 		public ColorGenerator ()

@@ -1,53 +1,55 @@
-﻿<UserControl x:Class="Mino.StatusBarView"
-             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
-             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
-             xmlns:local="clr-namespace:Mino"
-             mc:Ignorable="d" 
-             d:DesignHeight="450" d:DesignWidth="800">
-    <Grid>
+﻿<UserControl
+	x:Class="Mino.StatusBarView"
+	xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+	xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+	xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+	xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+	xmlns:local="clr-namespace:Mino"
+	mc:Ignorable="d"
+	d:DesignHeight="450" d:DesignWidth="800">
 
-        <StatusBar MinHeight="32" VerticalAlignment="Bottom">
-            <StatusBar.ItemsPanel>
-                <ItemsPanelTemplate>
-                    <Grid>
-                        <Grid.RowDefinitions>
-                            <RowDefinition Height="auto" />
-                        </Grid.RowDefinitions>
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="*" />
-                            <ColumnDefinition Width="*" />
-                            <ColumnDefinition Width="*" />
-                            <ColumnDefinition Width="*" />
-                            <ColumnDefinition Width="*" />
-                        </Grid.ColumnDefinitions>
-                    </Grid>
-                </ItemsPanelTemplate>
-            </StatusBar.ItemsPanel>
+	<Grid>
 
-            <StatusBarItem>
-                <TextBlock Text="{ Binding SelectedItemId, StringFormat='Id: {0}', UpdateSourceTrigger=PropertyChanged }" />
-            </StatusBarItem>
+		<StatusBar MinHeight="32" VerticalAlignment="Bottom">
+			<StatusBar.ItemsPanel>
+				<ItemsPanelTemplate>
+					<Grid>
+						<Grid.RowDefinitions>
+							<RowDefinition Height="auto" />
+						</Grid.RowDefinitions>
+						<Grid.ColumnDefinitions>
+							<ColumnDefinition Width="*" />
+							<ColumnDefinition Width="*" />
+							<ColumnDefinition Width="*" />
+							<ColumnDefinition Width="*" />
+							<ColumnDefinition Width="*" />
+						</Grid.ColumnDefinitions>
+					</Grid>
+				</ItemsPanelTemplate>
+			</StatusBar.ItemsPanel>
 
-            <StatusBarItem Grid.Column="1">
-                <TextBlock Text="{ Binding SelectedDateCreated, StringFormat='{}Created: {0:MM/dd/yyyy}', UpdateSourceTrigger=PropertyChanged }" />
-            </StatusBarItem>
+			<StatusBarItem>
+				<TextBlock Text="{ Binding SelectedItemId, StringFormat='Id: {0}', UpdateSourceTrigger=PropertyChanged }" />
+			</StatusBarItem>
 
-            <!--<Separator Grid.Column="2" />-->
+			<StatusBarItem Grid.Column="1">
+				<TextBlock Text="{ Binding SelectedDateCreated, StringFormat='{}Created: {0:MM/dd/yyyy}', UpdateSourceTrigger=PropertyChanged }" />
+			</StatusBarItem>
 
-            <StatusBarItem Grid.Column="2">
-                <TextBlock Text="{ Binding NoteCount, StringFormat='# of records: {0}', UpdateSourceTrigger=PropertyChanged }" />
-            </StatusBarItem>
+			<!--<Separator Grid.Column="2" />-->
 
-            <StatusBarItem Grid.Column="3">
-                <TextBlock Text="{ Binding GroupCount, StringFormat='# of groups: {0}', UpdateSourceTrigger=PropertyChanged }" />
-            </StatusBarItem>
+			<StatusBarItem Grid.Column="2">
+				<TextBlock Text="{ Binding NoteCount, StringFormat='# of records: {0}', UpdateSourceTrigger=PropertyChanged }" />
+			</StatusBarItem>
 
-            <StatusBarItem Grid.Column="4">
-                <TextBlock Text="{ Binding CursorPos, UpdateSourceTrigger=PropertyChanged }" />
-            </StatusBarItem>
+			<StatusBarItem Grid.Column="3">
+				<TextBlock Text="{ Binding GroupCount, StringFormat='# of groups: {0}', UpdateSourceTrigger=PropertyChanged }" />
+			</StatusBarItem>
 
-        </StatusBar>
-    </Grid>
+			<StatusBarItem Grid.Column="4">
+				<TextBlock Text="{ Binding CursorPos, UpdateSourceTrigger=PropertyChanged }" />
+			</StatusBarItem>
+
+		</StatusBar>
+	</Grid>
 </UserControl>

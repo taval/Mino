@@ -12,7 +12,6 @@ namespace Mino.Model
 	{
 		public int Id { get; set; }
 
-		[Required]
 		public string Title { get; set; }
 
 		public string Color {

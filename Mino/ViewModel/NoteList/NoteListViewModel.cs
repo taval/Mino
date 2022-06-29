@@ -46,6 +46,14 @@ namespace Mino.ViewModel
 
 
 
+		#region EventHandler
+
+		IDictionary<string, PropertyChangedEventHandler> f_Handlers;
+
+		#endregion
+
+
+
 		#region Cross-View Data
 
 		/// <summary>
@@ -53,7 +61,12 @@ namespace Mino.ViewModel
 		/// </summary>
 		public NoteListObjectViewModel? Highlighted {
 			get { return f_Highlighted; }
-			set { Set(ref f_Highlighted, value); }
+			set {
+				if (Highlighted != null) Highlighted.PropertyChanged -= f_Handlers["DropReady"];
+				Set(ref f_Highlighted, value);
+				if (Highlighted != null) Highlighted.PropertyChanged += f_Handlers["DropReady"];
+				NotifyPropertyChanged(nameof(IsDropReady));
+			}
 		}
 
 		private NoteListObjectViewModel? f_Highlighted;
@@ -65,10 +78,6 @@ namespace Mino.ViewModel
 			get { return f_List.Items.Count(); }
 		}
 
-		public bool HasNote {
-			get { return f_List.Any(); }
-		}
-
 		public string DefaultText {
 			get { return f_DefaultText ?? String.Empty; }
 			set { Set(ref f_DefaultText, value); }
@@ -76,6 +85,14 @@ namespace Mino.ViewModel
 
 		private string? f_DefaultText;
 
+		public bool IsDropReady {
+			get {
+				if (Highlighted == null) return false;
+				return
+					NoteTitleRule.IsValidNoteTitle(Highlighted.Title) &&
+					PriorityRule.IsValidPriority(Highlighted.Priority);
+			}
+		}
 		#endregion
 
 
@@ -138,6 +155,7 @@ namespace Mino.ViewModel
 			f_ViewModelKit = viewModelKit;
 			f_ComponentCreator = new ComponentCreator();
 
+			f_Handlers = new Dictionary<string, PropertyChangedEventHandler>();
 
 			// init change 'queue'
 			f_Changes = f_ComponentCreator.CreateChangeQueue<NoteListObjectViewModel>();
@@ -145,10 +163,23 @@ namespace Mino.ViewModel
 			// init highlighted
 			f_Highlighted = null;
 
+			// init handler used for any object assigned at Highlighted
+			AddHighlightedHandler();
+
 			f_List = f_ComponentCreator.CreateObservableList<NoteListObjectViewModel>();
 
 			// notify the viewmodel list count has changed (zero is a size too)
 			NotifySizeChanged();
+		}
+
+		private void AddHighlightedHandler ()
+		{
+			f_Handlers["DropReady"] = (sender, e) =>
+			{
+				if (e.PropertyName.Equals("Title") || e.PropertyName.Equals("Priority")) {
+					NotifyPropertyChanged(nameof(IsDropReady));
+				}
+			};
 		}
 
 		#endregion
@@ -195,7 +226,6 @@ namespace Mino.ViewModel
 		private void NotifySizeChanged ()
 		{
 			NotifyPropertyChanged(nameof(ItemCount));
-			NotifyPropertyChanged(nameof(HasNote));
 		}
 
 		/// <summary>
@@ -336,6 +366,15 @@ namespace Mino.ViewModel
 			f_Changes.Clear();
 		}
 
+		private void RemoveHighlightedHandler ()
+		{
+			if (Highlighted != null) {
+				Highlighted.PropertyChanged -= f_Handlers["DropReady"];
+			}
+
+			f_Handlers.Clear();
+		}
+
 		/// <summary>
 		/// do housekeeping (save changes, clear resources, etc.)
 		/// </summary>
@@ -343,6 +382,7 @@ namespace Mino.ViewModel
 		{
 			SaveListOrder();
 			Clear();
+			RemoveHighlightedHandler();
 			RemoveAllEventHandlers();
 		}
 

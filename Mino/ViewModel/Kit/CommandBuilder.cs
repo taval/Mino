@@ -26,16 +26,11 @@ namespace Mino
 			target.ReorderCommand = new GroupReorderCommand(target);
 			target.PickupCommand = new GroupPickupCommand(target);
 
-			target.ChangeTitleCommand = new GroupChangeTitleCommand(target);
-			target.ChangeColorCommand = new GroupChangeColorCommand(target);
-
 			target.HighlightCommand = new GroupHighlightCommand(target);
 		}
 
 		public void MakeGroupTabs (GroupTabsViewModel target)
 		{
-			target.SwitchTabsCommand = new SwitchTabsCommand(target);
-
 			target.GroupSelectCommand = new GroupSelectCommand(target);
 			target.GroupCreateAtCommand = new GroupCreateAtCommand(target);
 			target.GroupDestroyCommand = new GroupDestroyCommand(target);
@@ -58,6 +53,9 @@ namespace Mino
 			target.NoteCreateAtCommand = new NoteCreateAtCommand(target);
 			target.NoteDestroyCommand = new NoteDestroyCommand(target);
 
+			target.GroupUpdateTitleCommand = new GroupUpdateTitleCommand(target);
+			target.GroupUpdateColorCommand = new GroupUpdateColorCommand(target);
+
 			target.GroupNoteHoldCommand = new GroupNoteHoldCommand(target);
 			target.GroupNoteDropCommand = new GroupNoteDropCommand(target);
 
@@ -72,12 +70,12 @@ namespace Mino
 
 		public void MakeNoteText (NoteTextViewModel target)
 		{
-			target.ChangeTitleCommand = new NoteChangeTitleCommand(target);
+			target.UpdateTitleCommand = new NoteUpdateTitleCommand(target);
 			target.ChangeTextCommand = new NoteChangeTextCommand(target);
 
 			target.UpdateTextCommand = new NoteUpdateTextCommand(target);
 
-			target.ChangePriorityCommand = new NoteChangePriorityCommand(target);
+			target.UpdatePriorityCommand = new NoteUpdatePriorityCommand(target);
 
 			target.CalcCursorPosCommand = new CalcCursorPosCommand(target);
 

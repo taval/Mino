@@ -8,36 +8,35 @@ using Microsoft.EntityFrameworkCore.ChangeTracking;
 namespace Mino.Model
 {
 	/// <summary>
-	
+
 	/// interface for Mino database context. performs all necessary data abstraction layer operations.
-	
+
 	/// allows temporary (managed by GC) and permanent (managed by DbContext)
-	/// GC managed entities should not use the disposal methods here - these are intented only for Db entities
-	
+	/// GC managed entities should not use the disposal methods here - these are intended only for Db entities
+
 	/// Use caution when manually managing simple objects -
 	/// composite objects manage existing simple objects and so care must be taken to not leave strays behind when using temps,
 	/// and to call the composite delete method to cleanup any associated simple objects
-	
+
+	/// Model conventions
+	/// - Id is private set - assuming that only EF/db is setting the model's id.
+	/// - parameterless constructor is called by and most object instantiation done via initializers ({} syntax).
+	/// - using custom object hierarchy for association (lacking many ef core conventions)
+	///   e.g. a Note may be associated with a Group, but could it also be independently associated with a Category, SubGroup, etc?
+	/// - Item: stores Id of each entity that composes a composite model
+	/// - Object: stores instance of each entity that composes a composite model plus the Item
 	/// </summary>
-	
+
+	/// TODO: associations may be formalized within the fluent configuration
+
 	public interface IDbContext : IDisposable
 	{
-		#region Tables
-
-		public DbSet<Node> Nodes { get; set; }
-		public DbSet<Timestamp> Timestamps { get; set; }
-		public DbSet<Note> Notes { get; set; }
-		public DbSet<Group> Groups { get; set; }
-		public DbSet<NoteListItem> NoteListItems { get; set; }
-		public DbSet<GroupListItem> GroupListItems { get; set; }
-		public DbSet<GroupItem> GroupItems { get; set; }
-		public DbSet<State> States { get; set; }
-
-
-		#endregion
-
 		#region Queries
 
+		public IQueryable<Node> GetAllNodes ();
+		public IQueryable<Timestamp> GetAllTimestamps ();
+		public IQueryable<Note> GetAllNotes ();
+		public IQueryable<Group> GetAllGroups ();
 		public IQueryable<NoteListItem> GetAllNoteListItems ();
 		public IQueryable<GroupListItem> GetAllGroupListItems ();
 		public IQueryable<GroupItem> GetAllGroupItems ();
@@ -61,8 +60,6 @@ namespace Mino.Model
 			Timestamp target, long? userModified, long? userIndexed, long? autoModified, bool temporary = false);
 		public void DeleteTimestamp (Timestamp target);
 
-		//public Note CreateNote (string title, string text, bool temporary = false);
-		//public void UpdateNote (Note target, string? title, string? text, bool temporary = false);
 		public Note CreateNote (string title, string text, int priority, bool temporary = false);
 		public void UpdateNote (Note target, string? title, string? text, int? priority, bool temporary = false);
 		public void DeleteNote (Note target);
@@ -76,15 +73,12 @@ namespace Mino.Model
         #region Composite Table Objects
 
         public NoteListItem CreateNoteListItem (IObject root, Note data, bool temporary = false);
-		public void UpdateNoteListItem (bool temporary = false);
 		public void DeleteNoteListItem (NoteListItem target);
 
 		public GroupListItem CreateGroupListItem (IObject root, Group data, bool temporary = false);
-		public void UpdateGroupListItem (bool temporary = false);
 		public void DeleteGroupListItem (GroupListItem target);
 
 		public GroupItem CreateGroupItem (IObject root, Group groop, Note data, bool temporary = false);
-		public void UpdateGroupItem (bool temporary = false);
 		public void DeleteGroupItem (GroupItem target);
 
 		#endregion

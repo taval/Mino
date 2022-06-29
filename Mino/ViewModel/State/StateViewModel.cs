@@ -4,6 +4,8 @@ using System.Linq;
 using System.Text;
 using Mino.Model;
 
+// This has no necessary relationship with the view - rename to StateService or something like that to reflect that it is only used in accessing db
+
 namespace Mino.ViewModel
 {
 	public class StateViewModel : ViewModelBase

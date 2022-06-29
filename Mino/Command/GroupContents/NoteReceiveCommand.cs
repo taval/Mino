@@ -12,11 +12,11 @@ namespace Mino.Command
 {
 	public class NoteReceiveCommand : CommandBase
 	{
-		private readonly GroupContentsViewModel f_GroupContentsViewModel;
+		private readonly GroupContentsViewModel f_Context;
 
-		public NoteReceiveCommand (GroupContentsViewModel groupContentsViewModel)
+		public NoteReceiveCommand (GroupContentsViewModel context)
 		{
-			f_GroupContentsViewModel = groupContentsViewModel;
+			f_Context = context;
 		}
 
 		public override void Execute (object parameter)
@@ -24,14 +24,17 @@ namespace Mino.Command
 			DragEventArgs e = (DragEventArgs)parameter;
 
 			// prevent close button from performing operation
-			Button? closeButton = UIHelper.FindChild<Button>(((FrameworkElement)e.Source).Parent, "RemoveItemButton");
+			Button? closeButton =
+				(Button?)UIHelper.FindChildOrNull<Button>(((FrameworkElement)e.Source).Parent, "RemoveItemButton");
 
-			if (e == null || e.Handled || !(e.Source is ListView) || closeButton?.IsMouseOver == true) return;
+			if (e == null || e.Handled || closeButton?.IsMouseOver == true) return;
 
 			e.Handled = true;
 
 			// get the event source element
-			ListView listView = (ListView)e.Source;
+			ListView? listView = e.Source as ListView;
+
+			if (listView == null || !listView.AllowDrop) return;
 
 			// get the data from DragDrop operation
 			Tuple<string, object> data =
@@ -43,11 +46,11 @@ namespace Mino.Command
 			if (itemListName.Equals(listView.Name)) return;
 
 			// get the actual data to be sent
-			if (data.Item2 == null || !(data.Item2 is NoteListObjectViewModel)) return;
+			NoteListObjectViewModel? dataContext = data.Item2 as NoteListObjectViewModel;
 
-			NoteListObjectViewModel dataContext = (NoteListObjectViewModel)data.Item2;
+			if (dataContext == null) return;
 
-			f_GroupContentsViewModel.Incoming = dataContext;
+			f_Context.Incoming = dataContext;
 		}
 	}
 }

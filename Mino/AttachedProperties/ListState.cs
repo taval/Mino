@@ -29,6 +29,15 @@ namespace Mino
 		public static void SetSelectedTitle (DependencyObject o, string val) => o.SetValue(SelectedTitle, val);
 
 		/// <summary>
+		/// a notification that a (highlighted) item is ready for DragDrop operation
+		/// </summary>
+		public static readonly DependencyProperty IsDropReady = DependencyProperty.RegisterAttached(
+		nameof(IsDropReady), typeof(bool), typeof(ListState), new FrameworkPropertyMetadata(
+		defaultValue: false));
+		public static bool GetIsDropReady (DependencyObject o) => (bool)o.GetValue(IsDropReady);
+		public static void SetIsDropReady (DependencyObject o, bool val) => o.SetValue(IsDropReady, val);
+
+		/// <summary>
 		/// a newly inserted item
 		/// </summary>
 		public static readonly DependencyProperty Inserted = DependencyProperty.RegisterAttached(

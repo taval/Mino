@@ -20,7 +20,7 @@ namespace Mino.Command
 
 		public override void Execute (object parameter)
 		{
-			f_GroupTabsViewModel.SelectGroupNote((GroupObjectViewModel)parameter);
+			f_GroupTabsViewModel.SelectedGroupNoteViewModel = (GroupObjectViewModel)parameter;
 		}
 	}
 }

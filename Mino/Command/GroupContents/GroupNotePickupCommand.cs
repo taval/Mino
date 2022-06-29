@@ -25,7 +25,8 @@ namespace Mino.Command
 			MouseEventArgs e = (MouseEventArgs)parameter;
 
 			// if button not pressed, invalid event source, or close button is under mouse, bail out
-			Button? closeButton = UIHelper.FindChild<Button>(((FrameworkElement)e.Source).Parent, "RemoveItemButton");
+			Button? closeButton =
+				(Button?)UIHelper.FindChildOrNull<Button>(((FrameworkElement)e.Source).Parent, "RemoveItemButton");
 
 			if (e == null ||
 				e.Handled ||

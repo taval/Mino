@@ -1,8 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
-using System.Diagnostics.CodeAnalysis;
-using System.Drawing;
 
 
 
@@ -12,7 +8,6 @@ namespace Mino.Model
 	{
 		public int Id { get; set; }
 
-		[Required]
 		public string Key {
 			get { return f_Key; }
 			set { if (f_Key.Equals(String.Empty)) f_Key = value; }
@@ -20,7 +15,6 @@ namespace Mino.Model
 
 		private string f_Key;
 
-		[Required]
 		public int Value { get; set; }
 
 		public State ()
