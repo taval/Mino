@@ -87,6 +87,18 @@
 									<i:InvokeCommandAction
 										PassEventArgsToCommand="True"
 										Command="{ Binding
+											Path=(local:GroupAction.ChangeTitleCommand),
+											RelativeSource={ RelativeSource AncestorType={ x:Type local:GroupListView } } }" />
+								</i:EventTrigger>
+
+								<i:EventTrigger
+									EventName="LostFocus"
+									SourceObject="{ Binding RelativeSource={ RelativeSource AncestorType={ x:Type TextBox } } }">
+									<i:InvokeCommandAction
+										CommandParameter="{ Binding
+											Path=DataContext.Highlighted,
+											RelativeSource={ RelativeSource AncestorType={ x:Type local:GroupListView } } }"
+										Command="{ Binding
 											Path=(local:GroupAction.UpdateTitleCommand),
 											RelativeSource={ RelativeSource AncestorType={ x:Type local:GroupListView } } }" />
 								</i:EventTrigger>

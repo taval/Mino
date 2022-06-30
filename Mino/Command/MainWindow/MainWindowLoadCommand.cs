@@ -27,16 +27,8 @@ namespace Mino.Command
 		{
 			ViewModelContext context = (ViewModelContext)parameter;
 
-			context.StateViewModel.Load();
-			context.NoteListViewModel.Load();
-			context.GroupListViewModel.Load();
-			context.GroupContentsViewModel.Load();
-			context.GroupTabsViewModel.Load();
-			context.PrimeViewModel.Load();
+			context.Load();
 
-			if (context.NoteTextViewModel.LoadCommand.CanExecute(null)) {
-				context.NoteTextViewModel.LoadCommand.Execute(null);
-			}
 		}
 	}
 }

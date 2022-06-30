@@ -16,8 +16,12 @@ namespace Mino.ViewModel
 		public PrimeViewModel PrimeViewModel { get; private set; }
 		public MainWindowViewModel MainWindowViewModel { get; private set; }
 
+		public bool IsLoaded { get; private set; }
+
 		public ViewModelContext (IViewModelCreator viewModelCreator)
 		{
+			IsLoaded = false;
+
 			StateViewModel = viewModelCreator.CreateStateViewModel();
 
 			NoteListViewModel = viewModelCreator.CreateNoteListViewModel();
@@ -37,14 +41,24 @@ namespace Mino.ViewModel
 			MainWindowViewModel = viewModelCreator.CreateMainWindowViewModel();
 		}
 
-		//public void Load ()
-		//{
-			//PrimeViewModel.Load();
-		//}
+		public void Load ()
+		{
+			StateViewModel.Load();
+			NoteListViewModel.Load();
+			GroupListViewModel.Load();
+			GroupContentsViewModel.Load();
+			GroupTabsViewModel.Load();
+			PrimeViewModel.Load();
+			NoteTextViewModel.Load();
+
+			IsLoaded = true;
+		}
 
 		public void Shutdown ()
 		{
 			PrimeViewModel.Shutdown();
+
+			IsLoaded = false;
 		}
 	}
 }

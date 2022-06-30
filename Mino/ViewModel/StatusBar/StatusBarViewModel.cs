@@ -66,7 +66,7 @@ namespace Mino.ViewModel
 		public string CursorPos {
 			get {
 				return
-					$"Line: { f_NoteTextCursorLinePos }," +
+					$"Line: { f_NoteTextCursorLinePos }, " +
 					$"Column: { f_NoteTextCursorColumnPos }";
 			}
 		}

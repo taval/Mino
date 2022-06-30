@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Text;
+using System.Windows;
 using Mino.ViewModel;
 
 
@@ -13,6 +14,11 @@ namespace Mino.Command
 		public NoteUpdatePriorityCommand (NoteTextViewModel context)
 		{
 			f_Context = context;
+		}
+
+		public override bool CanExecute (object parameter)
+		{
+			return ((ViewModelContext)Application.Current.MainWindow.DataContext).IsLoaded;
 		}
 
 		public override void Execute (object parameter)

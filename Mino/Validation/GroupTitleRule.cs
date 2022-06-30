@@ -20,7 +20,7 @@ namespace Mino
 		public override ValidationResult Validate (object value, CultureInfo cultureInfo)
 		{
 			if (!IsValidNewGroupTitle((string)value)) {
-				return new ValidationResult(false, $"A tag may only consist of a single word with no spaces.");
+				return new ValidationResult(false, $"A tag may only consist of a single word with no spaces");
 			}
 
 			return ValidationResult.ValidResult;

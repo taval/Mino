@@ -34,7 +34,7 @@ namespace Mino
 			}
 
 			if (!IsValidNoteTitle(title)) {
-				return new ValidationResult(false, $"Please enter a valid filename.");
+				return new ValidationResult(false, $"Enter a valid title - allowed characters: alphanumeric, space, ( ) _ - , .");
 			}
 
 			return ValidationResult.ValidResult;
@@ -46,10 +46,3 @@ namespace Mino
 		}
 	}
 }
-
-
-
-
-
-
-

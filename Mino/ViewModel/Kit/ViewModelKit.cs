@@ -23,7 +23,7 @@ namespace Mino.ViewModel
 
 			// TODO: Testing only: truncating the table and resetting id auto-increment - remove this in production
 			using (IDbContext dbContext = CreateDbContext()) {
-				dbContext.Reset();
+				//dbContext.Reset();
 			}
 
 			DbListHelper = new DbListHelper();

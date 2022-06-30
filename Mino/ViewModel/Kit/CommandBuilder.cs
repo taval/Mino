@@ -53,6 +53,7 @@ namespace Mino
 			target.NoteCreateAtCommand = new NoteCreateAtCommand(target);
 			target.NoteDestroyCommand = new NoteDestroyCommand(target);
 
+			target.GroupChangeTitleCommand = new GroupChangeTitleCommand(target);
 			target.GroupUpdateTitleCommand = new GroupUpdateTitleCommand(target);
 			target.GroupUpdateColorCommand = new GroupUpdateColorCommand(target);
 
@@ -78,8 +79,6 @@ namespace Mino
 			target.UpdatePriorityCommand = new NoteUpdatePriorityCommand(target);
 
 			target.CalcCursorPosCommand = new CalcCursorPosCommand(target);
-
-			target.LoadCommand = new NoteTextLoadCommand(target);
 		}
 	}
 }

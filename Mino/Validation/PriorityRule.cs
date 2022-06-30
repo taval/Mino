@@ -19,7 +19,7 @@ namespace Mino
 		public override ValidationResult Validate (object value, CultureInfo cultureInfo)
 		{
 			if (!IsValidPriority((int)value)) {
-				return new ValidationResult(false, $"Please enter a valid priority level.");
+				return new ValidationResult(false, $"Enter a valid priority level (0 - 2)");
 			}
 
 			return ValidationResult.ValidResult;

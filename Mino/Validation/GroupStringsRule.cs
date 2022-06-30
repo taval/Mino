@@ -22,7 +22,7 @@ namespace Mino
 			string groupStrings = (string)value;
 
 			if (!IsValidGroupStrings(groupStrings)) {
-				return new ValidationResult(false, $"Please enter a valid space-separated list of tags.");
+				return new ValidationResult(false, $"Enter a valid space-separated list of tags");
 			}
 			return ValidationResult.ValidResult;
 		}

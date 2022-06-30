@@ -30,7 +30,7 @@
 			<TextBox.Text>
 				<Binding Path="Title" UpdateSourceTrigger="PropertyChanged" ValidatesOnExceptions="True">
 					<Binding.ValidationRules>
-						<local:NoteTitleRule MaxChars="127" />
+						<local:NoteTitleRule MaxChars="127" ValidatesOnTargetUpdated="True" />
 					</Binding.ValidationRules>
 				</Binding>
 			</TextBox.Text>
@@ -140,12 +140,14 @@
 				Height="24"
 				VerticalAlignment="Center"
 				FontSize="16"
-				Style="{ StaticResource warnHighlightStyle }">
+				Style="{ StaticResource warnHighlightStyle }"
+				IsEnabled="{ Binding IsTitleValid }"
+				BorderBrush="{ Binding TagFormBorderColor }">
 
 				<TextBox.Text>
 					<Binding Path="GroupStrings" UpdateSourceTrigger="PropertyChanged" ValidatesOnExceptions="True">
 						<Binding.ValidationRules>
-							<local:GroupStringsRule />
+							<local:GroupStringsRule ValidatesOnTargetUpdated="True"/>
 						</Binding.ValidationRules>
 					</Binding>
 				</TextBox.Text>
@@ -175,7 +177,7 @@
 				<ColumnDefinition Width="*" />
 			</Grid.ColumnDefinitions>
 
-			<Label FontSize="12" Content="Allow new groups" VerticalAlignment="Center" />
+			<Label FontSize="12" Content="Allow new tags" VerticalAlignment="Center" />
 			<CheckBox
 				Grid.Column="1"
 				IsChecked="{ Binding IsNewGroupAllowed, UpdateSourceTrigger=PropertyChanged }"

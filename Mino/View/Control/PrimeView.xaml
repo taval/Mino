@@ -46,7 +46,11 @@
 				Margin="4 0 4 0"
 				Grid.Column="1"
 				DataContext="{ Binding NoteTextViewModel }"
-				
+				Visibility="{ Binding
+					RelativeSource={ RelativeSource AncestorType={ x:Type local:PrimeView } },
+					Path=DataContext.HasSelected,
+					Converter={ local:BoolToVisibilityConverter } }"
+
 				local:TextAction.ChangeGroupsCommand="{ Binding
 					RelativeSource={ RelativeSource AncestorType={ x:Type local:PrimeView } },
 					Path=DataContext.NoteChangeGroupsCommand }" />
@@ -69,6 +73,10 @@
 					RelativeSource={ RelativeSource AncestorType={ x:Type local:PrimeView } },
 					Path=DataContext.GroupNoteDropCommand }"
                 
+				local:GroupAction.ChangeTitleCommand="{ Binding
+					RelativeSource={ RelativeSource AncestorType={ x:Type local:PrimeView } },
+					Path=DataContext.GroupChangeTitleCommand }"
+				
                 local:GroupAction.UpdateTitleCommand="{ Binding
 					RelativeSource={ RelativeSource AncestorType={ x:Type local:PrimeView } },
 					Path=DataContext.GroupUpdateTitleCommand }"

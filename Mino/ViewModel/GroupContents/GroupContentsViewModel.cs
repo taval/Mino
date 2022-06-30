@@ -123,49 +123,13 @@ namespace Mino.ViewModel
 				}
 
 				Set(ref f_ContentData, value);
-				//NotifyPropertyChanged(nameof(Title));
-				//NotifyPropertyChanged(nameof(Color));
-				NotifyPropertyChanged(nameof(Items));
 
+				NotifyPropertyChanged(nameof(Items));
 				NotifySizeChanged();
 			}
 		}
 
 		private GroupListObjectViewModel? f_ContentData;
-
-		///// <summary>
-		///// the group's title
-		///// </summary>
-		//public string Title {
-		//	get {
-		//		if (f_ContentData != null) return f_ContentData.Title;
-		//		return string.Empty;
-		//	}
-		//	set {
-		//		if (f_ContentData != null) {
-		//			if (Equals(f_ContentData.Title, value)) return;
-		//			f_ContentData.Title = value;
-		//			NotifyPropertyChanged(nameof(Title));
-		//		}
-		//	}
-		//}
-
-		///// <summary>
-		///// the group's associated color
-		///// </summary>
-		//public string Color {
-		//	get {
-		//		if (f_ContentData != null) return f_ContentData.Color;
-		//		return string.Empty;
-		//	}
-		//	set {
-		//		if (f_ContentData != null) {
-		//			if (Equals(f_ContentData.Color, value)) return;
-		//			f_ContentData.Color = value;
-		//			NotifyPropertyChanged(nameof(Color));
-		//		}
-		//	}
-		//}
 
 		#endregion
 
@@ -433,7 +397,8 @@ namespace Mino.ViewModel
 
 		public NoteListObjectViewModel FindNote (GroupObjectViewModel input)
 		{
-			return f_NoteListViewModel.Find((noteListViewModel) => noteListViewModel.DataId == input.DataId);
+			return f_NoteListViewModel.Find(
+				(noteListObjectViewModel) => noteListObjectViewModel.DataId == input.DataId);
 		}
 
 		public bool HasNoteInGroup (Group groop, Note note)
@@ -643,7 +608,6 @@ namespace Mino.ViewModel
 		/// <param name="groop">the group from which the items are sourced</param>
 		private void PopulateGroup (IDbContext dbContext, IList<GroupObjectViewModel> list, Group groop)
 		{
-
 			IQueryable<Tuple<GroupItem, ObjectRoot>> unsortedObjects =
 				f_ViewModelKit.DbQueryHelper.GetGroupItemsInGroup(dbContext, groop);
 			IList<Tuple<GroupItem, ObjectRoot>> groupItemsInGroup = unsortedObjects.ToList();

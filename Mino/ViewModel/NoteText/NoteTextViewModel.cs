@@ -6,8 +6,6 @@ using System.Threading.Tasks;
 using System.Windows.Input;
 using Mino.Model;
 
-// TODO/NOTE: the GroupStrings textbox will always be invalid as long as a newly-created note's title is invalid. As soon as a valid title is entered, even if it is invalidated afterward, GroupStrings will validate normally. This is because a new object is not created until it validates for the first time: commands are blocked before then. This is logical behavior, but not very intuitive for the user. A user message might be helpful or supress the error for that particular case to the user (not in implementation - still must create a valid object or block creation based on that)
-
 // TODO: methods here in NoteTextViewModel associated with anything other than NoteListObjectViewModel belong in PrimeViewModel. This entails setting GroupStrings externally when ContentData is changed
 namespace Mino.ViewModel
 {
@@ -31,6 +29,10 @@ namespace Mino.ViewModel
 				NotifyPropertyChanged(nameof(Title));
 				NotifyPropertyChanged(nameof(Text));
 				NotifyPropertyChanged(nameof(Priority));
+				NotifyPropertyChanged(nameof(IsTitleValid));
+				NotifyPropertyChanged(nameof(TagFormBorderColor));
+				NotifyPropertyChanged(nameof(GroupStrings));
+				NotifyPropertyChanged(nameof(GroupStringList));
 				if (f_ContentData != null) {
 					Note note = f_ContentData.Model.Data;
 					GroupStrings = NoteGroupsToString(note);
@@ -63,6 +65,8 @@ namespace Mino.ViewModel
 					if (Equals(f_ContentData.Title, value)) return;
 					f_ContentData.Title = value;
 					NotifyPropertyChanged(nameof(Title));
+					NotifyPropertyChanged(nameof(IsTitleValid));
+					NotifyPropertyChanged(nameof(TagFormBorderColor));
 				}
 			}
 		}
@@ -142,10 +146,25 @@ namespace Mino.ViewModel
 		/// </summary>
 		public bool IsNewGroupAllowed {
 			get { return f_IsNewGroupAllowed; }
-			set { Set(ref f_IsNewGroupAllowed, value); }
+			set {
+				Set(ref f_IsNewGroupAllowed, value);
+				NotifyPropertyChanged(nameof(GroupStrings));
+				NotifyPropertyChanged(nameof(GroupStringList));
+			}
 		}
 
 		private bool f_IsNewGroupAllowed;
+
+		/// <summary>
+		/// if title is valid, return true, else return false
+		/// </summary>
+		public bool IsTitleValid {
+			get { return NoteTitleRule.IsValidNoteTitle(Title); }
+		}
+
+		public string TagFormBorderColor {
+			get { return (IsTitleValid) ? "#ccc" : "Transparent"; }
+		}
 
 		#endregion
 
@@ -188,13 +207,6 @@ namespace Mino.ViewModel
 
 		private ICommand? f_CalcCursorPosCommand;
 
-		public ICommand LoadCommand {
-			get { return f_LoadCommand ?? throw new MissingCommandException(); }
-			set { if (f_LoadCommand == null) f_LoadCommand = value; }
-		}
-
-		private ICommand? f_LoadCommand;
-
 		#endregion
 
 
@@ -224,6 +236,9 @@ namespace Mino.ViewModel
 			NotifyPropertyChanged(nameof(Text));
 			NotifyPropertyChanged(nameof(Priority));
 			NotifyPropertyChanged(nameof(GroupStrings));
+			NotifyPropertyChanged(nameof(GroupStringList));
+			NotifyPropertyChanged(nameof(IsTitleValid));
+			NotifyPropertyChanged(nameof(TagFormBorderColor));
 		}
 
 		#endregion

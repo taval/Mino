@@ -21,8 +21,6 @@ using Mino.Model;
 
 // TODO: incomplete/invalid Groups should be disallowed from saving in db
 
-// TODO: tooltips not displaying on error
-
 namespace Mino.ViewModel
 {
 	public class PrimeViewModel : ViewModelBase
@@ -53,6 +51,7 @@ namespace Mino.ViewModel
 
 				Set(ref f_SelectedNoteViewModel, value);
 				NotifyPropertyChanged(nameof(SelectedNoteTitle));
+				NotifyPropertyChanged(nameof(HasSelected));
 			}
 		}
 
@@ -66,6 +65,11 @@ namespace Mino.ViewModel
 				return String.Empty;
 			}
 		}
+
+		public bool HasSelected {
+			get { return (SelectedNoteViewModel != null); }
+		}
+
 		#endregion
 
 
@@ -141,6 +145,16 @@ namespace Mino.ViewModel
 		/// <summary>
 		/// change the title
 		/// </summary>
+		public ICommand GroupChangeTitleCommand {
+			get { return f_GroupChangeTitleCommand ?? throw new MissingCommandException(); }
+			set { if (f_GroupChangeTitleCommand == null) f_GroupChangeTitleCommand = value; }
+		}
+
+		private ICommand? f_GroupChangeTitleCommand;
+
+		/// <summary>
+		/// update the title
+		/// </summary>
 		public ICommand GroupUpdateTitleCommand {
 			get { return f_GroupUpdateTitleCommand ?? throw new MissingCommandException(); }
 			set { if (f_GroupUpdateTitleCommand == null) f_GroupUpdateTitleCommand = value; }
@@ -149,7 +163,7 @@ namespace Mino.ViewModel
 		private ICommand? f_GroupUpdateTitleCommand;
 
 		/// <summary>
-		/// change the color
+		/// update the color
 		/// </summary>
 		public ICommand GroupUpdateColorCommand {
 			get { return f_GroupUpdateColorCommand ?? throw new MissingCommandException(); }
@@ -284,10 +298,10 @@ namespace Mino.ViewModel
 		/// </summary>
 		public void Load ()
 		{
-			// if no notes exist, create one
-			if (NoteListViewModel.Items.Count() == 0) {
-				AddNote(NoteListViewModel.Create());
-			}
+			//// if no notes exist, create one
+			//if (NoteListViewModel.Items.Count() == 0) {
+			//	AddNote(NoteListViewModel.Create());
+			//}
 
 			// select the most recently selected or first note
 			IEnumerable<NoteListObjectViewModel> match =
@@ -296,9 +310,9 @@ namespace Mino.ViewModel
 			if (match.Any()) {
 				NoteListViewModel.Highlighted = match.First();
 			}
-			else {
-				NoteListViewModel.Highlighted = NoteListViewModel.Items.First();
-			}
+			//else {
+			//	NoteListViewModel.Highlighted = NoteListViewModel.Items.First();
+			//}
 			NoteListObjectViewModel? highlighted = NoteListViewModel.Highlighted;
 
 			if (highlighted != null) {

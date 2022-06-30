@@ -46,11 +46,15 @@ namespace Mino
 
 			optionsBuilder.UseSqlite($"Data Source={ dbFilePath }");
 
+			// configure NoteListObjectViewModel: set Priority options
+			string[] priorityTypes = config.GetSection("PriorityTypes").Get<string[]>();
+			foreach (string priorityType in priorityTypes) NoteListObjectViewModel.PriorityTypes.Add(priorityType);
+
 			#endregion
 
 
 
-			#region Load Resources
+			#region Load View Resources
 
 			AddResource("CloseButton");
 			AddResource("Button");
@@ -59,15 +63,13 @@ namespace Mino
 			//AddResource("ListView");
 			AddResource("ListViewItem");
 
-			AddResource("TextBoxError");
-			IViewModelKit viewModelKit = new ViewModelKit(optionsBuilder.Options);
-
 			#endregion
 
 
 
 			#region ViewModel Context
 
+			IViewModelKit viewModelKit = new ViewModelKit(optionsBuilder.Options);
 			IViewModelContext context = new ViewModelContext(viewModelKit.ViewModelCreator);
 
 			#endregion
@@ -76,8 +78,8 @@ namespace Mino
 
 			#region Load Test Data
 
-			AppTestData.AddNoteListObjects(viewModelKit, context);
-			AppTestData.AddGroupListObjects(viewModelKit, context);
+			//AppTestData.AddNoteListObjects(viewModelKit, context);
+			//AppTestData.AddGroupListObjects(viewModelKit, context);
 
 			#endregion
 

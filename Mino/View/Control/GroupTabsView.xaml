@@ -84,6 +84,10 @@
 						RelativeSource={ RelativeSource AncestorType={ x:Type local:GroupTabsView } },
 						Path=DataContext.GroupDestroyCommand }"
 
+					local:GroupAction.ChangeTitleCommand="{ Binding
+						RelativeSource={ RelativeSource AncestorType={ x:Type local:GroupTabsView } },
+						Path=(local:GroupAction.ChangeTitleCommand) }"
+					
 					local:GroupAction.UpdateTitleCommand="{ Binding
 						RelativeSource={ RelativeSource AncestorType={ x:Type local:GroupTabsView } },
 						Path=(local:GroupAction.UpdateTitleCommand) }"
