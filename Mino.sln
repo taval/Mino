@@ -5,20 +5,29 @@ VisualStudioVersion = 17.1.32328.378
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Mino", "Mino\Mino.csproj", "{97A93780-32CD-4571-9EC0-49E4677D865F}"
 EndProject
-Project("{54435603-DBB4-11D2-8724-00A0C9A8B90C}") = "MinoSetup", "MinoSetup\MinoSetup.vdproj", "{AFBE955C-CE9D-43A8-B41F-E905AC5AF6A8}"
+Project("{54435603-DBB4-11D2-8724-00A0C9A8B90C}") = "MinoSetup", "MinoSetup\MinoSetup.vdproj", "{28FEEB97-43EE-4B6E-9C22-C91EA192197D}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
+		Debug|x64 = Debug|x64
 		Release|Any CPU = Release|Any CPU
+		Release|x64 = Release|x64
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
 		{97A93780-32CD-4571-9EC0-49E4677D865F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{97A93780-32CD-4571-9EC0-49E4677D865F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{97A93780-32CD-4571-9EC0-49E4677D865F}.Debug|x64.ActiveCfg = Debug|x64
+		{97A93780-32CD-4571-9EC0-49E4677D865F}.Debug|x64.Build.0 = Debug|x64
 		{97A93780-32CD-4571-9EC0-49E4677D865F}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{97A93780-32CD-4571-9EC0-49E4677D865F}.Release|Any CPU.Build.0 = Release|Any CPU
-		{AFBE955C-CE9D-43A8-B41F-E905AC5AF6A8}.Debug|Any CPU.ActiveCfg = Debug
-		{AFBE955C-CE9D-43A8-B41F-E905AC5AF6A8}.Release|Any CPU.ActiveCfg = Release
+		{97A93780-32CD-4571-9EC0-49E4677D865F}.Release|x64.ActiveCfg = Release|x64
+		{97A93780-32CD-4571-9EC0-49E4677D865F}.Release|x64.Build.0 = Release|x64
+		{28FEEB97-43EE-4B6E-9C22-C91EA192197D}.Debug|Any CPU.ActiveCfg = Debug
+		{28FEEB97-43EE-4B6E-9C22-C91EA192197D}.Debug|x64.ActiveCfg = Debug
+		{28FEEB97-43EE-4B6E-9C22-C91EA192197D}.Release|Any CPU.ActiveCfg = Release
+		{28FEEB97-43EE-4B6E-9C22-C91EA192197D}.Release|x64.ActiveCfg = Release
+		{28FEEB97-43EE-4B6E-9C22-C91EA192197D}.Release|x64.Build.0 = Release
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

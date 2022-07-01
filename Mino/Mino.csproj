@@ -4,12 +4,25 @@
 		<OutputType>WinExe</OutputType>
 		<TargetFramework>netcoreapp3.1</TargetFramework>
 		<UseWPF>true</UseWPF>
+		<RuntimeIdentifier>win10-x64</RuntimeIdentifier>
+		<GenerateAsssemblyInfo>False</GenerateAsssemblyInfo>
+		<Platforms>AnyCPU;x64</Platforms>
 	</PropertyGroup>
 
 	<PropertyGroup>
 		<Nullable>enable</Nullable>
 		<StartupObject>Mino.App</StartupObject>
 		<ApplicationIcon>appicon.ico</ApplicationIcon>
+	</PropertyGroup>
+
+	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+		<WarningLevel>9999</WarningLevel>
+		<TreatWarningsAsErrors>True</TreatWarningsAsErrors>
+	</PropertyGroup>
+
+	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+		<WarningLevel>9999</WarningLevel>
+		<TreatWarningsAsErrors>True</TreatWarningsAsErrors>
 	</PropertyGroup>
 
 	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
@@ -39,7 +52,7 @@
 	</ItemGroup>
 
 	<ItemGroup>
-	  <EditorConfigFiles Remove="C:\code\dev\Mino\Mino\.editorconfig" />
+		<EditorConfigFiles Remove="C:\code\dev\Mino\Mino\.editorconfig" />
 	</ItemGroup>
 
 	<ItemGroup>
@@ -47,7 +60,7 @@
 	</ItemGroup>
 
 	<ItemGroup>
-	  <None Include="C:\code\dev\Mino\Mino\.editorconfig" />
+		<None Include="C:\code\dev\Mino\Mino\.editorconfig" />
 	</ItemGroup>
 
 </Project>
