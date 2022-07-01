@@ -1,9 +1,4 @@
-﻿using System;
-using System.Text;
-
-
-
-namespace Mino.Model
+﻿namespace Mino.Model
 {
 	public class Timestamp : IIdentifiable
 	{

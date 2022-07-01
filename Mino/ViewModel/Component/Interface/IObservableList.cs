@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Text;
 
 // TODO/NOTE: implementing IObservable as an IEnumerable fails miserably, breaking everything. A problem with ObservableCollection, perhaps? since custom implementation of GetEnumerator has the same problem, would seem unlikely.
 

@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Linq;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
 
 
@@ -104,6 +103,11 @@ namespace Mino.Model
 		#endregion
 
 		#region Methods
+
+		/// <summary>
+		/// perform migrations, create database if does not exist
+		/// </summary>
+		public void Migrate ();
 
 		/// <summary>
 		/// identity tracking for singular entities

@@ -1,6 +1,4 @@
-﻿using System;
-using System.Text;
-using Mino.ViewModel;
+﻿using Mino.ViewModel;
 
 
 

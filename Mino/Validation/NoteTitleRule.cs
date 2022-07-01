@@ -1,7 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Globalization;
-using System.Text;
 using System.Windows.Controls;
 
 // TODO: IDataErrorInfo/ValidatesOnDataErrors="True" for model validations; use ValidationRules in markup for view validation

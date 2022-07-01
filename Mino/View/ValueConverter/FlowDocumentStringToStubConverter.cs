@@ -1,7 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Globalization;
-using System.Text;
 using System.Windows.Data;
 using System.Windows.Documents;
 
@@ -9,7 +7,7 @@ using System.Windows.Documents;
 
 namespace Mino
 {
-    [ValueConversion(typeof(string), typeof(string))]
+	[ValueConversion(typeof(string), typeof(string))]
     public class FlowDocumentStringToStubConverter : BaseConverter, IValueConverter
     {
         public object Convert (object value, Type targetType, object parameter, CultureInfo culture)

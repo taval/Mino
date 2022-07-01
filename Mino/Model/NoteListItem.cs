@@ -1,9 +1,4 @@
-﻿using System;
-using System.Text;
-
-
-
-namespace Mino.Model
+﻿namespace Mino.Model
 {
 	/// <summary>
 	/// container for ids of Note plus list item model components

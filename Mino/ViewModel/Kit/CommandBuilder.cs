@@ -1,16 +1,11 @@
 ﻿using Mino.Command;
 using Mino.ViewModel;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 
 
 namespace Mino
 {
-	
+
 	public class CommandBuilder : ICommandBuilder
 	{
 		public void MakeGroup (GroupContentsViewModel target)

@@ -9,6 +9,7 @@
 	<PropertyGroup>
 		<Nullable>enable</Nullable>
 		<StartupObject>Mino.App</StartupObject>
+		<ApplicationIcon>appicon.ico</ApplicationIcon>
 	</PropertyGroup>
 
 	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
@@ -39,6 +40,10 @@
 
 	<ItemGroup>
 	  <EditorConfigFiles Remove="C:\code\dev\Mino\Mino\.editorconfig" />
+	</ItemGroup>
+
+	<ItemGroup>
+	  <Content Include="appicon.ico" />
 	</ItemGroup>
 
 	<ItemGroup>

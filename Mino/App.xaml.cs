@@ -69,7 +69,15 @@ namespace Mino
 
 			#region ViewModel Context
 
+			// load kit
 			IViewModelKit viewModelKit = new ViewModelKit(optionsBuilder.Options);
+
+			// create db if does not exist
+			using (IDbContext dbContext = viewModelKit.CreateDbContext()) {
+				dbContext.Migrate();
+			}
+
+			// load viewmodel
 			IViewModelContext context = new ViewModelContext(viewModelKit.ViewModelCreator);
 
 			#endregion

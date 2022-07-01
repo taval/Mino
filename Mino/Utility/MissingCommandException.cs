@@ -1,12 +1,10 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Text;
 
 
 
 namespace Mino
 {
-    [Serializable]
+	[Serializable]
     public class MissingCommandException : Exception
     {
         public MissingCommandException () : base("Command has no assignment") { }

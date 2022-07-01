@@ -1,7 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Drawing;
-using System.Text;
 using Mino.Model;
 
 // TODO: (do search for all references of Model here)

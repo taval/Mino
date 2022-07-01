@@ -1,8 +1,4 @@
-﻿using Microsoft.Data.Sqlite;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.ChangeTracking;
-using System;
-using System.Collections.Generic;
+﻿using Microsoft.EntityFrameworkCore;
 using System.Linq;
 
 
@@ -26,7 +22,20 @@ namespace Mino.Model
 
 
 
+		#region IsMigrated
+
+		private static bool f_IsMigrated;
+
+		#endregion
+
+
+
 		#region Constructor
+
+		static MinoDbContext ()
+		{
+			f_IsMigrated = false;
+		}
 
 		public MinoDbContext (DbContextOptions<MinoDbContext> options) :
 			base(options)
@@ -39,6 +48,20 @@ namespace Mino.Model
 			GroupListItems = Set<GroupListItem>();
 			GroupItems = Set<GroupItem>();
 			States = Set<State>();
+		}
+
+		#endregion
+
+
+
+		#region Migrate
+
+		public void Migrate ()
+		{
+			if (f_IsMigrated == true) return;
+
+			Database.Migrate();
+			f_IsMigrated = true;
 		}
 
 		#endregion

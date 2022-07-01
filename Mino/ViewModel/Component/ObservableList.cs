@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
-using System.Text;
 
 /** NOTE:
  * because there is no input option for a comparator object, the input type must implement IEquatable<IListItem>

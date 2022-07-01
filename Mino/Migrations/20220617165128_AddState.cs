@@ -2,7 +2,7 @@
 
 namespace Mino.Migrations
 {
-    public partial class AddState : Migration
+	public partial class AddState : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {

@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-
-
-namespace Mino.Model
+﻿namespace Mino.Model
 {
 	/// <summary>
 	/// wrapper of instantiated instances of an item and its supporting data

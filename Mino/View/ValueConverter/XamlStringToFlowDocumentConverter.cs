@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
 using System.Text;
@@ -11,7 +10,7 @@ using System.Windows.Markup;
 
 namespace Mino
 {
-    [ValueConversion(typeof(string), typeof(FlowDocument))]
+	[ValueConversion(typeof(string), typeof(FlowDocument))]
     public class XamlStringToFlowDocumentConverter : BaseConverter, IValueConverter
     {
         public object Convert (object value, Type targetType, object parameter, CultureInfo culture)

@@ -6,7 +6,7 @@ using System.Linq;
 
 namespace Mino
 {
-    public static class Utility
+	public static class Utility
     {
 		/// <summary>
 		/// clone a list
