@@ -6,6 +6,8 @@ using Microsoft.Extensions.Configuration;
 using Mino.Model;
 using Mino.ViewModel;
 
+// NOTE: creation time is slow, possibly because the forcing of redundant lookups w/ linear over constant time when searching for associated models. This only ever comes into play when testing large data set inputs. If there is ever a reason for the user to generate a batch of populated notes at a time, then this might be a concern; otherwise leave it alone.
+
 // TODO: make modules for view, vm, db, etc.
 
 // TODO: most exceptions should trigger a rollback to the last known good state and shutdown/commit properly (exception safety)
@@ -61,10 +63,9 @@ namespace Mino
 			AddResource("CloseButton");
 			AddResource("Button");
 			AddResource("WarnHighlight");
-			//AddResource("LeftScrollViewer");
-			//AddResource("ListView");
 			AddResource("ListViewItem");
 			AddResource("Status");
+			//AddResource("LeftScrollViewer");
 
 			#endregion
 
@@ -91,6 +92,7 @@ namespace Mino
 
 			//AppTestData.AddNoteListObjects(viewModelKit, context);
 			//AppTestData.AddGroupListObjects(viewModelKit, context);
+			//AppTestData.AddLotsOfNoteListObjects(viewModelKit, context);
 
 			#endregion
 
