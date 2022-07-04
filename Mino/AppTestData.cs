@@ -1,7 +1,6 @@
 ﻿using Mino.Model;
 using Mino.ViewModel;
-
-
+using System;
 
 namespace Mino
 {
@@ -26,6 +25,30 @@ $@"
 
 </FlowDocument>
 ";
+		}
+
+		public static void AddLotsOfNoteListObjects (IViewModelKit viewModelKit, IViewModelContext context)
+		{
+			using (IDbContext dbContext = viewModelKit.CreateDbContext()) {
+				Random rnd = new Random();
+
+				string lorem =
+						@"    Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.";
+
+				string flowDoc = FlowDocumentWrap(lorem);
+
+				for (int i = 0; i < 1000; i++) {
+					context.PrimeViewModel.AddNote(viewModelKit.ViewModelCreator.CreateNoteListObjectViewModel(
+						dbContext, c => {
+							c.Title = $"Title { i }";
+							c.Text = flowDoc;
+							c.Priority = rnd.Next(0, 3);
+						}
+					));
+				}
+
+				context.NoteListViewModel.SaveListOrder();
+			}
 		}
 
 		/// <summary>

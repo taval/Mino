@@ -36,6 +36,13 @@
 	</PropertyGroup>
 
 	<ItemGroup>
+	  <Compile Remove="ViewModel\NoteContents\**" />
+	  <EmbeddedResource Remove="ViewModel\NoteContents\**" />
+	  <None Remove="ViewModel\NoteContents\**" />
+	  <Page Remove="ViewModel\NoteContents\**" />
+	</ItemGroup>
+
+	<ItemGroup>
 		<PackageReference Include="Microsoft.Data.SqlClient" Version="3.1.0" />
 		<PackageReference Include="Microsoft.EntityFrameworkCore" Version="3.1.26" />
 		<PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="3.1.26" />
