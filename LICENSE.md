@@ -6,11 +6,6 @@ Except for the exceptions stated below, all code is licensed under the [MIT Lice
 
 ## Exceptions
 
-- Mino.Command.CalcCursorPosCommand (with modifications)  
-Original author: Sisco
-License: [CC BY-SA 3.0](LICENSE.md#cc-by-sa-3.0-license)
-Source: https://stackoverflow.com/questions/17994674/c-sharp-wpf-line-and-column-number-from-richtextbox
-
 - Mino.UIHelper.GetChildOfType (with modifications)  
 Original author: Matt Hamilton
 License: [CC BY-SA 3.0](LICENSE.md#cc-by-sa-3.0-license)

@@ -26,7 +26,7 @@
 		<Grid Height="32" Margin="0 16 0 8">
 
 			<Grid.ColumnDefinitions>
-				<ColumnDefinition Width="*" />
+				<ColumnDefinition Width="auto" />
 				<ColumnDefinition Width="*" />
 			</Grid.ColumnDefinitions>
 			<Grid.RowDefinitions>
@@ -34,20 +34,12 @@
 				<RowDefinition Height="*" />
 			</Grid.RowDefinitions>
 
-			<TextBlock
-				FontWeight="Bold"
-				FontSize="12"
-				Text="Tags" />
-			<TextBlock
-				Grid.Row="1"
-				FontSize="9"
-				Text="{ Binding SelectedGroupTitle }" />
-
 			<!-- Add Group button -->
-
+			
 			<Button
-				Grid.Column="1"
 				Grid.RowSpan="2"
+				Margin="10 0 10 0"
+				Padding="0 0 0 3"
 				Template="{ StaticResource buttonTemplate }"
 				Style="{ StaticResource buttonStyle }"
 				Name="AddButton"
@@ -56,6 +48,18 @@
 				Command="{ Binding
 					Path=DataContext.GroupCreateAtCommand,
 					RelativeSource={ RelativeSource AncestorType={ x:Type local:GroupTabsView } } }" />
+			
+			<!-- Selected item text -->
+			<TextBlock
+				Grid.Column="1"
+				FontWeight="Bold"
+				FontSize="12"
+				Text="Tags" />
+			<TextBlock
+				Grid.Column="1"
+				Grid.Row="1"
+				FontSize="9"
+				Text="{ Binding SelectedGroupTitle }" />
 
 		</Grid>
 
@@ -76,7 +80,7 @@
 					x:Name="GroupListView"
 					DataContext="{ Binding GroupListViewModel }"
 
-					local:ListAction.SelectCommand="{ Binding
+					local:SelectProperty.SelectCommand="{ Binding
 						RelativeSource={ RelativeSource AncestorType={ x:Type local:GroupTabsView } },
 						Path=DataContext.GroupSelectCommand }"
 
@@ -112,20 +116,20 @@
 					x:Name="GroupContentsView"
 					DataContext="{ Binding GroupContentsViewModel }"
 
-					local:ListState.IsDropReady="{ Binding
+					local:DragDropProperty.IsDropReady="{ Binding
 						Mode=OneWay,
 						RelativeSource={ RelativeSource AncestorType={ x:Type local:GroupTabsView } },
-						Path=(local:ListState.IsDropReady) }"
+						Path=(local:DragDropProperty.IsDropReady) }"
 					
-					local:ListAction.HoldCommand="{ Binding
+					local:DragDropProperty.HoldCommand="{ Binding
 						RelativeSource={ RelativeSource AncestorType={ x:Type local:GroupTabsView } },
-						Path=(local:ListAction.HoldCommand) }"
+						Path=(local:DragDropProperty.HoldCommand) }"
 
-					local:ListAction.DropCommand="{ Binding
+					local:DragDropProperty.DropCommand="{ Binding
 						RelativeSource={ RelativeSource AncestorType={ x:Type local:GroupTabsView } },
-						Path=(local:ListAction.DropCommand) }"
+						Path=(local:DragDropProperty.DropCommand) }"
 
-					local:ListAction.SelectCommand="{ Binding
+					local:SelectProperty.SelectCommand="{ Binding
 						RelativeSource={ RelativeSource AncestorType={ x:Type local:GroupTabsView } },
 						Path=DataContext.GroupNoteSelectCommand }"
 

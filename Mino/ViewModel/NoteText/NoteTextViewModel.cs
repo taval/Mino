@@ -97,19 +97,19 @@ namespace Mino.ViewModel
 			}
 		}
 
-		public int LineNumber {
-			get { return f_LineNumber; }
-			set { Set(ref f_LineNumber, value); }
+		public int LineIndex {
+			get { return f_LineIndex; }
+			set { Set(ref f_LineIndex, value); }
 		}
 
-		private int f_LineNumber;
+		private int f_LineIndex;
 
-		public int ColumnNumber {
-			get { return f_ColumnNumber; }
-			set { Set(ref f_ColumnNumber, value); }
+		public int ColumnIndex {
+			get { return f_ColumnIndex; }
+			set { Set(ref f_ColumnIndex, value); }
 		}
 
-		private int f_ColumnNumber;
+		private int f_ColumnIndex;
 
 		/// <summary>
 		/// user-inputted space-separated string list of Groups to which the Note will be attached

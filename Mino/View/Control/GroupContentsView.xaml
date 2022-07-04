@@ -6,7 +6,6 @@
 	xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
 	xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
 	xmlns:local="clr-namespace:Mino"
-	xmlns:diag="clr-namespace:System.Diagnostics;assembly=WindowsBase"
 	mc:Ignorable="d"
 	xmlns:i="http://schemas.microsoft.com/xaml/behaviors"
 	d:DesignHeight="450"
@@ -14,13 +13,11 @@
 
 	<Grid>
 
-		<!--DragLeave="List_DragLeave"
-			DragOver="List_DragOver"-->
 		<ListView
 			FontSize="9"
 			x:Name="ListView_GroupContentsView"
 			AllowDrop="{ Binding
-				(local:ListState.IsDropReady),
+				(local:DragDropProperty.IsDropReady),
 				UpdateSourceTrigger=PropertyChanged,
 				RelativeSource={ RelativeSource AncestorType={ x:Type local:GroupContentsView } } }"
 			Background="Transparent"
@@ -35,8 +32,7 @@
 			<ListView.ItemContainerStyle>
 				<Style TargetType="{ x:Type ListViewItem }">
 					<Setter Property="IsSelected" Value="{ Binding IsSelected }" />
-					<!--<EventSetter Event="MouseMove" Handler="Item_MouseMove" />-->
-					<!--<EventSetter Event="DragOver" Handler="Item_DragOver" />-->
+					<Setter Property="HorizontalContentAlignment" Value="Stretch" />
 				</Style>
 			</ListView.ItemContainerStyle>
 
@@ -58,7 +54,7 @@
 					<i:InvokeCommandAction
 						PassEventArgsToCommand="True"
 						Command="{ Binding
-							Path=(local:ListAction.HoldCommand),
+							Path=(local:DragDropProperty.HoldCommand),
 							RelativeSource={ RelativeSource AncestorType={ x:Type local:GroupContentsView } } }" />
 				</i:EventTrigger>
 
@@ -68,7 +64,7 @@
 					<i:InvokeCommandAction
 						PassEventArgsToCommand="True"
 						Command="{ Binding
-							Path=(local:ListAction.DropCommand),
+							Path=(local:DragDropProperty.DropCommand),
 							RelativeSource={ RelativeSource AncestorType={ x:Type local:GroupContentsView } } }" />
 				</i:EventTrigger>
 
@@ -78,33 +74,39 @@
 				<DataTemplate>
 					<Grid>
 						<Grid.ColumnDefinitions>
+							<ColumnDefinition Width="auto" />
 							<ColumnDefinition Width="*" />
-							<ColumnDefinition Width="*" />
-							<ColumnDefinition Width="*" />
+							<ColumnDefinition Width="auto" />
 						</Grid.ColumnDefinitions>
+
+						<!-- ListViewItem: Close button -->
 						<Button
 							Template="{ StaticResource closeButtonTemplate }"
 							Style="{ StaticResource closeButtonStyle }"
 							Grid.Column="0"
-							Margin="0 0 10 0"
-							Padding="10 0"
+							Margin="0 0 6 0"
+							Padding="8 0 8 3"
 							Name="RemoveItemButton"
 							Content="x"
 							CommandParameter="{ Binding }"
 							Command="{ Binding
 								(local:ListAction.RemoveCommand),
 								RelativeSource={ RelativeSource AncestorType={ x:Type local:GroupContentsView } } }" />
+						
+						<!-- GroupObject: grouped note preview -->
 						<StackPanel Grid.Column="1" MinWidth="96">
 							<TextBlock FontWeight="Bold" Text="{ Binding Title, Converter={ local:StringToStubConverter }, UpdateSourceTrigger=PropertyChanged }" />
 							<TextBlock Text="{ Binding Text, Converter={ local:FlowDocumentStringToStubConverter } }" />
 						</StackPanel>
 
+						<!-- GroupObject: Priority -->
 						<Ellipse
 							Grid.Column="2"
 							Width="18"
 							Height="18"
 							Stroke="#999"
 							StrokeThickness="0.5"
+							Margin="0 0 10 0"
 							Fill="{ Binding Priority, Converter={ local:PriorityToColorConverter } }" />
 
 						<i:Interaction.Triggers>
@@ -137,7 +139,7 @@
 										Path=DataContext.Highlighted,
 										RelativeSource={ RelativeSource AncestorType={ x:Type local:GroupContentsView } } }"
 									Command="{ Binding
-										Path=(local:ListAction.SelectCommand),
+										Path=(local:SelectProperty.SelectCommand),
 										RelativeSource={ RelativeSource AncestorType={ x:Type local:GroupContentsView } } }" />
 							</i:EventTrigger>
 

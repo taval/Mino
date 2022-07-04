@@ -8,6 +8,7 @@
 	xmlns:local="clr-namespace:Mino"
     xmlns:i="http://schemas.microsoft.com/xaml/behaviors"
 	mc:Ignorable="d"
+	MinHeight="480"
 	Title="Mino" Height="450" Width="800">
 
 	<StackPanel>
@@ -35,7 +36,11 @@
 		</Menu>
 		
 		<local:PrimeView
-            DataContext="{ Binding PrimeViewModel }" />
+			DataContext="{ Binding PrimeViewModel }"
+			local:ViewState.ElementHeight="{ Binding
+				Path=ActualHeight,
+				RelativeSource={ RelativeSource AncestorType={ x:Type local:MainWindow } },
+				Mode=OneWay }" />
 	</StackPanel>
 
     <i:Interaction.Triggers>

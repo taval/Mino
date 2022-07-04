@@ -7,7 +7,8 @@
 	xmlns:local="clr-namespace:Mino"
 	mc:Ignorable="d"
 	xmlns:i="http://schemas.microsoft.com/xaml/behaviors"
-	d:DesignHeight="480" d:DesignWidth="800">
+	d:DesignHeight="450"
+	d:DesignWidth="800">
 
 	<StackPanel>
 		<!-- Viewing window -->
@@ -19,24 +20,30 @@
 			</Grid.ColumnDefinitions>
 
 			<Grid.RowDefinitions>
-				<RowDefinition MinHeight="360" Height="*" />
+				<RowDefinition Height="{ Binding
+					Path=(local:ViewState.ElementHeight),
+					RelativeSource={ RelativeSource AncestorType={ x:Type local:PrimeView } },
+					ConverterParameter='96',
+					Converter={ local:SubtractionConverter },
+					FallbackValue=0,
+					TargetNullValue=0 }" />
 			</Grid.RowDefinitions>
 
 			<local:NoteListView
 				Margin="8 0 4 0"
 				DataContext="{ Binding NoteListViewModel }"
 
-				local:ListState.SelectedTitle="{ Binding
+				local:SelectProperty.SelectCommand="{ Binding
+					RelativeSource={ RelativeSource AncestorType={ x:Type local:PrimeView } },
+					Path=DataContext.NoteSelectCommand }"
+
+				local:SelectProperty.SelectedTitle="{ Binding
 					RelativeSource={ RelativeSource AncestorType={ x:Type local:PrimeView } },
 					Path=DataContext.SelectedNoteViewModel.Title }"
-				
+
 				local:ListAction.CreateAtCommand="{ Binding
 					RelativeSource={ RelativeSource AncestorType={ x:Type local:PrimeView } },
 					Path=DataContext.NoteCreateAtCommand }"
-
-				local:ListAction.SelectCommand="{ Binding
-					RelativeSource={ RelativeSource AncestorType={ x:Type local:PrimeView } },
-					Path=DataContext.NoteSelectCommand }"
 
 				local:ListAction.RemoveCommand="{ Binding
 					RelativeSource={ RelativeSource AncestorType={ x:Type local:PrimeView } },
@@ -60,16 +67,16 @@
 				Grid.Column="2"
 				DataContext="{ Binding GroupTabsViewModel }"
 
-				local:ListState.IsDropReady="{ Binding
+				local:DragDropProperty.IsDropReady="{ Binding
 					Mode=OneWay,
 					RelativeSource={ RelativeSource AncestorType={ x:Type local:PrimeView } },
 					Path=DataContext.NoteListViewModel.IsDropReady }"
 				
-				local:ListAction.HoldCommand="{ Binding
+				local:DragDropProperty.HoldCommand="{ Binding
 					RelativeSource={ RelativeSource AncestorType={ x:Type local:PrimeView } },
 					Path=DataContext.GroupNoteHoldCommand }"
 
-				local:ListAction.DropCommand="{ Binding
+				local:DragDropProperty.DropCommand="{ Binding
 					RelativeSource={ RelativeSource AncestorType={ x:Type local:PrimeView } },
 					Path=DataContext.GroupNoteDropCommand }"
                 

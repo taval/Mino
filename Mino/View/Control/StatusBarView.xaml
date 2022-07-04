@@ -10,44 +10,61 @@
 
 	<Grid>
 
-		<StatusBar MinHeight="32" VerticalAlignment="Bottom">
+		<StatusBar MinHeight="32" VerticalAlignment="Bottom" HorizontalContentAlignment="Stretch">
 			<StatusBar.ItemsPanel>
 				<ItemsPanelTemplate>
 					<Grid>
 						<Grid.RowDefinitions>
 							<RowDefinition Height="auto" />
+							<RowDefinition Height="*" />
 						</Grid.RowDefinitions>
 						<Grid.ColumnDefinitions>
+							<ColumnDefinition Width="auto" />
 							<ColumnDefinition Width="*" />
-							<ColumnDefinition Width="*" />
-							<ColumnDefinition Width="*" />
-							<ColumnDefinition Width="*" />
-							<ColumnDefinition Width="*" />
+							<ColumnDefinition Width="auto" />
 						</Grid.ColumnDefinitions>
 					</Grid>
 				</ItemsPanelTemplate>
 			</StatusBar.ItemsPanel>
 
 			<StatusBarItem>
-				<TextBlock Text="{ Binding SelectedItemId, StringFormat='Id: {0}', UpdateSourceTrigger=PropertyChanged }" />
+				<TextBlock
+					Style="{ StaticResource statusStyle }"
+					Text="{ Binding
+						SelectedItemId,
+						TargetNullValue='',
+						FallbackValue='',
+						StringFormat='Id: {0}',
+						UpdateSourceTrigger=PropertyChanged }" />
 			</StatusBarItem>
 
-			<StatusBarItem Grid.Column="1">
-				<TextBlock Text="{ Binding SelectedDateCreated, StringFormat='{}Created: {0:MM/dd/yyyy}', UpdateSourceTrigger=PropertyChanged }" />
+			<StatusBarItem Grid.Row="1">
+				<TextBlock
+					Style="{ StaticResource statusStyle }"
+					Text="{ Binding
+						SelectedDateCreated,
+						TargetNullValue='',
+						FallbackValue='',
+						StringFormat='{}Created: {0:MM/dd/yyyy}',
+						UpdateSourceTrigger=PropertyChanged }" />
 			</StatusBarItem>
 
-			<!--<Separator Grid.Column="2" />-->
+			<StatusBarItem Grid.Column="1" Grid.RowSpan="2" HorizontalAlignment="Center">
+				<TextBlock
+					Style="{ StaticResource statusStyle }"
+					Text="{ Binding CursorPos, UpdateSourceTrigger=PropertyChanged }" />
+			</StatusBarItem>
 
 			<StatusBarItem Grid.Column="2">
-				<TextBlock Text="{ Binding NoteCount, StringFormat='# of records: {0}', UpdateSourceTrigger=PropertyChanged }" />
+				<TextBlock
+					Style="{ StaticResource statusStyle }"
+					Text="{ Binding NoteCount, StringFormat='# of records: {0}', UpdateSourceTrigger=PropertyChanged }" />
 			</StatusBarItem>
 
-			<StatusBarItem Grid.Column="3">
-				<TextBlock Text="{ Binding GroupCount, StringFormat='# of groups: {0}', UpdateSourceTrigger=PropertyChanged }" />
-			</StatusBarItem>
-
-			<StatusBarItem Grid.Column="4">
-				<TextBlock Text="{ Binding CursorPos, UpdateSourceTrigger=PropertyChanged }" />
+			<StatusBarItem Grid.Column="2" Grid.Row="1">
+				<TextBlock
+					Style="{ StaticResource statusStyle }"
+					Text="{ Binding GroupCount, StringFormat='# of tags: {0}', UpdateSourceTrigger=PropertyChanged }" />
 			</StatusBarItem>
 
 		</StatusBar>

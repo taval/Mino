@@ -16,6 +16,8 @@ using Mino.ViewModel;
  * but adding configuration/post-InitializeComponent fix did not alleviate the problem
  */
 
+// TODO: update or clear the cursor position when a note is selected
+
 namespace Mino
 {
 	/// <summary>
@@ -62,6 +64,7 @@ namespace Mino
 			//AddResource("LeftScrollViewer");
 			//AddResource("ListView");
 			AddResource("ListViewItem");
+			AddResource("Status");
 
 			#endregion
 

@@ -6,19 +6,19 @@ namespace Mino.ViewModel
 {
 	public class StatusBarViewModel : ViewModelBase
 	{
-		public int SelectedItemId {
+		public int? SelectedItemId {
 			get { return f_SelectedItemId; }
 			set { Set(ref f_SelectedItemId, value); }
 		}
 
-		private int f_SelectedItemId;
+		private int? f_SelectedItemId;
 
-		public DateTime SelectedDateCreated {
+		public DateTime? SelectedDateCreated {
 			get { return f_SelectedDateCreated; }
 			set { Set(ref f_SelectedDateCreated, value); }
 		}
 
-		private DateTime f_SelectedDateCreated;
+		private DateTime? f_SelectedDateCreated;
 
 		public int NoteCount {
 			get { return f_NoteCount; }
@@ -63,9 +63,12 @@ namespace Mino.ViewModel
 
 		public string CursorPos {
 			get {
-				return
-					$"Line: { f_NoteTextCursorLinePos }, " +
-					$"Column: { f_NoteTextCursorColumnPos }";
+				string output =
+					$"Line: {f_NoteTextCursorLinePos}, " +
+					$"Column: {f_NoteTextCursorColumnPos}";
+
+				return (SelectedItemId != null) ? output : string.Empty;
+					
 			}
 		}
 	}

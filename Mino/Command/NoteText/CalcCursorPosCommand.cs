@@ -9,39 +9,40 @@ namespace Mino.Command
 {
 	public class CalcCursorPosCommand : CommandBase
 	{
-		private readonly NoteTextViewModel f_NoteTextViewModel;
+		private readonly NoteTextViewModel f_Context;
 
-		public CalcCursorPosCommand (NoteTextViewModel noteTextViewModel)
+		public CalcCursorPosCommand (NoteTextViewModel context)
 		{
-			f_NoteTextViewModel = noteTextViewModel;
+			f_Context = context;
 		}
 
 		public override void Execute (object parameter)
 		{
-			if (parameter == null || !(parameter is RoutedEventArgs)) return;
-			RoutedEventArgs e = (RoutedEventArgs)parameter;
+			if (parameter == null) return;
 
-			if (e.Handled || !(e.Source is RichTextBox)) return;
-
+			RoutedEventArgs? e = parameter as RoutedEventArgs;
+			if (e == null || e.Handled) return;
 			e.Handled = true;
 
-			RichTextBox textBox = (RichTextBox)e.Source;
+			RichTextBox? textBox = e.Source as RichTextBox;
+			if (textBox == null) return;
+
 			TextPointer ptr1 = textBox.Selection.Start.GetLineStartPosition(0);
 			TextPointer ptr2 = textBox.Selection.Start;
 
 			int columnPos = ptr1.GetOffsetToPosition(ptr2);
 
-			int columnNumber = (columnPos > 0) ? columnPos - 1 : columnPos;
+			int columnIndex = (columnPos > 0) ? columnPos - 1 : columnPos;
 
-			int bigNumber = int.MaxValue;
-			int lineMoved = 0;
-			int currentLineNumber = 0;
+			int MaxValue = int.MaxValue;
+			int linePos = 0;
+			int lineIndex = 0;
 
-			textBox.Selection.Start.GetLineStartPosition(-bigNumber, out lineMoved);
-			currentLineNumber = -lineMoved;
+			textBox.Selection.Start.GetLineStartPosition(-MaxValue, out linePos);
+			lineIndex = -linePos;
 
-			f_NoteTextViewModel.LineNumber = currentLineNumber;
-			f_NoteTextViewModel.ColumnNumber = columnNumber;
+			f_Context.LineIndex = lineIndex;
+			f_Context.ColumnIndex = columnIndex;
 		}
 	}
 }

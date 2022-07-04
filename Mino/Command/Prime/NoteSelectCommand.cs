@@ -10,27 +10,30 @@ namespace Mino.Command
 {
 	public class NoteSelectCommand : CommandBase
 	{
-		private readonly PrimeViewModel f_PrimeViewModel;
+		private readonly PrimeViewModel f_Context;
 
-		public NoteSelectCommand (PrimeViewModel primeViewModel)
+		public NoteSelectCommand (PrimeViewModel context)
 		{
-			f_PrimeViewModel = primeViewModel;
+			f_Context = context;
 		}
 
 		public override void Execute (object parameter)
 		{
 			// use the highlighted object as the one to select
-			NoteListObjectViewModel highlighted = (NoteListObjectViewModel)parameter;
+			NoteListObjectViewModel? highlighted = parameter as NoteListObjectViewModel;
 
-			f_PrimeViewModel.SelectedNoteViewModel = highlighted;
+			f_Context.SelectedNoteViewModel = highlighted;
 
 			// find the RichTextBox
 			RichTextBox? rtb = UIHelper.FindChildOfType<RichTextBox>(Application.Current.MainWindow);
 			if (rtb == null) return;
 
 			// deserialize the Text string into a FlowDocument and set the RichTextBox's document to it
-			if (!string.IsNullOrEmpty(highlighted.Text)) {
+			if (highlighted != null && !string.IsNullOrEmpty(highlighted.Text)) {
 				rtb.Document = (FlowDocument)XamlReader.Parse(highlighted.Text);
+			}
+			else {
+				rtb.Document = (FlowDocument)XamlReader.Parse(f_Context.NoteListViewModel.DefaultText);
 			}
 		}
 	}

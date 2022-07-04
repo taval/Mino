@@ -10,20 +10,6 @@
 	d:DesignHeight="450"
 	d:DesignWidth="800">
 
-	<!--
-
-	- commands -
-
-	Insert: new empty Note
-	Add: add from one list to another
-	Reorder: move around
-	Remove: delete
-	Refresh: touch all values in list to alert view to changes
-	Highlight: highlights singly-clicked list item
-	Select: displays double-clicked item in Text viewer
-
-	-->
-
 	<!-- NOTE: in contrast with other bindings outside interaction triggers, 'Path' property must be explicit within one -->
 
 	<Grid
@@ -42,7 +28,7 @@
 		<Grid Height="32" Margin="0 16 0 8" Background="Transparent">
 
 			<Grid.ColumnDefinitions>
-				<ColumnDefinition Width="*" />
+				<ColumnDefinition Width="auto" />
 				<ColumnDefinition Width="*" />
 			</Grid.ColumnDefinitions>
 			<Grid.RowDefinitions>
@@ -50,22 +36,12 @@
 				<RowDefinition Height="*" />
 			</Grid.RowDefinitions>
 
-			<TextBlock
-				FontWeight="Bold"
-				FontSize="12"
-				Text="Notes" />
-			<TextBlock
-				Grid.Row="1"
-				FontSize="9"
-				Text="{ Binding
-					(local:ListState.SelectedTitle),
-					RelativeSource={ RelativeSource AncestorType={ x:Type local:NoteListView } } }" />
-
 			<!-- the Add Note button -->
-			
+
 			<Button
-				Grid.Column="1"
 				Grid.RowSpan="2"
+				Margin="10 0"
+				Padding="0 0 0 3"
 				Template="{ StaticResource buttonTemplate }"
 				Style="{ StaticResource buttonStyle }"
 				Name="AddButton"
@@ -73,6 +49,19 @@
 				CommandParameter="{ Binding Highlighted }"
 				Command="{ Binding
 					(local:ListAction.CreateAtCommand),
+					RelativeSource={ RelativeSource AncestorType={ x:Type local:NoteListView } } }" />
+			
+			<TextBlock
+				Grid.Column="1"
+				FontWeight="Bold"
+				FontSize="12"
+				Text="Notes" />
+			<TextBlock
+				Grid.Column="1"
+				Grid.Row="1"
+				FontSize="9"
+				Text="{ Binding
+					(local:SelectProperty.SelectedTitle),
 					RelativeSource={ RelativeSource AncestorType={ x:Type local:NoteListView } } }" />
 
 		</Grid>
@@ -89,6 +78,7 @@
 			<ListView.ItemContainerStyle>
 				<Style TargetType="{ x:Type ListViewItem }" BasedOn="{ StaticResource listViewItemStyle }">
 					<Setter Property="IsSelected" Value="{ Binding IsSelected }" />
+					<Setter Property="HorizontalContentAlignment" Value="Stretch" />
 				</Style>
 			</ListView.ItemContainerStyle>
 
@@ -97,16 +87,17 @@
 					<Grid Background="Transparent">
 
 						<Grid.ColumnDefinitions>
+							<ColumnDefinition Width="auto" />
 							<ColumnDefinition Width="*" />
-							<ColumnDefinition Width="*" />
-							<ColumnDefinition Width="*" />
+							<ColumnDefinition Width="auto" />
 						</Grid.ColumnDefinitions>
 
+						<!-- ListViewItem: Close button -->
 						<Button
 							Template="{ StaticResource closeButtonTemplate }"
 							Style="{ StaticResource closeButtonStyle }"
-							Margin="0 0 10 0"
-							Padding="10 0"
+							Margin="0 0 6 0"
+							Padding="8 0 8 3"
 							x:Name="RemoveItemButton"
 							Content="x"
 							CommandParameter="{ Binding }"
@@ -114,18 +105,21 @@
 								(local:ListAction.RemoveCommand),
 								RelativeSource={ RelativeSource AncestorType={ x:Type local:NoteListView } } }" />
 
+						<!-- NoteListObject: note preview -->
 						<StackPanel Grid.Column="1" Background="Transparent" MinWidth="72pt">
 							<TextBlock Text="{ Binding ItemId, StringFormat='Id: {0}', UpdateSourceTrigger=PropertyChanged }" />
 							<TextBlock FontWeight="Bold" Text="{ Binding Title, Converter={ local:StringToStubConverter } }" />
 							<TextBlock Text="{ Binding Text, Converter={ local:FlowDocumentStringToStubConverter } }" />
 						</StackPanel>
 
+						<!-- NoteListObject: Priority -->
 						<Ellipse
 							Grid.Column="2"
 							Width="18"
 							Height="18"
 							Stroke="#999"
 							StrokeThickness="0.5"
+							Margin="0 0 10 0"
 							Fill="{ Binding Priority, Converter={ local:PriorityToColorConverter } }" />
 
 						<i:Interaction.Triggers>
@@ -159,7 +153,7 @@
 										Path=DataContext.Highlighted,
 										RelativeSource={ RelativeSource AncestorType={ x:Type local:NoteListView } } }"
 									Command="{ Binding
-										Path=(local:ListAction.SelectCommand),
+										Path=(local:SelectProperty.SelectCommand),
 										RelativeSource={ RelativeSource AncestorType={ x:Type local:NoteListView } } }" />
 							</i:EventTrigger>
 

@@ -40,8 +40,8 @@ namespace Mino.ViewModel
 					StatusBarViewModel.SelectedDateCreated = value.DateCreated;
 				}
 				else {
-					StatusBarViewModel.SelectedItemId = -1;
-					StatusBarViewModel.SelectedDateCreated = DateTime.MinValue;
+					StatusBarViewModel.SelectedItemId = null;
+					StatusBarViewModel.SelectedDateCreated = null;
 				}
 				NoteTextViewModel.ContentData = value;
 
@@ -204,11 +204,25 @@ namespace Mino.ViewModel
 			f_SelectedNoteViewModel = null;
 
 			// attach handlers
+			SetSelectedChangedEventHandler();
 			SetNoteCountChangedEventHandler();
 			SetGroupCountChangedEventHandler();
 			SetGroupNoteCountChangedEventHandler();
 			SetNoteTextChangedEventHandler();
 			SetGroupStringsChangedEventHandler();
+		}
+
+		private void SetSelectedChangedEventHandler ()
+		{
+			PropertyChangedEventHandler handler = (sender, e) =>
+			{
+				if (e.PropertyName == "SelectedNoteViewModel") {
+					StatusBarViewModel.NoteTextCursorLinePos = 0;
+					StatusBarViewModel.NoteTextCursorColumnPos = 0;
+				}
+			};
+
+			PropertyChanged += handler;
 		}
 
 		private void SetNoteCountChangedEventHandler ()
@@ -251,11 +265,11 @@ namespace Mino.ViewModel
 		{
 			PropertyChangedEventHandler handler = (sender, e) =>
 			{
-				if (e.PropertyName == "LineNumber") {
-					StatusBarViewModel.NoteTextCursorLinePos = ((NoteTextViewModel)sender).LineNumber;
+				if (e.PropertyName == "LineIndex") {
+					StatusBarViewModel.NoteTextCursorLinePos = ((NoteTextViewModel)sender).LineIndex;
 				}
-				else if (e.PropertyName == "ColumnNumber") {
-					StatusBarViewModel.NoteTextCursorColumnPos = ((NoteTextViewModel)sender).ColumnNumber;
+				else if (e.PropertyName == "ColumnIndex") {
+					StatusBarViewModel.NoteTextCursorColumnPos = ((NoteTextViewModel)sender).ColumnIndex;
 				}
 				else if (e.PropertyName == "IsNewGroupAllowed") {
 					StateViewModel.IsNewGroupAllowed = ((NoteTextViewModel)sender).IsNewGroupAllowed;
@@ -429,13 +443,19 @@ namespace Mino.ViewModel
 		{
 			AutoSelectFailSafe(input);
 
-			// add a list item if none remain
+			//// add a list item if none remain
+			//if (NoteListViewModel.Items.Count() == 1) {
+			//	NoteListObjectViewModel newNote = CreateNoteAt(null);
+			//	if (NoteSelectCommand.CanExecute(newNote)) {
+			//		NoteSelectCommand.Execute(newNote);
+			//	}
+			//	NoteListViewModel.Highlighted = newNote;
+			//}
 			if (NoteListViewModel.Items.Count() == 1) {
-				NoteListObjectViewModel newNote = CreateNoteAt(null);
-				if (NoteSelectCommand.CanExecute(newNote)) {
-					NoteSelectCommand.Execute(newNote);
+				NoteListViewModel.Highlighted = null;
+				if (NoteSelectCommand.CanExecute(NoteListViewModel.Highlighted)) {
+					NoteSelectCommand.Execute(NoteListViewModel.Highlighted);
 				}
-				NoteListViewModel.Highlighted = newNote;
 			}
 
 			// remove any existing note objects matching the input in any of the groups
